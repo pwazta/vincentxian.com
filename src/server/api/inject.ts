@@ -13,8 +13,6 @@
  * - Testing: Mock database and services
  * - Development: Debug-enabled services
  */
-import { getPostService } from "~/services/post/service";
-
 import { db } from "../db";
 
 /**
@@ -23,16 +21,17 @@ import { db } from "../db";
  * 
  * Example usage in tRPC router:
  * .mutation(async ({ ctx }) => {
- *   const { postService } = ctx;
- *   return postService.createPost(input);
+ *   const { exampleService } = ctx;
+ *   return exampleService.create(input);
  * })
  */
 export function injectProtectedServices() {
-  const postService = getPostService(db);
+  // const postService = getPostService(db);
 
-  return {
-    postService,
-  };
+  // return {
+  //   postService,
+  // };
+  return {}
 }
 
 /**
@@ -40,7 +39,6 @@ export function injectProtectedServices() {
  * Keep sensitive operations in protected services
  * 
  * Use case: Public-facing APIs that don't require auth
- * Example: Blog post viewing, public statistics
  */
 export function injectPublicServices() {
   return {};

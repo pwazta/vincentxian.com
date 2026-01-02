@@ -28,7 +28,7 @@ export function useMutationWithToast<TData, TError, TVariables>(
 
   return useMutation({
     ...mutationOptions,
-    onSuccess: (data, variables, context) => {
+    onSuccess: (data, variables) => {
       // Show success toast
       const message =
         typeof successMessage === "function"
@@ -39,7 +39,7 @@ export function useMutationWithToast<TData, TError, TVariables>(
       // Call the original success callback
       onSuccess?.(data, variables);
     },
-    onError: (error, variables, context) => {
+    onError: (error, variables) => {
       // Show error toast
       const message =
         typeof errorMessage === "function"

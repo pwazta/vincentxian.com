@@ -29,7 +29,7 @@
  *   prefetch={[trpc.post.all.queryOptions()]}
  *   ErrorBoundaryComponent={ErrorBoundary}
  * >
- *   <PostList />
+ *   <ExampleList />
  * </Await>
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
