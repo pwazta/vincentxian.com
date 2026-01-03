@@ -42,13 +42,28 @@ function ClickableMesh({
       ? scale * 1.1
       : ([scale[0] * 1.1, scale[1] * 1.1, scale[2] * 1.1] as [number, number, number]);
 
+  const handlePointerOver = (e: { stopPropagation: () => void }) => {
+    e.stopPropagation();
+    setHovered(true);
+  };
+
+  const handlePointerOut = (e: { stopPropagation: () => void }) => {
+    e.stopPropagation();
+    setHovered(false);
+  };
+
+  const handleClick = (e: { stopPropagation: () => void }) => {
+    e.stopPropagation();
+    onClick();
+  };
+
   return (
     <HoverContext.Provider value={hovered}>
       <group
         position={position}
-        onClick={onClick}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
+        onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
         scale={hovered ? hoverScale : scale}
       >
         {children}
