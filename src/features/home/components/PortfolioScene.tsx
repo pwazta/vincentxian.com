@@ -5,10 +5,26 @@
 "use client";
 
 import * as React from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
+import * as THREE from "three";
+import { GrassField } from "./GrassField";
 
 const HoverContext = React.createContext<boolean>(false);
+
+/**
+ * Configures renderer settings for grass shadows and rendering
+ */
+function RendererConfig() {
+	const { gl } = useThree();
+	React.useEffect(() => {
+		gl.shadowMap.enabled = true;
+		gl.shadowMap.type = THREE.PCFSoftShadowMap;
+		gl.outputColorSpace = THREE.SRGBColorSpace;
+		gl.toneMapping = THREE.ACESFilmicToneMapping;
+	}, [gl]);
+	return null;
+}
 
 type ClickableMeshProps = {
   position: [number, number, number];
@@ -120,52 +136,70 @@ function SceneContent({
   onAboutClick: () => void;
   onContactClick: () => void;
 }) {
+  const { scene } = useThree();
+  React.useEffect(() => {
+    scene.fog = new THREE.FogExp2("#eeeeee", 0.02);
+    scene.background = new THREE.Color("#eeeeee");
+  }, [scene]);
+
   return (
     <>
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[5, 5, 5]} intensity={0.8} />
-      <directionalLight position={[-5, 5, -5]} intensity={0.4} />
+      <ambientLight intensity={0.5} />
+      <directionalLight
+        position={[100, 100, 100]}
+        intensity={2}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-far={200}
+        shadow-camera-left={-50}
+        shadow-camera-right={50}
+        shadow-camera-top={50}
+        shadow-camera-bottom={-50}
+      />
 
-      {/* Ground plane */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-        <planeGeometry args={[20, 20]} />
-        <meshStandardMaterial color="#e8e6e1" />
-      </mesh>
+      {/* Grass field with terrain */}
+      <GrassField
+        grassCount={3500}
+        terrainScale={2}
+        grassScale={5}
+        grassHeightScale={0.4}
+      />
 
       {/* Desk base */}
-      <mesh position={[0, 0.3, 0]}>
+      <mesh position={[0, 2.3, 0]}>
         <boxGeometry args={[4, 0.6, 2]} />
         <meshStandardMaterial color="#d4a574" />
       </mesh>
 
       {/* Computer monitor (bottom box - Coding) */}
       <ClickableBox
-        position={[-0.8, 1.2, 0]}
-        size={[1.2, 0.8, 0.1]}
+        position={[-0.8, 3.2, 0]}
+        size={[2.4, 1.6, 0.2]}
         color="#2a2a2a"
         onClick={onCodingClick}
       />
 
       {/* Computer monitor (top box - Arts) */}
       <ClickableBox
-        position={[-0.8, 2.1, 0]}
-        size={[1.2, 0.8, 0.1]}
+        position={[-0.8, 5.2, 0]}
+        size={[2.4, 1.6, 0.2]}
         color="#2a2a2a"
         onClick={onArtsClick}
       />
 
       {/* About box */}
       <ClickableBox
-        position={[1.2, 0.8, 0.5]}
-        size={[0.6, 0.6, 0.6]}
+        position={[1.2, 2.8, 0.8]}
+        size={[1.2, 1.2, 1.2]}
         color="#7c9082"
         onClick={onAboutClick}
       />
 
       {/* Contact box */}
       <ClickableBox
-        position={[1.2, 0.8, -0.5]}
-        size={[0.6, 0.6, 0.6]}
+        position={[2.8, 2.8, 0.8]}
+        size={[1.2, 1.2, 1.2]}
         color="#7c9082"
         onClick={onContactClick}
       />
@@ -189,9 +223,10 @@ export function PortfolioScene({
   return (
     <div className="h-full w-full">
       <Canvas
-        camera={{ position: [5, 5, 5], fov: 50 }}
+        camera={{ position: [-17, 12, -10], fov: 75 }}
         gl={{ antialias: true }}
       >
+        <RendererConfig />
         <SceneContent
           onCodingClick={onCodingClick}
           onArtsClick={onArtsClick}
@@ -202,7 +237,7 @@ export function PortfolioScene({
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
-          minDistance={3}
+          minDistance={5}
           maxDistance={15}
         />
       </Canvas>

@@ -125,6 +125,10 @@ src/
 └── app/            # Next.js app directory
 ```
 
+## Acknowledgments
+
+This project incorporates grass rendering code from "How to Make The Fluffiest Grass With Three.js" by Ebenezer, available under the MIT License. The original article can be found at: https://tympanus.net/codrops/2025/02/04/how-to-make-the-fluffiest-grass-with-three-js/
+
 ## Learn More
 
 To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
