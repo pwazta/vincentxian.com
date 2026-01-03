@@ -3,13 +3,7 @@
  * Used in: Portfolio section modals (Coding, Arts, About, Contact)
  */
 import * as React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "./ui/dialog";
 import { Button } from "./ui/button";
 
 type ModalFrameProps = {
@@ -20,13 +14,7 @@ type ModalFrameProps = {
   footer?: React.ReactNode;
 };
 
-export function ModalFrame({
-  open,
-  onOpenChange,
-  title,
-  children,
-  footer,
-}: ModalFrameProps) {
+export function ModalFrame({open, onOpenChange, title, children, footer}: ModalFrameProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">

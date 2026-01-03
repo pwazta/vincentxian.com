@@ -30,7 +30,7 @@ export default function Home() {
           onAboutClick={() => setAboutOpen(true)}
           onContactClick={() => setContactOpen(true)}
         />
-        <div className="h-full w-full pt-16">
+        <div className="h-full w-full">
           <PortfolioScene
             onCodingClick={() => setCodingOpen(true)}
             onArtsClick={() => setArtsOpen(true)}

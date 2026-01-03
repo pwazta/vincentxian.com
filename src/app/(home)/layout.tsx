@@ -7,10 +7,6 @@ export const metadata = {
   description: "Home",
 };
 
-export default function HomeLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function HomeLayout({children}: {children: React.ReactNode}) {
   return <HomeRouteLayout>{children}</HomeRouteLayout>;
 }

@@ -8,6 +8,55 @@ import * as React from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 
+const HoverContext = React.createContext<boolean>(false);
+
+type ClickableMeshProps = {
+  position: [number, number, number];
+  onClick: () => void;
+  children: React.ReactNode;
+  scale?: number | [number, number, number];
+};
+
+/**
+ * Reusable clickable mesh wrapper - can wrap any geometry or 3D model
+ * Used in: PortfolioScene for interactive elements
+ * 
+ * Provides hover state via context so children can react to hover
+ * Example with complex model:
+ * ```tsx
+ * const { scene } = useGLTF('/models/desk.glb');
+ * <ClickableMesh position={[0, 0, 0]} onClick={handleClick}>
+ *   <primitive object={scene} />
+ * </ClickableMesh>
+ * ```
+ */
+function ClickableMesh({
+  position,
+  onClick,
+  children,
+  scale = 1,
+}: ClickableMeshProps) {
+  const [hovered, setHovered] = React.useState(false);
+  const hoverScale: number | [number, number, number] =
+    typeof scale === "number"
+      ? scale * 1.1
+      : ([scale[0] * 1.1, scale[1] * 1.1, scale[2] * 1.1] as [number, number, number]);
+
+  return (
+    <HoverContext.Provider value={hovered}>
+      <group
+        position={position}
+        onClick={onClick}
+        onPointerOver={() => setHovered(true)}
+        onPointerOut={() => setHovered(false)}
+        scale={hovered ? hoverScale : scale}
+      >
+        {children}
+      </group>
+    </HoverContext.Provider>
+  );
+}
+
 type ClickableBoxProps = {
   position: [number, number, number];
   size: [number, number, number];
@@ -15,17 +64,14 @@ type ClickableBoxProps = {
   onClick: () => void;
 };
 
-function ClickableBox({ position, size, color, onClick }: ClickableBoxProps) {
-  const [hovered, setHovered] = React.useState(false);
+/**
+ * Inner box mesh component that reacts to hover state
+ */
+function BoxMesh({ size, color }: { size: [number, number, number]; color: string }) {
+  const hovered = React.useContext(HoverContext);
 
   return (
-    <mesh
-      position={position}
-      onClick={onClick}
-      onPointerOver={() => setHovered(true)}
-      onPointerOut={() => setHovered(false)}
-      scale={hovered ? 1.1 : 1}
-    >
+    <mesh>
       <boxGeometry args={size} />
       <meshStandardMaterial
         color={hovered ? "#bfc9bb" : color}
@@ -33,6 +79,18 @@ function ClickableBox({ position, size, color, onClick }: ClickableBoxProps) {
         roughness={0.5}
       />
     </mesh>
+  );
+}
+
+/**
+ * Simple box primitive - can be replaced with complex meshes later
+ * Used in: PortfolioScene as placeholder geometry
+ */
+function ClickableBox({ position, size, color, onClick }: ClickableBoxProps) {
+  return (
+    <ClickableMesh position={position} onClick={onClick}>
+      <BoxMesh size={size} color={color} />
+    </ClickableMesh>
   );
 }
 
