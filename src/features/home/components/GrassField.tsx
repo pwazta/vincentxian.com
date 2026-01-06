@@ -17,11 +17,18 @@ import { GrassMaterial } from "./grassMaterial";
 type GrassFieldProps = {
 	grassCount?: number;
 	terrainScale?: number;
+	terrainHeightScale?: number;
 	grassScale?: number;
 	grassHeightScale?: number;
 };
 
-export function GrassField({grassCount = 3500, terrainScale = 2, grassScale = 5, grassHeightScale = 0.4}: GrassFieldProps) {
+export function GrassField({
+	grassCount = 3500,
+	terrainScale = 2,
+	terrainHeightScale = 0.8,
+	grassScale = 5,
+	grassHeightScale = 0.4,
+}: GrassFieldProps) {
 	const [grassInstancedMesh, setGrassInstancedMesh] = React.useState<THREE.InstancedMesh | null>(null);
 	const [grassMaterial, setGrassMaterial] = React.useState<GrassMaterial | null>(null);
 	const timeRef = React.useRef(0);
@@ -66,7 +73,7 @@ export function GrassField({grassCount = 3500, terrainScale = 2, grassScale = 5,
 			if (child instanceof THREE.Mesh) {
 				child.material = terrainMaterial;
 				child.receiveShadow = true;
-				child.geometry.scale(terrainScale, terrainScale, terrainScale);
+				child.geometry.scale(terrainScale, terrainScale * terrainHeightScale, terrainScale);
 				terrainMesh = child;
 			}
 		});

@@ -10,13 +10,13 @@ import { LoadingSpinner } from "~/features/shared/components/LoadingSpinner";
 import { Navbar } from "~/features/home/components/Navbar";
 import { PortfolioScene } from "~/features/home/components/PortfolioScene";
 import { ModalFrame } from "~/features/shared/components/ModalFrame";
-import { CodingContent } from "~/features/home/components/CodingContent";
+import { SoftwareContent } from "~/features/home/components/SoftwareContent";
 import { ArtsContent } from "~/features/home/components/ArtsContent";
 import { AboutContent } from "~/features/home/components/AboutContent";
 import { ContactContent } from "~/features/home/components/ContactContent";
 
 export default function Home() {
-  const [codingOpen, setCodingOpen] = React.useState(false);
+  const [softwareOpen, setSoftwareOpen] = React.useState(false);
   const [artsOpen, setArtsOpen] = React.useState(false);
   const [aboutOpen, setAboutOpen] = React.useState(false);
   const [contactOpen, setContactOpen] = React.useState(false);
@@ -25,14 +25,14 @@ export default function Home() {
     <Suspense fallback={<LoadingSpinner />}>
       <div className="relative h-screen w-screen overflow-hidden bg-background">
         <Navbar
-          onCodingClick={() => setCodingOpen(true)}
+          onSoftwareClick={() => setSoftwareOpen(true)}
           onArtsClick={() => setArtsOpen(true)}
           onAboutClick={() => setAboutOpen(true)}
           onContactClick={() => setContactOpen(true)}
         />
         <div className="h-full w-full">
           <PortfolioScene
-            onCodingClick={() => setCodingOpen(true)}
+            onSoftwareClick={() => setSoftwareOpen(true)}
             onArtsClick={() => setArtsOpen(true)}
             onAboutClick={() => setAboutOpen(true)}
             onContactClick={() => setContactOpen(true)}
@@ -40,11 +40,11 @@ export default function Home() {
         </div>
 
         <ModalFrame
-          open={codingOpen}
-          onOpenChange={setCodingOpen}
-          title="Coding"
+          open={softwareOpen}
+          onOpenChange={setSoftwareOpen}
+          title="Software"
         >
-          <CodingContent />
+          <SoftwareContent />
         </ModalFrame>
 
         <ModalFrame open={artsOpen} onOpenChange={setArtsOpen} title="Arts">

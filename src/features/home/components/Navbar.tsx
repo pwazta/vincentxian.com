@@ -9,14 +9,14 @@ import { Menu, X } from "lucide-react";
 import { Button } from "~/features/shared/components/ui/button";
 
 type NavbarProps = {
-  onCodingClick: () => void;
+  onSoftwareClick: () => void;
   onArtsClick: () => void;
   onAboutClick: () => void;
   onContactClick: () => void;
 };
 
 export function Navbar({
-  onCodingClick,
+  onSoftwareClick,
   onArtsClick,
   onAboutClick,
   onContactClick,
@@ -44,10 +44,10 @@ export function Navbar({
         >
           <Button
             variant="ghost"
-            onClick={onCodingClick}
+            onClick={onSoftwareClick}
             className="hover:bg-accent/10 whitespace-nowrap"
           >
-            Coding
+            Software
           </Button>
           <Button
             variant="ghost"

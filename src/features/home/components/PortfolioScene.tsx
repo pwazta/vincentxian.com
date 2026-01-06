@@ -6,11 +6,14 @@
 
 import * as React from "react";
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { GrassField } from "./GrassField";
-
-const HoverContext = React.createContext<boolean>(false);
+import { setupInteractiveObjects } from "../utils/sceneObjectSetup";
+import { useSceneRaycaster } from "../hooks/useSceneRaycaster";
+import { useObjectInteractions } from "../hooks/useObjectInteractions";
+import { storeOriginalColors } from "../utils/materialUtils";
+import type { ClickActions } from "./sceneInteractions";
 
 /**
  * Configures renderer settings for grass shadows and rendering
@@ -26,121 +29,77 @@ function RendererConfig() {
 	return null;
 }
 
-type ClickableMeshProps = {
-  position: [number, number, number];
-  onClick: () => void;
-  children: React.ReactNode;
-  scale?: number | [number, number, number];
-};
-
-/**
- * Reusable clickable mesh wrapper - can wrap any geometry or 3D model
- * Used in: PortfolioScene for interactive elements
- * 
- * Provides hover state via context so children can react to hover
- * Example with complex model:
- * ```tsx
- * const { scene } = useGLTF('/models/desk.glb');
- * <ClickableMesh position={[0, 0, 0]} onClick={handleClick}>
- *   <primitive object={scene} />
- * </ClickableMesh>
- * ```
- */
-function ClickableMesh({
-  position,
-  onClick,
-  children,
-  scale = 1,
-}: ClickableMeshProps) {
-  const [hovered, setHovered] = React.useState(false);
-  const hoverScale: number | [number, number, number] =
-    typeof scale === "number"
-      ? scale * 1.1
-      : ([scale[0] * 1.1, scale[1] * 1.1, scale[2] * 1.1] as [number, number, number]);
-
-  const handlePointerOver = (e: { stopPropagation: () => void }) => {
-    e.stopPropagation();
-    setHovered(true);
-  };
-
-  const handlePointerOut = (e: { stopPropagation: () => void }) => {
-    e.stopPropagation();
-    setHovered(false);
-  };
-
-  const handleClick = (e: { stopPropagation: () => void }) => {
-    e.stopPropagation();
-    onClick();
-  };
-
-  return (
-    <HoverContext.Provider value={hovered}>
-      <group
-        position={position}
-        onClick={handleClick}
-        onPointerOver={handlePointerOver}
-        onPointerOut={handlePointerOut}
-        scale={hovered ? hoverScale : scale}
-      >
-        {children}
-      </group>
-    </HoverContext.Provider>
-  );
-}
-
-type ClickableBoxProps = {
-  position: [number, number, number];
-  size: [number, number, number];
-  color: string;
-  onClick: () => void;
-};
-
-/**
- * Inner box mesh component that reacts to hover state
- */
-function BoxMesh({ size, color }: { size: [number, number, number]; color: string }) {
-  const hovered = React.useContext(HoverContext);
-
-  return (
-    <mesh>
-      <boxGeometry args={size} />
-      <meshStandardMaterial
-        color={hovered ? "#bfc9bb" : color}
-        metalness={0.1}
-        roughness={0.5}
-      />
-    </mesh>
-  );
-}
-
-/**
- * Simple box primitive - can be replaced with complex meshes later
- * Used in: PortfolioScene as placeholder geometry
- */
-function ClickableBox({ position, size, color, onClick }: ClickableBoxProps) {
-  return (
-    <ClickableMesh position={position} onClick={onClick}>
-      <BoxMesh size={size} color={color} />
-    </ClickableMesh>
-  );
-}
-
 function SceneContent({
-  onCodingClick,
+  onSoftwareClick,
   onArtsClick,
   onAboutClick,
   onContactClick,
 }: {
-  onCodingClick: () => void;
+  onSoftwareClick: () => void;
   onArtsClick: () => void;
   onAboutClick: () => void;
   onContactClick: () => void;
 }) {
   const { scene } = useThree();
+  const [hitboxes, setHitboxes] = React.useState<THREE.Mesh[]>([]);
+
+  // Scene setup
   React.useEffect(() => {
     scene.fog = new THREE.FogExp2("#eeeeee", 0.02);
     scene.background = new THREE.Color("#eeeeee");
   }, [scene]);
+
+  // Load GLB models
+  const computerModel = useGLTF("/models/computer.glb");
+  const cabinetModel = useGLTF("/models/cabinet.glb");
+  const phoneModel = useGLTF("/models/phone.glb");
+
+  // Setup interactive objects after models load
+  React.useEffect(() => {
+    // Wait for models to be fully loaded
+    const timer = setTimeout(() => {
+      const newHitboxes = setupInteractiveObjects(scene);
+      
+      // Store original colors for all interactive objects
+      for (const hitbox of newHitboxes) {
+        const metadata = hitbox.userData.metadata;
+        if (metadata) {
+          storeOriginalColors(metadata.originalObject);
+        }
+      }
+      
+      setHitboxes(newHitboxes);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [scene, computerModel.scene, cabinetModel.scene, phoneModel.scene]);
+
+  // Raycaster for intersection detection
+  const { intersects } = useSceneRaycaster({
+    hitboxes,
+    enabled: hitboxes.length > 0,
+  });
+
+  // Click actions mapping
+  const clickActions: ClickActions = React.useMemo(
+    () => ({
+      onPhoneClick: onContactClick,
+      onComputerClick: onSoftwareClick,
+      onDiskLinkedInClick: () => {},
+      onDiskGithubClick: () => {},
+      onDrawerAboutClick: onAboutClick,
+      onDrawerSoftwareClick: onSoftwareClick,
+      onDrawerArtsClick: onArtsClick,
+    }),
+    [onSoftwareClick, onArtsClick, onAboutClick, onContactClick]
+  );
+
+  // Handle interactions
+  useObjectInteractions({
+    intersects,
+    clickActions,
+    enabled: hitboxes.length > 0,
+  });
 
   return (
     <>
@@ -162,60 +121,41 @@ function SceneContent({
       <GrassField
         grassCount={3500}
         terrainScale={2}
+        terrainHeightScale={0.5}
         grassScale={5}
         grassHeightScale={0.4}
       />
 
-      {/* Desk base */}
-      <mesh position={[0, 2.3, 0]}>
-        <boxGeometry args={[4, 0.6, 2]} />
-        <meshStandardMaterial color="#d4a574" />
-      </mesh>
+      {/* GLB Models - scaled from cm to meters and positioned in a T layout */}
+      <group position={[0, 2.3, 0]} scale={1}>
+        {/* Center: computer, facing camera */}
+        <group position={[0, 0, 0.1]} rotation={[0, Math.PI, 0]}>
+          <primitive object={computerModel.scene} />
+        </group>
 
-      {/* Computer monitor (bottom box - Coding) */}
-      <ClickableBox
-        position={[-0.8, 3.2, 0]}
-        size={[2.4, 1.6, 0.2]}
-        color="#2a2a2a"
-        onClick={onCodingClick}
-      />
+        {/* Left: phone, 45° rotated toward center/camera */}
+        <group position={[-0.04, 0, 0]} rotation={[0, Math.PI / 4, 0]}>
+          <primitive object={phoneModel.scene} />
+        </group>
 
-      {/* Computer monitor (top box - Arts) */}
-      <ClickableBox
-        position={[-0.8, 5.2, 0]}
-        size={[2.4, 1.6, 0.2]}
-        color="#2a2a2a"
-        onClick={onArtsClick}
-      />
-
-      {/* About box */}
-      <ClickableBox
-        position={[1.2, 2.8, 0.8]}
-        size={[1.2, 1.2, 1.2]}
-        color="#7c9082"
-        onClick={onAboutClick}
-      />
-
-      {/* Contact box */}
-      <ClickableBox
-        position={[2.8, 2.8, 0.8]}
-        size={[1.2, 1.2, 1.2]}
-        color="#7c9082"
-        onClick={onContactClick}
-      />
+        {/* Right: cabinet, 45° rotated toward center/camera */}
+        <group position={[-0.1, 0, 0.2]} rotation={[0, -Math.PI / 4, 0]}>
+          <primitive object={cabinetModel.scene} />
+        </group>
+      </group>
     </>
   );
 }
 
 type PortfolioSceneProps = {
-  onCodingClick: () => void;
+  onSoftwareClick: () => void;
   onArtsClick: () => void;
   onAboutClick: () => void;
   onContactClick: () => void;
 };
 
 export function PortfolioScene({
-  onCodingClick,
+  onSoftwareClick,
   onArtsClick,
   onAboutClick,
   onContactClick,
@@ -223,12 +163,12 @@ export function PortfolioScene({
   return (
     <div className="h-full w-full">
       <Canvas
-        camera={{ position: [-17, 12, -10], fov: 75 }}
+        camera={{ position: [-14, 8, -10], fov: 75 }}
         gl={{ antialias: true }}
       >
         <RendererConfig />
         <SceneContent
-          onCodingClick={onCodingClick}
+          onSoftwareClick={onSoftwareClick}
           onArtsClick={onArtsClick}
           onAboutClick={onAboutClick}
           onContactClick={onContactClick}
@@ -245,3 +185,7 @@ export function PortfolioScene({
   );
 }
 
+// Preload models for better performance
+useGLTF.preload("/models/computer.glb");
+useGLTF.preload("/models/cabinet.glb");
+useGLTF.preload("/models/phone.glb");
