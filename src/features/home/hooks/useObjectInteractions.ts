@@ -15,7 +15,7 @@ interface UseObjectInteractionsOptions {
   enabled?: boolean;
 }
 
-const HOVER_SCALE = 1.1;
+const HOVER_SCALE = 1.02;
 const LERP_FACTOR = 0.15; // Smooth animation factor
 
 /**

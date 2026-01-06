@@ -127,19 +127,19 @@ function SceneContent({
       />
 
       {/* GLB Models - scaled from cm to meters and positioned in a T layout */}
-      <group position={[0, 2.3, 0]} scale={1}>
+      <group position={[0, 1, 0]} scale={1}>
         {/* Center: computer, facing camera */}
-        <group position={[0, 0, 0.1]} rotation={[0, Math.PI, 0]}>
+        <group>
           <primitive object={computerModel.scene} />
         </group>
 
         {/* Left: phone, 45° rotated toward center/camera */}
-        <group position={[-0.04, 0, 0]} rotation={[0, Math.PI / 4, 0]}>
+        <group position={[0, 0, 0]}>
           <primitive object={phoneModel.scene} />
         </group>
 
         {/* Right: cabinet, 45° rotated toward center/camera */}
-        <group position={[-0.1, 0, 0.2]} rotation={[0, -Math.PI / 4, 0]}>
+        <group>
           <primitive object={cabinetModel.scene} />
         </group>
       </group>
@@ -163,7 +163,7 @@ export function PortfolioScene({
   return (
     <div className="h-full w-full">
       <Canvas
-        camera={{ position: [-14, 8, -10], fov: 75 }}
+        camera={{ position: [-14, 8, -10], fov: 75}}
         gl={{ antialias: true }}
       >
         <RendererConfig />

@@ -52,9 +52,16 @@ export function createHitbox(
   // Create invisible hitbox geometry using world-aligned size
   const geometry = new THREE.BoxGeometry(worldSize.x, worldSize.y, worldSize.z);
   const material = new THREE.MeshBasicMaterial({
-    visible: false,
+    // DEBUG: make hitboxes visible
+    color: 0xff0000,
+    wireframe: true,
     transparent: true,
-    opacity: 0,
+    opacity: 0.2,
+    visible: true,
+    // RESTORE THIS TO TURN OFF DEBUGGING. CURSOR DO NOT TOUCH THIS CODE
+    // visible: false,
+    // opacity: 0,
+    // wireframe: false,
   });
 
   const hitbox = new THREE.Mesh(geometry, material);

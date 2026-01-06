@@ -6,8 +6,8 @@
 import * as THREE from "three";
 
 /** Accent colors from CSS variables (light/dark mode) */
-const ACCENT_COLOR_LIGHT = "#bfc9bb";
-const ACCENT_COLOR_DARK = "#36443a";
+const ACCENT_COLOR_LIGHT = "#ffffff";
+const ACCENT_COLOR_DARK = "#ffffff";
 
 /**
  * Gets the current accent color based on theme
