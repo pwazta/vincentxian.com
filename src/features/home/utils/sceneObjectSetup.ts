@@ -13,10 +13,7 @@ import {
 /**
  * Recursively traverses a scene to find all mesh objects
  */
-export function traverseSceneObjects(
-  object: THREE.Object3D,
-  meshes: THREE.Mesh[] = []
-): THREE.Mesh[] {
+export function traverseSceneObjects(object: THREE.Object3D, meshes: THREE.Mesh[] = []): THREE.Mesh[] {
   if (object instanceof THREE.Mesh && object.name) {
     meshes.push(object);
   }
@@ -31,10 +28,7 @@ export function traverseSceneObjects(
 /**
  * Creates an invisible hitbox mesh from an object's bounding box
  */
-export function createHitbox(
-  object: THREE.Object3D,
-  interactionType: InteractionType
-): THREE.Mesh | null {
+export function createHitbox(object: THREE.Object3D, interactionType: InteractionType): THREE.Mesh | null {
   if (interactionType === "none") return null;
 
   // Calculate bounding box in world space
@@ -88,9 +82,7 @@ export function createHitbox(
 /**
  * Sets up interactive objects in a scene by creating hitboxes
  */
-export function setupInteractiveObjects(
-  scene: THREE.Scene
-): THREE.Mesh[] {
+export function setupInteractiveObjects(scene: THREE.Scene): THREE.Mesh[] {
   const hitboxes: THREE.Mesh[] = [];
 
   // Traverse scene to find all meshes

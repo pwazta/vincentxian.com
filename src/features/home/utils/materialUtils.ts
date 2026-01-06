@@ -25,9 +25,7 @@ function getAccentColor(): string {
 export function storeOriginalColors(object: THREE.Object3D): void {
   if (!(object instanceof THREE.Mesh) || !object.material) return;
 
-  const materials = Array.isArray(object.material)
-    ? object.material
-    : [object.material];
+  const materials = Array.isArray(object.material) ? object.material : [object.material];
 
   const originalColors: string[] = [];
 
@@ -48,9 +46,7 @@ export function storeOriginalColors(object: THREE.Object3D): void {
 export function applyAccentColor(object: THREE.Object3D): void {
   if (!(object instanceof THREE.Mesh) || !object.material) return;
 
-  const materials = Array.isArray(object.material)
-    ? object.material
-    : [object.material];
+  const materials = Array.isArray(object.material) ? object.material : [object.material];
 
   const accentColor = getAccentColor();
 
@@ -71,15 +67,11 @@ export function applyAccentColor(object: THREE.Object3D): void {
 export function restoreOriginalColors(object: THREE.Object3D): void {
   if (!(object instanceof THREE.Mesh) || !object.material) return;
 
-  const originalColors = object.userData.originalColors as
-    | string[]
-    | undefined;
+  const originalColors = object.userData.originalColors as string[] | undefined;
 
   if (!originalColors) return;
 
-  const materials = Array.isArray(object.material)
-    ? object.material
-    : [object.material];
+  const materials = Array.isArray(object.material) ? object.material : [object.material];
 
   for (let i = 0; i < materials.length; i++) {
     const material = materials[i];

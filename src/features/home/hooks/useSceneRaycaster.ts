@@ -20,10 +20,7 @@ interface RaycasterResult {
 /**
  * Hook for raycaster-based pointer tracking and intersection detection
  */
-export function useSceneRaycaster({
-  hitboxes,
-  enabled = true,
-}: UseSceneRaycasterOptions): RaycasterResult {
+export function useSceneRaycaster({ hitboxes, enabled = true }: UseSceneRaycasterOptions): RaycasterResult {
   const { camera, size } = useThree();
   const raycaster = React.useRef(new THREE.Raycaster());
   const pointer = React.useRef(new THREE.Vector2());
@@ -70,9 +67,6 @@ export function useSceneRaycaster({
     setIntersects(intersections);
   });
 
-  return {
-    intersects,
-    pointer: pointer.current,
-  };
+  return { intersects, pointer: pointer.current };
 }
 

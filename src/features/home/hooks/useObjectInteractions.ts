@@ -48,9 +48,7 @@ export function useObjectInteractions({
       if (!metadata || metadata.interactionType !== "clickable") return;
 
       // Get action name and trigger callback
-      const actionName = getClickActionName(
-        metadata.originalObject.name
-      );
+      const actionName = getClickActionName(metadata.originalObject.name);
       
       // Handle external links first
       if (metadata.originalObject.name.includes("disk_linkedin")) {
@@ -109,10 +107,7 @@ export function useObjectInteractions({
     if (!enabled) return;
 
     const currentIntersects = intersectsRef.current;
-    const hitbox =
-      currentIntersects.length > 0 && currentIntersects[0]
-        ? (currentIntersects[0].object as THREE.Mesh)
-        : null;
+    const hitbox = currentIntersects.length > 0 && currentIntersects[0] ? (currentIntersects[0].object as THREE.Mesh) : null;
 
     const metadata = hitbox?.userData.metadata as
       | {
@@ -136,22 +131,14 @@ export function useObjectInteractions({
             }
           | undefined;
         if (prevMeta) {
-          playHoverAnimation(
-            prevMeta.originalObject,
-            prevMeta.initialScale,
-            false
-          );
+          playHoverAnimation(prevMeta.originalObject, prevMeta.initialScale, false);
           restoreOriginalColors(prevMeta.originalObject);
         }
       }
 
       // Apply hover to new target
       if (hitbox && metadata) {
-        playHoverAnimation(
-          metadata.originalObject,
-          metadata.initialScale,
-          true
-        );
+        playHoverAnimation(metadata.originalObject, metadata.initialScale, true);
         if (metadata.interactionType === "clickable") {
           applyAccentColor(metadata.originalObject);
         }
