@@ -6,6 +6,7 @@
 import * as React from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import gsap from "gsap";
 import { applyAccentColor, restoreOriginalColors } from "../utils/materialUtils";
 import { getClickActionName, type ClickActions } from "../components/sceneInteractions";
 
@@ -15,8 +16,7 @@ interface UseObjectInteractionsOptions {
   enabled?: boolean;
 }
 
-const HOVER_SCALE = 1.02;
-const LERP_FACTOR = 0.15; // Smooth animation factor
+const HOVER_SCALE = 1.03;
 
 /**
  * Hook for managing hover and click interactions with 3D objects
@@ -82,19 +82,24 @@ export function useObjectInteractions({
     };
   }, [clickActions, enabled]);
 
-  /**
-   * Simple hover animation: instant scale up/down using stored initialScale.
-   * This mirrors the imperative playHoverAnimation(object, isHovering) pattern.
-   */
   const playHoverAnimation = React.useCallback(
     (
       originalObject: THREE.Object3D,
       initialScale: THREE.Vector3,
       isHovering: boolean
     ) => {
+      // Stop any in-flight tweens on this scale
+      gsap.killTweensOf(originalObject.scale);
+
       const factor = isHovering ? HOVER_SCALE : 1;
-      const target = initialScale.clone().multiplyScalar(factor);
-      originalObject.scale.copy(target);
+
+      gsap.to(originalObject.scale, {
+        x: initialScale.x * factor,
+        y: initialScale.y * factor,
+        z: initialScale.z * factor,
+        duration: isHovering ? 0.3 : 0.25,
+        ease: isHovering ? "back.out(2)" : "power2.out",
+      });
     },
     []
   );
