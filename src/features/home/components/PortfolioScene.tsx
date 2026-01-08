@@ -31,9 +31,11 @@ function RendererConfig() {
 
 /**
  * OrbitControls with pan limits - clamps target instead of camera to prevent rotation issues
+ * Hard limit at y=1.5 to prevent camera from going under the island
  */
 function LimitedOrbitControls() {
-	const { controls } = useThree();
+	const { controls, camera } = useThree();
+	const ISLAND_FLOOR_Y = 1.5; // Hard limit - no camera below this
 
 	useFrame(() => {
 		if (!controls || !('target' in controls)) return;
@@ -41,9 +43,12 @@ function LimitedOrbitControls() {
 		// Clamp the target (pan center) to prevent panning beyond limits
 		// This prevents rotation issues that occur when clamping camera position
 		const target = (controls as { target: THREE.Vector3 }).target;
-		target.x = Math.max(-5, Math.min(5, target.x));
-		target.y = Math.max(0, Math.min(5, target.y));
+		target.x = Math.max(-5, Math.min(8, target.x));
+		target.y = Math.max(ISLAND_FLOOR_Y, Math.min(5, target.y));
 		target.z = Math.max(-5, Math.min(5, target.z));
+
+		// Also clamp camera position to prevent it from going below island floor
+		camera.position.y = Math.max(ISLAND_FLOOR_Y, camera.position.y);
 	});
 
 	return (
@@ -201,8 +206,8 @@ function SceneContent({
     <>
       <ambientLight intensity={0.5} />
       <directionalLight
-        position={[100, 100, 100]}
-        intensity={2}
+        position={[10, 50, 50]}
+        intensity={1.3}
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}

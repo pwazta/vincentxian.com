@@ -31,7 +31,7 @@ export function Navbar({
           : "bg-transparent"
       }`}
     >
-      <div className="text-xl font-semibold text-foreground">Your Name</div>
+      <div className="text-xl font-semibold text-foreground">vx</div>
       
       {/* Collapsible menu buttons - slide in horizontally */}
       <div className="flex items-center gap-4">
