@@ -99,6 +99,7 @@ function SceneContent({
     intersects,
     clickActions,
     enabled: hitboxes.length > 0,
+    hitboxes,
   });
 
   return (
@@ -167,12 +168,7 @@ export function PortfolioScene({
         gl={{ antialias: true }}
       >
         <RendererConfig />
-        <SceneContent
-          onSoftwareClick={onSoftwareClick}
-          onArtsClick={onArtsClick}
-          onAboutClick={onAboutClick}
-          onContactClick={onContactClick}
-        />
+        <SceneContent onSoftwareClick={onSoftwareClick} onArtsClick={onArtsClick} onAboutClick={onAboutClick} onContactClick={onContactClick} />
         <OrbitControls
           enablePan={true}
           enableZoom={true}
