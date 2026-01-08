@@ -18,7 +18,7 @@ interface UseObjectInteractionsOptions {
 }
 
 const HOVER_SCALE = 1.03;
-const HOVER_OVEREXTEND_SCALE = 1.06;
+const HOVER_OVEREXTEND_SCALE = 1.05;
 
 /**
  * Hook for managing hover and click interactions with 3D objects
@@ -141,7 +141,19 @@ export function useObjectInteractions({
         return group;
       }
 
-      // Default: just this object
+      // Group phone_base with phone_device (one-way: only when phone_base is hovered)
+      if (name.includes("phone_base")) {
+        const group: HoverMetadata[] = [];
+        for (const hb of hitboxes) {
+          const m = hb.userData.metadata as HoverMetadata | undefined;
+          if (m && m.originalObject.name.includes("phone_")) {
+            group.push(m);
+          }
+        }
+        return group;
+      }
+
+      // Default: just this object (phone_device hovered alone, or any other object)
       return [meta];
     },
     [hitboxes]
