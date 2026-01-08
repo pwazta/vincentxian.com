@@ -57,11 +57,11 @@ export function useObjectInteractions({intersects, clickActions, enabled = true,
 
       // Handle external links
       if (objectName.includes("disk_linkedin")) {
-        window.open("https://linkedin.com", "_blank");
+        window.open("https://www.linkedin.com/in/vincent-xian/", "_blank");
         return;
       }
       if (objectName.includes("disk_github")) {
-        window.open("https://github.com", "_blank");
+        window.open("https://github.com/pwazta", "_blank");
         return;
       }
 
@@ -89,6 +89,7 @@ export function useObjectInteractions({intersects, clickActions, enabled = true,
   const playHoverAnimation = React.useCallback(
     (originalObject: THREE.Object3D, initialScale: THREE.Vector3, initialPosition: THREE.Vector3, isHovering: boolean) => {
       const isDrawer = originalObject.name.includes("cabinet_drawer_");
+      const isPCube = originalObject.name.includes("pCube");
 
       if (isDrawer) {
         // Drawer animation: slide outward instead of scaling
@@ -114,6 +115,32 @@ export function useObjectInteractions({intersects, clickActions, enabled = true,
             y: initialPosition.y,
             z: initialPosition.z,
             duration: 0.25,
+            ease: "power2.out",
+          });
+        }
+      } else if (isPCube) {
+        // pCube animation: translate up by 0.5, no scaling
+        gsap.killTweensOf(originalObject.position);
+        gsap.killTweensOf(originalObject.scale);
+        applyAccentColor(originalObject);
+        if (isHovering) {
+          // Translate up by 0.5
+          const targetPosition = initialPosition.clone().add(new THREE.Vector3(0, -3.3, 0));
+          
+          gsap.to(originalObject.position, {
+            x: targetPosition.x,
+            y: targetPosition.y,
+            z: targetPosition.z,
+            duration: 0.2,
+            ease: "back.out(1.5)",
+          });
+        } else {
+          // Restore original position
+          gsap.to(originalObject.position, {
+            x: initialPosition.x,
+            y: initialPosition.y,
+            z: initialPosition.z,
+            duration: 0.2,
             ease: "power2.out",
           });
         }

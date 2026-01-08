@@ -4,6 +4,7 @@
  */
 
 import * as THREE from "three";
+import gsap from "gsap";
 
 /** Accent colors from CSS variables (light/dark mode) */
 const ACCENT_COLOR_LIGHT = "#ffffff";
@@ -20,10 +21,46 @@ function getAccentColor(): string {
 }
 
 /**
+ * Clones materials for objects that share materials (like keyboard keys)
+ * This ensures each object has its own material instance
+ */
+function cloneMaterialsIfNeeded(object: THREE.Mesh): void {
+  if (!object.material) return;
+
+  const isPCube = object.name.includes("pCube");
+  if (!isPCube) return; // Only clone for pCube objects
+
+  const materials = Array.isArray(object.material) ? object.material : [object.material];
+  const clonedMaterials: THREE.Material[] = [];
+
+  for (const material of materials) {
+    if (material instanceof THREE.MeshStandardMaterial) {
+      // Clone the material so each key has its own instance
+      const cloned = material.clone();
+      clonedMaterials.push(cloned);
+    } else {
+      clonedMaterials.push(material);
+    }
+  }
+
+  // Replace the shared material with cloned materials
+  if (clonedMaterials.length === 0) return; // Safety check
+  
+  if (clonedMaterials.length === 1) {
+    object.material = clonedMaterials[0]!;
+  } else {
+    object.material = clonedMaterials;
+  }
+}
+
+/**
  * Stores original material colors in object userData
  */
 export function storeOriginalColors(object: THREE.Object3D): void {
   if (!(object instanceof THREE.Mesh) || !object.material) return;
+
+  // Clone materials for pCube objects to avoid shared material issues
+  cloneMaterialsIfNeeded(object);
 
   const materials = Array.isArray(object.material) ? object.material : [object.material];
 
@@ -41,14 +78,15 @@ export function storeOriginalColors(object: THREE.Object3D): void {
 }
 
 /**
- * Applies accent color to object materials
+ * Applies accent color to object materials with smooth animation
  */
-export function applyAccentColor(object: THREE.Object3D): void {
+export function applyAccentColor(object: THREE.Object3D, animated = true): void {
   if (!(object instanceof THREE.Mesh) || !object.material) return;
 
   const materials = Array.isArray(object.material) ? object.material : [object.material];
 
   const accentColor = getAccentColor();
+  const accentColorObj = new THREE.Color(accentColor);
 
   for (const material of materials) {
     if (material instanceof THREE.MeshStandardMaterial) {
@@ -56,15 +94,28 @@ export function applyAccentColor(object: THREE.Object3D): void {
       if (!object.userData.originalColors) {
         storeOriginalColors(object);
       }
-      material.color.set(accentColor);
+
+      if (animated) {
+        // Animate color transition with GSAP
+        gsap.killTweensOf(material.color);
+        gsap.to(material.color, {
+          r: accentColorObj.r,
+          g: accentColorObj.g,
+          b: accentColorObj.b,
+          duration: 0.15,
+          ease: "power2.out",
+        });
+      } else {
+        material.color.set(accentColor);
+      }
     }
   }
 }
 
 /**
- * Restores original material colors from userData
+ * Restores original material colors from userData with smooth animation
  */
-export function restoreOriginalColors(object: THREE.Object3D): void {
+export function restoreOriginalColors(object: THREE.Object3D, animated = true): void {
   if (!(object instanceof THREE.Mesh) || !object.material) return;
 
   const originalColors = object.userData.originalColors as string[] | undefined;
@@ -77,7 +128,21 @@ export function restoreOriginalColors(object: THREE.Object3D): void {
     const material = materials[i];
     const originalColor = originalColors[i];
     if (material instanceof THREE.MeshStandardMaterial && typeof originalColor === "string" && originalColor) {
-      material.color.setHex(parseInt(originalColor, 16));
+      const originalColorObj = new THREE.Color(parseInt(originalColor, 16));
+      
+      if (animated) {
+        // Animate color transition back with GSAP
+        gsap.killTweensOf(material.color);
+        gsap.to(material.color, {
+          r: originalColorObj.r,
+          g: originalColorObj.g,
+          b: originalColorObj.b,
+          duration: 0.15,
+          ease: "power2.out",
+        });
+      } else {
+        material.color.setHex(parseInt(originalColor, 16));
+      }
     }
   }
 }

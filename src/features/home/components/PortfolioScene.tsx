@@ -205,10 +205,10 @@ function SceneContent({
 
       {/* Grass field with terrain */}
       <GrassField
-        grassCount={3500}
+        grassCount={2000}
         terrainScale={2}
         terrainHeightScale={0.5}
-        grassScale={5}
+        grassScale={8}
         grassHeightScale={0.4}
       />
 

@@ -131,7 +131,9 @@ export function GrassField({
 		const position = new THREE.Vector3();
 		const quaternion = new THREE.Quaternion();
 		// Apply height scale to instance scale as well for additional control
-		const scale = new THREE.Vector3(1, grassHeightScale, 1);
+		// Increase width/depth scale to make blades thicker
+		const thicknessMultiplier = 1.2; // Makes blades 20% thicker
+		const scale = new THREE.Vector3(thicknessMultiplier, grassHeightScale, thicknessMultiplier);
 		const normal = new THREE.Vector3();
 		const yAxis = new THREE.Vector3(0, 1, 0);
 		const matrix = new THREE.Matrix4();
@@ -161,7 +163,7 @@ export function GrassField({
 		// Cleanup
 		return () => {
 			instancedMesh.dispose();
-			grassGeometry.dispose();
+			if (grassGeometry) grassGeometry.dispose();
 			if (terrainMaterial) terrainMaterial.dispose();
 		};
 	}, [

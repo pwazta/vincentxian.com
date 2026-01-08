@@ -11,7 +11,7 @@ export const HOVERABLE_PATTERNS = [
   "disk",
   "phone",
   "button",
-  "pcube",
+  "pCube",
   "cabinet_drawer",
 ] as const;
 
