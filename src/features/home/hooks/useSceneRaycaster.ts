@@ -14,7 +14,6 @@ interface UseSceneRaycasterOptions {
 
 interface RaycasterResult {
   intersects: THREE.Intersection[];
-  pointer: THREE.Vector2;
 }
 
 /**
@@ -67,6 +66,6 @@ export function useSceneRaycaster({ hitboxes, enabled = true }: UseSceneRaycaste
     setIntersects(intersections);
   });
 
-  return { intersects, pointer: pointer.current };
+  return { intersects };
 }
 

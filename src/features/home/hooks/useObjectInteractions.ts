@@ -19,22 +19,19 @@ interface UseObjectInteractionsOptions {
 
 const HOVER_SCALE = 1.03;
 const HOVER_OVEREXTEND_SCALE = 1.05;
+const DRAWER_SLIDE_DISTANCE = 100; // Distance to slide drawer outward
 
 /**
  * Hook for managing hover and click interactions with 3D objects
  */
-export function useObjectInteractions({
-  intersects,
-  clickActions,
-  enabled = true,
-  hitboxes,
-}: UseObjectInteractionsOptions): void {
+export function useObjectInteractions({intersects, clickActions, enabled = true, hitboxes}: UseObjectInteractionsOptions): void {
   const intersectsRef = React.useRef<THREE.Intersection[]>([]);
   const hoveredHitboxRef = React.useRef<THREE.Mesh | null>(null);
 
   type HoverMetadata = {
     originalObject: THREE.Object3D;
     initialScale: THREE.Vector3;
+    initialPosition: THREE.Vector3;
     interactionType: "hoverable" | "clickable" | "none";
   };
 
@@ -56,20 +53,20 @@ export function useObjectInteractions({
 
       if (!metadata || metadata.interactionType !== "clickable") return;
 
-      // Get action name and trigger callback
-      const actionName = getClickActionName(metadata.originalObject.name);
-      
-      // Handle external links first
-      if (metadata.originalObject.name.includes("disk_linkedin")) {
+      const objectName = metadata.originalObject.name;
+
+      // Handle external links
+      if (objectName.includes("disk_linkedin")) {
         window.open("https://linkedin.com", "_blank");
         return;
       }
-      if (metadata.originalObject.name.includes("disk_github")) {
+      if (objectName.includes("disk_github")) {
         window.open("https://github.com", "_blank");
         return;
       }
 
       // Handle modal actions
+      const actionName = getClickActionName(objectName);
       if (actionName && clickActions[actionName]) {
         clickActions[actionName]();
       }
@@ -90,74 +87,92 @@ export function useObjectInteractions({
   }, [clickActions, enabled]);
 
   const playHoverAnimation = React.useCallback(
-    (originalObject: THREE.Object3D, initialScale: THREE.Vector3, isHovering: boolean) => {
-      // Stop any in-flight tweens on this scale
-      gsap.killTweensOf(originalObject.scale);
+    (originalObject: THREE.Object3D, initialScale: THREE.Vector3, initialPosition: THREE.Vector3, isHovering: boolean) => {
+      const isDrawer = originalObject.name.includes("cabinet_drawer_");
 
-      if (isHovering) {
-        // Bounce animation: overshoot to 1.1, then settle to 1.03
-        const tl = gsap.timeline();
-        tl.to(originalObject.scale, {
-          x: initialScale.x * HOVER_OVEREXTEND_SCALE,
-          y: initialScale.y * HOVER_OVEREXTEND_SCALE,
-          z: initialScale.z * HOVER_OVEREXTEND_SCALE,
-          duration: 0.1,
-          ease: "power2.out",
-        }).to(originalObject.scale, {
-          x: initialScale.x * HOVER_SCALE,
-          y: initialScale.y * HOVER_SCALE,
-          z: initialScale.z * HOVER_SCALE,
-          duration: 0.15,
-          ease: "back.out(1.5)",
-        });
+      if (isDrawer) {
+        // Drawer animation: slide outward instead of scaling
+        gsap.killTweensOf(originalObject.position);
+        gsap.killTweensOf(originalObject.scale);
+
+        if (isHovering) {
+          // Slide drawer outward - try Z direction first (forward), fallback to X if needed
+          const slideDirection = new THREE.Vector3(0, 0, DRAWER_SLIDE_DISTANCE);
+          const targetPosition = initialPosition.clone().add(slideDirection);
+          
+          gsap.to(originalObject.position, {
+            x: targetPosition.x,
+            y: targetPosition.y,
+            z: targetPosition.z,
+            duration: 0.3,
+            ease: "back.out(1.5)",
+          });
+        } else {
+          // Restore drawer position
+          gsap.to(originalObject.position, {
+            x: initialPosition.x,
+            y: initialPosition.y,
+            z: initialPosition.z,
+            duration: 0.25,
+            ease: "power2.out",
+          });
+        }
       } else {
-        // Simple restore animation
-        gsap.to(originalObject.scale, {
-          x: initialScale.x,
-          y: initialScale.y,
-          z: initialScale.z,
-          duration: 0.25,
-          ease: "power2.out",
-        });
+        // Regular scale animation for non-drawer objects
+        gsap.killTweensOf(originalObject.scale);
+
+        if (isHovering) {
+          // Bounce animation: overshoot to 1.05, then settle to 1.03
+          const tl = gsap.timeline();
+          tl.to(originalObject.scale, {
+            x: initialScale.x * HOVER_OVEREXTEND_SCALE,
+            y: initialScale.y * HOVER_OVEREXTEND_SCALE,
+            z: initialScale.z * HOVER_OVEREXTEND_SCALE,
+            duration: 0.1,
+            ease: "power2.out",
+          }).to(originalObject.scale, {
+            x: initialScale.x * HOVER_SCALE,
+            y: initialScale.y * HOVER_SCALE,
+            z: initialScale.z * HOVER_SCALE,
+            duration: 0.15,
+            ease: "back.out(1.5)",
+          });
+        } else {
+          // Simple restore animation
+          gsap.to(originalObject.scale, {
+            x: initialScale.x,
+            y: initialScale.y,
+            z: initialScale.z,
+            duration: 0.25,
+            ease: "power2.out",
+          });
+        }
       }
     },
     []
   );
 
-  const getGroupMetas = React.useCallback(
-    (meta: HoverMetadata | undefined): HoverMetadata[] => {
-      if (!meta) return [];
-      const name = meta.originalObject.name;
+  const getGroupMetas = React.useCallback((meta: HoverMetadata | undefined): HoverMetadata[] => {
+    if (!meta) return [];
+    const name = meta.originalObject.name;
 
-      // Group all computer_* parts together
-      if (name.includes("computer_")) {
-        const group: HoverMetadata[] = [];
-        for (const hb of hitboxes) {
-          const m = hb.userData.metadata as HoverMetadata | undefined;
-          if (m && m.originalObject.name.includes("computer_")) {
-            group.push(m);
-          }
-        }
-        return group;
+    // Helper to find all objects matching a pattern
+    const findGroup = (pattern: string): HoverMetadata[] => {
+      const group: HoverMetadata[] = [];
+      for (const hb of hitboxes) {
+        const m = hb.userData.metadata as HoverMetadata | undefined;
+        if (m && m.originalObject.name.includes(pattern)) group.push(m);
       }
+      return group;
+    };
 
-      // Group phone_base with phone_device (one-way: only when phone_base is hovered)
-      if (name.includes("phone_base")) {
-        const group: HoverMetadata[] = [];
-        for (const hb of hitboxes) {
-          const m = hb.userData.metadata as HoverMetadata | undefined;
-          if (m && m.originalObject.name.includes("phone_")) {
-            group.push(m);
-          }
-        }
-        return group;
-      }
+    // Group all computer_* parts together, and group phone_base with phone_device (one-way: only when phone_base is hovered) 
+    if (name.includes("computer_")) return findGroup("computer_");
+    if (name.includes("phone_base")) return findGroup("phone_");
 
-      // Default: just this object (phone_device hovered alone, or any other object)
-      return [meta];
-    },
-    [hitboxes]
-  );
+    // Default: just this object (phone_device hovered alone, or any other object)
+    return [meta];
+  }, [hitboxes]);
 
   // Animate hover effects (scale only) and manage hover state in a single render loop
   useFrame(() => {
@@ -165,10 +180,8 @@ export function useObjectInteractions({
 
     const currentIntersects = intersectsRef.current;
     const hitbox = currentIntersects.length > 0 && currentIntersects[0] ? (currentIntersects[0].object as THREE.Mesh) : null;
-
-    const metadata = hitbox?.userData.metadata as HoverMetadata | undefined;
-
     const prevHitbox = hoveredHitboxRef.current;
+    const metadata = hitbox?.userData.metadata as HoverMetadata | undefined;
 
     // If hover target changed, reset previous and apply hover to new
     if (hitbox !== prevHitbox) {
@@ -177,7 +190,7 @@ export function useObjectInteractions({
         const prevMeta = prevHitbox.userData.metadata as HoverMetadata | undefined;
         const prevGroup = getGroupMetas(prevMeta);
         for (const m of prevGroup) {
-          playHoverAnimation(m.originalObject, m.initialScale, false);
+          playHoverAnimation(m.originalObject, m.initialScale, m.initialPosition, false);
           restoreOriginalColors(m.originalObject);
         }
       }
@@ -186,22 +199,16 @@ export function useObjectInteractions({
       if (hitbox && metadata) {
         const group = getGroupMetas(metadata);
         for (const m of group) {
-          playHoverAnimation(m.originalObject, m.initialScale, true);
+          playHoverAnimation(m.originalObject, m.initialScale, m.initialPosition, true);
         }
-        if (metadata.interactionType === "clickable") {
-          applyAccentColor(metadata.originalObject);
-        }
+        if (metadata.interactionType === "clickable") applyAccentColor(metadata.originalObject);
       }
 
       hoveredHitboxRef.current = hitbox;
     }
 
     // Update cursor based on current hover metadata
-    if (metadata && metadata.interactionType === "clickable") {
-      document.body.style.cursor = "pointer";
-    } else {
-      document.body.style.cursor = "default";
-    }
+    if (metadata?.interactionType === "clickable") document.body.style.cursor = "pointer";
+    else document.body.style.cursor = "default";
   });
 }
-

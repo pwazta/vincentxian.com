@@ -34,7 +34,7 @@ export interface HitboxMetadata {
   originalObject: THREE.Object3D;
   interactionType: InteractionType;
   initialScale: THREE.Vector3;
-  initialWorldCenter: THREE.Vector3;
+  initialPosition: THREE.Vector3;
 }
 
 /** Click action callbacks for different object types */

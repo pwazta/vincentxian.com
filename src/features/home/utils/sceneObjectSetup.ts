@@ -71,7 +71,7 @@ export function createHitbox(object: THREE.Object3D, interactionType: Interactio
     originalObject: object,
     interactionType,
     initialScale: object.scale.clone(),
-    initialWorldCenter: worldCenter.clone(),
+    initialPosition: object.position.clone(),
   };
 
   hitbox.userData.metadata = metadata;
