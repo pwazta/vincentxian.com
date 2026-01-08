@@ -5,7 +5,7 @@
 "use client";
 
 import * as React from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Grid, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { GrassField } from "./GrassField";
@@ -27,6 +27,35 @@ function RendererConfig() {
 		gl.toneMapping = THREE.ACESFilmicToneMapping;
 	}, [gl]);
 	return null;
+}
+
+/**
+ * OrbitControls with pan limits - clamps target instead of camera to prevent rotation issues
+ */
+function LimitedOrbitControls() {
+	const { controls } = useThree();
+
+	useFrame(() => {
+		if (!controls || !('target' in controls)) return;
+
+		// Clamp the target (pan center) to prevent panning beyond limits
+		// This prevents rotation issues that occur when clamping camera position
+		const target = (controls as { target: THREE.Vector3 }).target;
+		target.x = Math.max(-5, Math.min(5, target.x));
+		target.y = Math.max(0, Math.min(5, target.y));
+		target.z = Math.max(-5, Math.min(5, target.z));
+	});
+
+	return (
+		<OrbitControls
+			makeDefault
+			enablePan={true}
+			enableZoom={true}
+			enableRotate={true}
+			minDistance={4}
+			maxDistance={12}
+		/>
+	);
 }
 
 /**
@@ -276,13 +305,7 @@ export function PortfolioScene({
           onContactClick={onContactClick}
           showGrid={showGrid}
         />
-        <OrbitControls
-          enablePan={true}
-          enableZoom={true}
-          enableRotate={true}
-          minDistance={5}
-          maxDistance={15}
-        />
+        <LimitedOrbitControls />
       </Canvas>
     </div>
   );
