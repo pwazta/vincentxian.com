@@ -22,22 +22,24 @@ export default function Home() {
   const [contactOpen, setContactOpen] = React.useState(false);
 
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <div className="relative h-screen w-screen overflow-hidden bg-background">
-        <Navbar
-          onSoftwareClick={() => setSoftwareOpen(true)}
-          onArtsClick={() => setArtsOpen(true)}
-          onAboutClick={() => setAboutOpen(true)}
-          onContactClick={() => setContactOpen(true)}
-        />
-        <div className="h-full w-full">
+    <div className="relative h-screen w-screen overflow-hidden bg-background">
+      <Navbar
+        onSoftwareClick={() => setSoftwareOpen(true)}
+        onArtsClick={() => setArtsOpen(true)}
+        onAboutClick={() => setAboutOpen(true)}
+        onContactClick={() => setContactOpen(true)}
+      />
+      <div className="h-full w-full">
+        <Suspense fallback={<LoadingSpinner />}>
           <PortfolioScene
+            showGrid={true}
             onSoftwareClick={() => setSoftwareOpen(true)}
             onArtsClick={() => setArtsOpen(true)}
             onAboutClick={() => setAboutOpen(true)}
             onContactClick={() => setContactOpen(true)}
           />
-        </div>
+        </Suspense>
+      </div>
 
         <ModalFrame
           open={softwareOpen}
@@ -67,6 +69,5 @@ export default function Home() {
           <ContactContent />
         </ModalFrame>
       </div>
-    </Suspense>
   );
 }

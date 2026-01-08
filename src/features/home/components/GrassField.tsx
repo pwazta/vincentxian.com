@@ -37,10 +37,13 @@ export function GrassField({
 	const islandModel = useGLTF("/models/island.glb");
 	const grassLODsModel = useGLTF("/models/grassLODs.glb");
 
-	// Load textures
+	// Load textures with proper cleanup
 	const grassAlphaTexture = React.useMemo(() => {
 		const loader = new THREE.TextureLoader();
 		const texture = loader.load("/models/grass.jpeg");
+		texture.generateMipmaps = true;
+		texture.minFilter = THREE.LinearMipmapLinearFilter;
+		texture.magFilter = THREE.LinearFilter;
 		return texture;
 	}, []);
 
@@ -48,14 +51,32 @@ export function GrassField({
 		const loader = new THREE.TextureLoader();
 		const texture = loader.load("/models/perlinnoise.webp");
 		texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+		texture.generateMipmaps = true;
+		texture.minFilter = THREE.LinearMipmapLinearFilter;
+		texture.magFilter = THREE.LinearFilter;
 		return texture;
 	}, []);
+
+	// Cleanup textures on unmount
+	React.useEffect(() => {
+		return () => {
+			grassAlphaTexture.dispose();
+			noiseTexture.dispose();
+		};
+	}, [grassAlphaTexture, noiseTexture]);
 
 	// Initialize grass material
 	React.useEffect(() => {
 		const material = new GrassMaterial();
 		material.setupTextures(grassAlphaTexture, noiseTexture);
 		setGrassMaterial(material);
+		
+		return () => {
+			// Cleanup material
+			if (material.material) {
+				material.material.dispose();
+			}
+		};
 	}, [grassAlphaTexture, noiseTexture]);
 
 	// Setup terrain and grass after models load
@@ -140,6 +161,8 @@ export function GrassField({
 		// Cleanup
 		return () => {
 			instancedMesh.dispose();
+			grassGeometry.dispose();
+			if (terrainMaterial) terrainMaterial.dispose();
 		};
 	}, [
 		islandModel.scene,

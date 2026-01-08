@@ -6,7 +6,7 @@
 
 import * as React from "react";
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF } from "@react-three/drei";
+import { OrbitControls, useGLTF, Grid, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { GrassField } from "./GrassField";
 import { setupInteractiveObjects } from "../utils/sceneObjectSetup";
@@ -29,19 +29,81 @@ function RendererConfig() {
 	return null;
 }
 
+/**
+ * Grid axis labels component using Html overlays (GPU-friendly, no 3D geometry)
+ */
+function GridLabels() {
+	const labelHeight = 0.05;
+	const range = 20; // Reduced range to limit labels
+	const step = 10; // Only major intervals to reduce count
+
+	const labels: Array<{ position: [number, number, number]; text: string }> = [];
+
+	// Origin label
+	labels.push({ position: [0, labelHeight, 0], text: "0,0" });
+
+	// X-axis labels (only major intervals, limited range)
+	for (let x = step; x <= range; x += step) {
+		labels.push({ position: [x, labelHeight, 0], text: `${x},0` });
+		labels.push({ position: [-x, labelHeight, 0], text: `-${x},0` });
+	}
+
+	// Z-axis labels (only major intervals, limited range)
+	for (let z = step; z <= range; z += step) {
+		labels.push({ position: [0, labelHeight, z], text: `0,${z}` });
+		labels.push({ position: [0, labelHeight, -z], text: `0,-${z}` });
+	}
+
+	return (
+		<>
+			{labels.map((label, index) => (
+				<Html
+					key={index}
+					position={label.position}
+					center
+					style={{
+						color: "#666",
+						fontSize: "12px",
+						fontFamily: "monospace",
+						pointerEvents: "none",
+						textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
+						userSelect: "none",
+					}}
+				>
+					{label.text}
+				</Html>
+			))}
+		</>
+	);
+}
+
 function SceneContent({
   onSoftwareClick,
   onArtsClick,
   onAboutClick,
   onContactClick,
+  showGrid = false,
 }: {
   onSoftwareClick: () => void;
   onArtsClick: () => void;
   onAboutClick: () => void;
   onContactClick: () => void;
+  showGrid?: boolean;
 }) {
   const { scene } = useThree();
   const [hitboxes, setHitboxes] = React.useState<THREE.Mesh[]>([]);
+  const [gridVisible, setGridVisible] = React.useState(showGrid);
+
+  // Toggle grid with 'G' key
+  React.useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "g" || e.key === "G") {
+        setGridVisible((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, []);
 
   // Scene setup
   React.useEffect(() => {
@@ -113,14 +175,33 @@ function SceneContent({
         position={[100, 100, 100]}
         intensity={2}
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
         shadow-camera-far={200}
         shadow-camera-left={-50}
         shadow-camera-right={50}
         shadow-camera-top={50}
         shadow-camera-bottom={-50}
+        shadow-bias={-0.0001}
       />
+
+      {/* Debug grid helper - Press 'G' to toggle */}
+      {gridVisible && (
+        <>
+          <Grid
+            args={[50, 50]}
+            cellColor="#6f6f6f"
+            sectionColor="#9d4b4b"
+            cellThickness={0.5}
+            sectionThickness={1}
+            fadeDistance={30}
+            fadeStrength={1}
+            position={[0, 0, 0]}
+          />
+          {/* Grid axis labels */}
+          <GridLabels />
+        </>
+      )}
 
       {/* Grass field with terrain */}
       <GrassField
@@ -157,6 +238,7 @@ type PortfolioSceneProps = {
   onArtsClick: () => void;
   onAboutClick: () => void;
   onContactClick: () => void;
+  showGrid?: boolean;
 };
 
 export function PortfolioScene({
@@ -164,15 +246,36 @@ export function PortfolioScene({
   onArtsClick,
   onAboutClick,
   onContactClick,
+  showGrid = false,
 }: PortfolioSceneProps) {
   return (
     <div className="h-full w-full">
       <Canvas
-        camera={{ position: [-14, 8, -10], fov: 75}}
-        gl={{ antialias: true }}
+        camera={{ position: [0, 10, 8], fov: 70 }}
+        gl={{ 
+          antialias: true,
+          powerPreference: "high-performance",
+          preserveDrawingBuffer: false,
+        }}
+        onCreated={({ gl }) => {
+          // Handle WebGL context loss
+          gl.domElement.addEventListener("webglcontextlost", (e) => {
+            e.preventDefault();
+            console.warn("WebGL context lost - attempting to restore");
+          });
+          gl.domElement.addEventListener("webglcontextrestored", () => {
+            console.log("WebGL context restored");
+          });
+        }}
       >
         <RendererConfig />
-        <SceneContent onSoftwareClick={onSoftwareClick} onArtsClick={onArtsClick} onAboutClick={onAboutClick} onContactClick={onContactClick} />
+        <SceneContent 
+          onSoftwareClick={onSoftwareClick} 
+          onArtsClick={onArtsClick} 
+          onAboutClick={onAboutClick} 
+          onContactClick={onContactClick}
+          showGrid={showGrid}
+        />
         <OrbitControls
           enablePan={true}
           enableZoom={true}
