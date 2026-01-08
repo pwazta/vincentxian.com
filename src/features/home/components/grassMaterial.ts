@@ -32,7 +32,7 @@ export class GrassMaterial {
 		tipColor2: "#1f352a",
 	};
 
-	uniforms: { [key: string]: { value: unknown } } = {
+	uniforms: Record<string, { value: unknown }> = {
 		uTime: { value: 0 },
 		uEnableShadows: { value: true },
 		uShadowDarkness: { value: 0.5 },
@@ -49,8 +49,8 @@ export class GrassMaterial {
 	private mergeUniforms(newUniforms?: GrassUniformsInterface) {
 		if (!newUniforms) return;
 		for (const [key, value] of Object.entries(newUniforms)) {
-			if (value && this.uniforms.hasOwnProperty(key) && this.uniforms[key]) {
-				this.uniforms[key]!.value = value.value;
+			if (value && typeof value === "object" && "value" in value && this.uniforms.hasOwnProperty(key) && this.uniforms[key]) {
+				this.uniforms[key].value = (value as { value: unknown }).value;
 			}
 		}
 	}
@@ -68,7 +68,7 @@ export class GrassMaterial {
 		this.setupGrassMaterial(this.material);
 	}
 
-	public updateGrassGraphicsChange(high: boolean = true) {
+	public updateGrassGraphicsChange(high = true) {
 		const shadowUniform = this.uniforms.uEnableShadows;
 		if (shadowUniform) {
 			shadowUniform.value = high;

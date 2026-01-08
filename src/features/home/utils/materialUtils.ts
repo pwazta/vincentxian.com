@@ -71,15 +71,12 @@ export function restoreOriginalColors(object: THREE.Object3D): void {
 
   if (!originalColors) return;
 
-  const materials = Array.isArray(object.material) ? object.material : [object.material];
+  const materials: THREE.Material[] = Array.isArray(object.material) ? object.material : [object.material];
 
   for (let i = 0; i < materials.length; i++) {
     const material = materials[i];
     const originalColor = originalColors[i];
-    if (
-      material instanceof THREE.MeshStandardMaterial &&
-      originalColor
-    ) {
+    if (material instanceof THREE.MeshStandardMaterial && typeof originalColor === "string" && originalColor) {
       material.color.setHex(parseInt(originalColor, 16));
     }
   }

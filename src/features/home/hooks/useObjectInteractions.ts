@@ -49,7 +49,7 @@ export function useObjectInteractions({intersects, clickActions, enabled = true,
       if (currentIntersects.length === 0 || !currentIntersects[0]) return;
 
       const clickedMesh = currentIntersects[0].object as THREE.Mesh;
-      const metadata = clickedMesh.userData.metadata;
+      const metadata = clickedMesh.userData.metadata as HoverMetadata | undefined;
 
       if (!metadata || metadata.interactionType !== "clickable") return;
 
@@ -161,7 +161,7 @@ export function useObjectInteractions({intersects, clickActions, enabled = true,
       const group: HoverMetadata[] = [];
       for (const hb of hitboxes) {
         const m = hb.userData.metadata as HoverMetadata | undefined;
-        if (m && m.originalObject.name.includes(pattern)) group.push(m);
+        if (m?.originalObject.name.includes(pattern)) group.push(m);
       }
       return group;
     };

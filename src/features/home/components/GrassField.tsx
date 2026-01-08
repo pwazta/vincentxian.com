@@ -70,7 +70,7 @@ export function GrassField({
 		// Find terrain mesh from island model
 		let terrainMesh: THREE.Mesh | null = null;
 		islandModel.scene.traverse((child) => {
-			if (child instanceof THREE.Mesh) {
+			if (child instanceof THREE.Mesh && child.geometry instanceof THREE.BufferGeometry) {
 				child.material = terrainMaterial;
 				child.receiveShadow = true;
 				child.geometry.scale(terrainScale, terrainScale * terrainHeightScale, terrainScale);
@@ -83,7 +83,7 @@ export function GrassField({
 		// Find grass geometry from LODs model
 		let grassGeometry: THREE.BufferGeometry | null = null;
 		grassLODsModel.scene.traverse((child) => {
-			if (child instanceof THREE.Mesh && child.name.includes("LOD00")) {
+			if (child instanceof THREE.Mesh && child.name.includes("LOD00") && child.geometry instanceof THREE.BufferGeometry) {
 				// Scale width/depth uniformly, but height separately
 				child.geometry.scale(
 					grassScale,
@@ -147,6 +147,7 @@ export function GrassField({
 		grassMaterial,
 		grassCount,
 		terrainScale,
+		terrainHeightScale,
 		grassScale,
 		grassHeightScale,
 	]);

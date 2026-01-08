@@ -3,7 +3,7 @@
  * Used in: PortfolioScene and interaction hooks for determining hoverable/clickable objects
  */
 
-import * as THREE from "three";
+import type * as THREE from "three";
 
 /** Name patterns that identify hoverable objects */
 export const HOVERABLE_PATTERNS = [

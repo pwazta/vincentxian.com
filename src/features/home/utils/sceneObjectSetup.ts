@@ -13,9 +13,9 @@ import {
 /**
  * Recursively traverses a scene to find all mesh objects
  */
-export function traverseSceneObjects(object: THREE.Object3D, meshes: THREE.Mesh[] = []): THREE.Mesh[] {
+export function traverseSceneObjects(object: THREE.Object3D, meshes: THREE.Mesh<THREE.BufferGeometry, THREE.Material>[] = []): THREE.Mesh<THREE.BufferGeometry, THREE.Material>[] {
   if (object instanceof THREE.Mesh && object.name) {
-    meshes.push(object);
+    meshes.push(object as THREE.Mesh<THREE.BufferGeometry, THREE.Material>);
   }
 
   for (const child of object.children) {

@@ -62,7 +62,7 @@ function SceneContent({
       
       // Store original colors for all interactive objects
       for (const hitbox of newHitboxes) {
-        const metadata = hitbox.userData.metadata;
+        const metadata = hitbox.userData.metadata as { originalObject: THREE.Object3D } | undefined;
         if (metadata) {
           storeOriginalColors(metadata.originalObject);
         }
@@ -85,8 +85,12 @@ function SceneContent({
     () => ({
       onPhoneClick: onContactClick,
       onComputerClick: onSoftwareClick,
-      onDiskLinkedInClick: () => {},
-      onDiskGithubClick: () => {},
+      onDiskLinkedInClick: () => {
+        // External link handled in useObjectInteractions
+      },
+      onDiskGithubClick: () => {
+        // External link handled in useObjectInteractions
+      },
       onDrawerAboutClick: onAboutClick,
       onDrawerSoftwareClick: onSoftwareClick,
       onDrawerArtsClick: onArtsClick,
