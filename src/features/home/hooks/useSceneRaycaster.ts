@@ -8,7 +8,7 @@ import { useThree, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 interface UseSceneRaycasterOptions {
-  hitboxes: THREE.Mesh[];
+  interactiveMeshes: THREE.Mesh[];
   enabled?: boolean;
 }
 
@@ -18,8 +18,9 @@ interface RaycasterResult {
 
 /**
  * Hook for raycaster-based pointer tracking and intersection detection
+ * Raycasts directly against original meshes for accurate hit detection
  */
-export function useSceneRaycaster({ hitboxes, enabled = true }: UseSceneRaycasterOptions): RaycasterResult {
+export function useSceneRaycaster({ interactiveMeshes, enabled = true }: UseSceneRaycasterOptions): RaycasterResult {
   const { camera, size } = useThree();
   const raycaster = React.useRef(new THREE.Raycaster());
   const pointer = React.useRef(new THREE.Vector2());
@@ -56,13 +57,13 @@ export function useSceneRaycaster({ hitboxes, enabled = true }: UseSceneRaycaste
 
   // Perform raycaster intersection tests in animation loop
   useFrame(() => {
-    if (!enabled || hitboxes.length === 0) {
+    if (!enabled || interactiveMeshes.length === 0) {
       setIntersects([]);
       return;
     }
 
     raycaster.current.setFromCamera(pointer.current, camera);
-    const intersections = raycaster.current.intersectObjects(hitboxes, false);
+    const intersections = raycaster.current.intersectObjects(interactiveMeshes, false);
     setIntersects(intersections);
   });
 

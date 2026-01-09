@@ -145,7 +145,7 @@ function SceneContent({
   showGrid?: boolean;
 }) {
   const { scene } = useThree();
-  const [hitboxes, setHitboxes] = React.useState<THREE.Mesh[]>([]);
+  const [interactiveMeshes, setInteractiveMeshes] = React.useState<THREE.Mesh[]>([]);
   const [gridVisible, setGridVisible] = React.useState(showGrid);
 
   // Toggle grid with 'G' key
@@ -172,49 +172,26 @@ function SceneContent({
 
   // Setup interactive objects after models load
   React.useEffect(() => {
-    let currentHitboxes: THREE.Mesh[] = [];
-  
     const timer = setTimeout(() => {
-      currentHitboxes = setupInteractiveObjects(scene);
+      const meshes = setupInteractiveObjects(scene);
   
       // Store original colors for all interactive objects
-      for (const hitbox of currentHitboxes) {
-        const metadata = hitbox.userData.metadata as {
-          originalObject: THREE.Object3D;
-        } | undefined;
-  
-        if (metadata) {
-          storeOriginalColors(metadata.originalObject);
-        }
+      for (const mesh of meshes) {
+        storeOriginalColors(mesh);
       }
   
-      setHitboxes(currentHitboxes);
+      setInteractiveMeshes(meshes);
     }, 100);
   
     return () => {
       clearTimeout(timer);
-  
-      // Remove and dispose hitboxes created by this effect run
-      for (const hitbox of currentHitboxes) {
-        scene.remove(hitbox);
-  
-        const geometry = hitbox.geometry as THREE.BufferGeometry | undefined;
-        if (geometry) geometry.dispose();
-  
-        const material = hitbox.material;
-        if (Array.isArray(material)) {
-          material.forEach((m) => m.dispose());
-        } else if (material) {
-          material.dispose();
-        }
-      }
     };
   }, [scene, computerModel.scene, cabinetModel.scene, phoneModel.scene]);
 
   // Raycaster for intersection detection
   const { intersects } = useSceneRaycaster({
-    hitboxes,
-    enabled: hitboxes.length > 0,
+    interactiveMeshes,
+    enabled: interactiveMeshes.length > 0,
   });
 
   // Click actions mapping
@@ -239,8 +216,8 @@ function SceneContent({
   useObjectInteractions({
     intersects,
     clickActions,
-    enabled: hitboxes.length > 0,
-    hitboxes,
+    enabled: interactiveMeshes.length > 0,
+    interactiveMeshes,
   });
 
   return (
