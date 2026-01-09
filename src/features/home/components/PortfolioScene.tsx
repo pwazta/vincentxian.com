@@ -245,19 +245,57 @@ function SceneContent({
 
   return (
     <>
-      <ambientLight intensity={0.5} />
+      {/* Ambient light for overall scene illumination - reduces harsh shadows */}
+      <ambientLight intensity={0.4} />
+      
+      {/* 
+        THREE.JS SHADOW SYSTEM EXPLAINED:
+        
+        1. SHADOW MAP BASICS:
+           - Three.js uses "shadow maps" - textures rendered from the light's perspective
+           - The shadow camera defines what area gets rendered into this texture
+           - Higher resolution = sharper shadows, but more GPU memory/performance cost
+        
+        2. SHADOW CAMERA FRUSTUM (the key to sharp shadows):
+           - The frustum (left/right/top/bottom/far) defines the "window" the light sees through
+           - SMALLER frustum = MORE detail (like zooming in with a camera)
+           - Scene bounds: X: ±5 units, Z: 0 to 15 units
+           - Frustum: X: ±6 (padding), Z: 0 to 16 (padding), Far: 70 (covers light distance)
+        
+        3. SHADOW MAP RESOLUTION:
+           - 2048x2048 = 4 million pixels total
+           - With frustum of 12x12 units, each pixel covers ~0.006 units (very sharp!)
+           - At 4096x4096, each pixel covers ~0.003 units (even sharper, but 4x more memory)
+        
+        4. SHADOW BIAS:
+           - shadow-bias: Prevents "shadow acne" (self-shadowing artifacts)
+           - shadow-normalBias: Additional bias along surface normals (helps with steep angles)
+        
+        5. SHADOW FILTERING (set in RendererConfig):
+           - PCFSoftShadowMap: Soft, smooth shadow edges (what you're using)
+           - PCFShadowMap: Harder edges, slightly faster
+           - BasicShadowMap: Hardest edges, fastest (not recommended)
+        
+        PERFORMANCE TIPS:
+        - Keep frustum as tight as possible around your scene
+        - 2048 resolution is usually sufficient for web
+        - Only objects with castShadow=true cast shadows
+        - Only objects with receiveShadow=true receive shadows
+        - Grass receiving shadows is fine, but don't let it CAST shadows (too many objects)
+      */}
       <directionalLight
-        position={[10, 50, 50]}
-        intensity={1.3}
+        position={[3, 6, 8]}
+        intensity={1}
         castShadow
-        shadow-mapSize-width={1024}
-        shadow-mapSize-height={1024}
-        shadow-camera-far={200}
-        shadow-camera-left={-50}
-        shadow-camera-right={50}
-        shadow-camera-top={50}
-        shadow-camera-bottom={-50}
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-far={20}
+        shadow-camera-left={-9}
+        shadow-camera-right={10}
+        shadow-camera-top={7}
+        shadow-camera-bottom={-3}
         shadow-bias={-0.0001}
+        shadow-normalBias={0.03}
       />
 
       {/* Debug grid helper - Press 'G' to toggle */}
