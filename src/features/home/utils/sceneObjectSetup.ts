@@ -13,14 +13,16 @@ import {
 /**
  * Recursively traverses a scene to find all mesh objects
  */
-export function traverseSceneObjects(object: THREE.Object3D, meshes: THREE.Mesh<THREE.BufferGeometry, THREE.Material>[] = []): THREE.Mesh<THREE.BufferGeometry, THREE.Material>[] {
-  if (object instanceof THREE.Mesh && object.name) {
-    meshes.push(object as THREE.Mesh<THREE.BufferGeometry, THREE.Material>);
-  }
+function traverseSceneObjects(object: THREE.Object3D): THREE.Mesh<THREE.BufferGeometry, THREE.Material>[] {
+  const meshes: THREE.Mesh<THREE.BufferGeometry, THREE.Material>[] = [];
 
-  for (const child of object.children) {
-    traverseSceneObjects(child, meshes);
-  }
+  object.traverse((child) => {
+    if (child instanceof THREE.Mesh && child.name) {
+      meshes.push(child as THREE.Mesh<THREE.BufferGeometry, THREE.Material>);
+      child.castShadow = true;
+      child.receiveShadow = true;
+    }
+  });
 
   return meshes;
 }
@@ -28,7 +30,7 @@ export function traverseSceneObjects(object: THREE.Object3D, meshes: THREE.Mesh<
 /**
  * Creates an invisible hitbox mesh from an object's bounding box
  */
-export function createHitbox(object: THREE.Object3D, interactionType: InteractionType): THREE.Mesh | null {
+function createHitbox(object: THREE.Object3D, interactionType: InteractionType): THREE.Mesh | null {
   if (interactionType === "none") return null;
 
   // Calculate bounding box in world space

@@ -17,6 +17,7 @@ import type { ClickActions } from "./sceneInteractions";
 
 /**
  * Configures renderer settings for grass shadows and rendering
+ * Handles WebGL context loss gracefully
  */
 function RendererConfig() {
 	const { gl } = useThree();
@@ -25,6 +26,25 @@ function RendererConfig() {
 		gl.shadowMap.type = THREE.PCFSoftShadowMap;
 		gl.outputColorSpace = THREE.SRGBColorSpace;
 		gl.toneMapping = THREE.ACESFilmicToneMapping;
+		
+		// Handle WebGL context loss - don't preventDefault to allow browser restoration
+		const canvas = gl.domElement;
+		const handleContextLost = () => {
+			// Don't preventDefault - allows browser to restore context automatically
+			console.warn("WebGL context lost - browser will attempt to restore");
+		};
+		
+		const handleContextRestored = () => {
+			console.log("WebGL context restored");
+		};
+		
+		canvas.addEventListener("webglcontextlost", handleContextLost);
+		canvas.addEventListener("webglcontextrestored", handleContextRestored);
+		
+		return () => {
+			canvas.removeEventListener("webglcontextlost", handleContextLost);
+			canvas.removeEventListener("webglcontextrestored", handleContextRestored);
+		};
 	}, [gl]);
 	return null;
 }
@@ -152,22 +172,43 @@ function SceneContent({
 
   // Setup interactive objects after models load
   React.useEffect(() => {
-    // Wait for models to be fully loaded
+    let currentHitboxes: THREE.Mesh[] = [];
+  
     const timer = setTimeout(() => {
-      const newHitboxes = setupInteractiveObjects(scene);
-      
+      currentHitboxes = setupInteractiveObjects(scene);
+  
       // Store original colors for all interactive objects
-      for (const hitbox of newHitboxes) {
-        const metadata = hitbox.userData.metadata as { originalObject: THREE.Object3D } | undefined;
+      for (const hitbox of currentHitboxes) {
+        const metadata = hitbox.userData.metadata as {
+          originalObject: THREE.Object3D;
+        } | undefined;
+  
         if (metadata) {
           storeOriginalColors(metadata.originalObject);
         }
       }
-      
-      setHitboxes(newHitboxes);
+  
+      setHitboxes(currentHitboxes);
     }, 100);
-
-    return () => clearTimeout(timer);
+  
+    return () => {
+      clearTimeout(timer);
+  
+      // Remove and dispose hitboxes created by this effect run
+      for (const hitbox of currentHitboxes) {
+        scene.remove(hitbox);
+  
+        const geometry = hitbox.geometry as THREE.BufferGeometry | undefined;
+        if (geometry) geometry.dispose();
+  
+        const material = hitbox.material;
+        if (Array.isArray(material)) {
+          material.forEach((m) => m.dispose());
+        } else if (material) {
+          material.dispose();
+        }
+      }
+    };
   }, [scene, computerModel.scene, cabinetModel.scene, phoneModel.scene]);
 
   // Raycaster for intersection detection
@@ -239,7 +280,7 @@ function SceneContent({
 
       {/* Grass field with terrain */}
       <GrassField
-        grassCount={2000}
+        grassCount={1500}
         terrainScale={2}
         terrainHeightScale={0.5}
         grassScale={8}
@@ -285,21 +326,13 @@ export function PortfolioScene({
   return (
     <div className="h-full w-full">
       <Canvas
+        shadows
+        dpr={[1, 1.5]} // clamp pixel ratio for performance / memory
         camera={{ position: [0, 10, 8], fov: 70 }}
-        gl={{ 
+        gl={{
           antialias: true,
-          powerPreference: "high-performance",
+          powerPreference: "default",
           preserveDrawingBuffer: false,
-        }}
-        onCreated={({ gl }) => {
-          // Handle WebGL context loss
-          gl.domElement.addEventListener("webglcontextlost", (e) => {
-            e.preventDefault();
-            console.warn("WebGL context lost - attempting to restore");
-          });
-          gl.domElement.addEventListener("webglcontextrestored", () => {
-            console.log("WebGL context restored");
-          });
         }}
       >
         <RendererConfig />

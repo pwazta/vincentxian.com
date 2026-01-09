@@ -46,11 +46,15 @@ export class GrassMaterial {
 		grassAlphaTexture: { value: new THREE.Texture() },
 	};
 
+	/**
+	 * Merges provided uniforms into existing uniforms
+	 * Matches reference implementation behavior
+	 */
 	private mergeUniforms(newUniforms?: GrassUniformsInterface) {
 		if (!newUniforms) return;
 		for (const [key, value] of Object.entries(newUniforms)) {
-			if (value && typeof value === "object" && "value" in value && this.uniforms.hasOwnProperty(key) && this.uniforms[key]) {
-				this.uniforms[key].value = (value as { value: unknown }).value;
+			if (value && this.uniforms.hasOwnProperty(key) && this.uniforms[key]) {
+				this.uniforms[key].value = value;
 			}
 		}
 	}
@@ -84,30 +88,30 @@ export class GrassMaterial {
 
 	private setupGrassMaterial(material: THREE.Material) {
 		material.onBeforeCompile = (shader) => {
-			const uniforms: Record<string, THREE.IUniform> = {
+			// Exact reference implementation - direct uniform assignment
+			// Type assertions needed for TypeScript compatibility
+			shader.uniforms = {
 				...shader.uniforms,
+				uTime: this.uniforms.uTime as THREE.IUniform,
+				uTipColor1: this.uniforms.tipColor1 as THREE.IUniform,
+				uTipColor2: this.uniforms.tipColor2 as THREE.IUniform,
+				uBaseColor: this.uniforms.baseColor as THREE.IUniform,
+				uEnableShadows: this.uniforms.uEnableShadows as THREE.IUniform,
+				uShadowDarkness: this.uniforms.uShadowDarkness as THREE.IUniform,
+				uGrassLightIntensity: this.uniforms.uGrassLightIntensity as THREE.IUniform,
+				uNoiseScale: this.uniforms.uNoiseScale as THREE.IUniform,
+				uNoiseTexture: this.uniforms.noiseTexture as THREE.IUniform,
+				uGrassAlphaTexture: this.uniforms.grassAlphaTexture as THREE.IUniform,
+				fogColor2: this.uniforms.fogColor2 as THREE.IUniform,
+				fogColor3: this.uniforms.fogColor3 as THREE.IUniform,
 			};
 
-			if (this.uniforms.uTime) uniforms.uTime = this.uniforms.uTime as THREE.IUniform;
-			if (this.uniforms.tipColor1) uniforms.uTipColor1 = this.uniforms.tipColor1 as THREE.IUniform;
-			if (this.uniforms.tipColor2) uniforms.uTipColor2 = this.uniforms.tipColor2 as THREE.IUniform;
-			if (this.uniforms.baseColor) uniforms.uBaseColor = this.uniforms.baseColor as THREE.IUniform;
-			if (this.uniforms.uEnableShadows) uniforms.uEnableShadows = this.uniforms.uEnableShadows as THREE.IUniform;
-			if (this.uniforms.uShadowDarkness) uniforms.uShadowDarkness = this.uniforms.uShadowDarkness as THREE.IUniform;
-			if (this.uniforms.uGrassLightIntensity) uniforms.uGrassLightIntensity = this.uniforms.uGrassLightIntensity as THREE.IUniform;
-			if (this.uniforms.uNoiseScale) uniforms.uNoiseScale = this.uniforms.uNoiseScale as THREE.IUniform;
-			if (this.uniforms.noiseTexture) uniforms.uNoiseTexture = this.uniforms.noiseTexture as THREE.IUniform;
-			if (this.uniforms.grassAlphaTexture) uniforms.uGrassAlphaTexture = this.uniforms.grassAlphaTexture as THREE.IUniform;
-			if (this.uniforms.fogColor2) uniforms.fogColor2 = this.uniforms.fogColor2 as THREE.IUniform;
-			if (this.uniforms.fogColor3) uniforms.fogColor3 = this.uniforms.fogColor3 as THREE.IUniform;
-
-			shader.uniforms = uniforms;
-
 			shader.vertexShader = `
+      // FOG
       #include <common>
       #include <fog_pars_vertex>
+      // FOG
       #include <shadowmap_pars_vertex>
-      
       uniform sampler2D uNoiseTexture;
       uniform float uNoiseScale;
       uniform float uTime;
@@ -118,12 +122,13 @@ export class GrassMaterial {
       varying vec3 vNormal;
       varying vec3 vViewPosition;
       varying vec2 vWindColor;
-      
       void main() {
         #include <color_vertex>
+
+        // Normals with instancing support
         #include <beginnormal_vertex>
         #include <defaultnormal_vertex>
-        
+
         // wind effect
         vec2 uWindDirection = vec2(1.0,1.0);
         float uWindAmp = 0.1;
@@ -132,7 +137,7 @@ export class GrassMaterial {
         float uNoiseFactor = 5.50;
         float uNoiseSpeed = 0.001;
 
-        vec2 windDirection = normalize(uWindDirection);
+        vec2 windDirection = normalize(uWindDirection); // Normalize the wind direction
         vec4 modelPosition = modelMatrix * instanceMatrix * vec4(position, 1.0);
 
         float terrainSize = 100.;
@@ -150,28 +155,21 @@ export class GrassMaterial {
         // use perlinNoise to vary the terrainHeight of the grass
         modelPosition.y += exp(texture2D(uNoiseTexture,vGlobalUV * uNoiseScale).r) * 0.5 * (1.-uv.y);
 
-        // Define transformed for worldpos_vertex
-        vec3 transformed = modelPosition.xyz;
-        
-        #include <worldpos_vertex>
-        
-        vec4 viewPosition = viewMatrix * modelPosition;
-        vec4 projectedPosition = projectionMatrix * viewPosition;
-        
-        // Define mvPosition for shadowmap
-        vec4 mvPosition = viewPosition;
-        
-        gl_Position = projectedPosition;
+        vec4 worldPosition = modelPosition;
+        vec4 mvPosition = viewMatrix * modelPosition;
+        gl_Position = projectionMatrix * mvPosition;
 
         // assign varyings
         vUv = vec2(uv.x,1.-uv.y);
         vNormal = normalize(normalMatrix * normal);
         vWindColor = vec2(xDisp,zDisp);
-        vViewPosition = viewPosition.xyz;
-        
+        vViewPosition = mvPosition.xyz;
+
+        // SHADOW
         #include <shadowmap_vertex>
+        // FOG
         #include <fog_vertex>
-      }    
+      }
       `;
 
 			shader.fragmentShader = `
@@ -216,15 +214,27 @@ export class GrassMaterial {
         vec4 diffuseColor = vec4( mix(uBaseColor,tipColor,vUv.y), step(0.1,grassAlpha.r) );
         vec3 grassFinalColor = diffuseColor.rgb * uGrassLightIntensity;
         
-        // light calculation with shadow
-        float shadow = 1.0;
-        if(uEnableShadows == 1){
-          #if defined( USE_SHADOWMAP ) && NUM_DIR_LIGHT_SHADOWS > 0
-            shadow = getShadowMask();
-          #endif
-          grassFinalColor = mix(grassFinalColor , grassFinalColor * uShadowDarkness,  1.0 - shadow) ;
-        }
-        diffuseColor.rgb = clamp(diffuseColor.rgb * shadow, 0.0, 1.0);
+        // light calculation derived from <lights_fragment_begin>
+        vec3 geometryPosition = vViewPosition;
+        vec3 geometryNormal = vNormal;
+        vec3 geometryViewDir = ( isOrthographic ) ? vec3( 0, 0, 1 ) : normalize( vViewPosition );
+        vec3 geometryClearcoatNormal;
+          IncidentLight directLight;
+          float shadow = 0.0;
+          float currentShadow = 0.0;
+          float NdotL;
+          if(uEnableShadows == 1){
+            #if defined( USE_SHADOWMAP ) && NUM_DIR_LIGHT_SHADOWS > 0
+              shadow = getShadowMask();
+            #else
+              shadow = 1.0;
+            #endif
+            grassFinalColor = mix(grassFinalColor , grassFinalColor * uShadowDarkness,  1.-shadow) ;
+          } else{
+            shadow = 1.0;
+            grassFinalColor = grassFinalColor ;
+          }
+        diffuseColor.rgb = clamp(diffuseColor.rgb*shadow,0.0,1.0);
 
         #include <alphatest_fragment>
         gl_FragColor = vec4(grassFinalColor ,1.0);
@@ -238,10 +248,7 @@ export class GrassMaterial {
 
         // FOG
         #include <fog_fragment>
-        // FOG
-
       }
-      
     `;
 		};
 	}
