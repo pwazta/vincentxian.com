@@ -177,3 +177,38 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scaleY(1);
+  }
+}
+
+@keyframes dialog-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scaleY(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scaleY(0);
+  }
+}
+
+.dialog-content-animated {
+  transform: translate(-50%, -50%) scaleY(0);
+  opacity: 0;
+}
+
+.dialog-content-animated[data-state="open"] {
+  animation: dialog-in 300ms ease-out forwards;
+}
+
+.dialog-content-animated[data-state="closed"] {
+  animation: dialog-out 300ms ease-in forwards;
+}

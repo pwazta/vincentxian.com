@@ -42,32 +42,16 @@ export function Navbar({
               : "max-w-0 opacity-0 pointer-events-none"
           }`}
         >
-          <Button
-            variant="ghost"
-            onClick={onSoftwareClick}
-            className="hover:bg-accent/10 whitespace-nowrap"
-          >
-            Software
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={onArtsClick}
-            className="hover:bg-accent/10 whitespace-nowrap"
-          >
-            Arts
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={onAboutClick}
-            className="hover:bg-accent/10 whitespace-nowrap"
-          >
+          <Button variant="ghost" onClick={onAboutClick} className="hover:bg-accent/10 whitespace-nowrap">
             About
           </Button>
-          <Button
-            variant="ghost"
-            onClick={onContactClick}
-            className="hover:bg-accent/10 whitespace-nowrap"
-          >
+          <Button variant="ghost" onClick={onSoftwareClick} className="hover:bg-accent/10 whitespace-nowrap">
+            Software
+          </Button>
+          <Button variant="ghost" onClick={onArtsClick} className="hover:bg-accent/10 whitespace-nowrap">
+            Arts
+          </Button>
+          <Button variant="ghost" onClick={onContactClick} className="hover:bg-accent/10 whitespace-nowrap">
             Contact
           </Button>
         </div>
