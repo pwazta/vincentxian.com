@@ -61,7 +61,7 @@ function LimitedOrbitControls() {
 	return <OrbitControls makeDefault enablePan={true} enableZoom={true} enableRotate={true} minDistance={4} maxDistance={12} />;
 }
 
-function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick }: PortfolioSceneProps) {
+function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen }: PortfolioSceneProps) {
   const { scene } = useThree();
   const [interactiveMeshes, setInteractiveMeshes] = React.useState<THREE.Mesh[]>([]);
   const [primaryColor, setPrimaryColor] = React.useState<string>("#7c9082");
@@ -111,8 +111,9 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
     return () => clearTimeout(timer);
   }, [scene, computerModel.scene, cabinetModel.scene, phoneModel.scene]);
 
-  // Raycaster for intersection detection
-  const { intersects } = useSceneRaycaster({ interactiveMeshes, enabled: interactiveMeshes.length > 0 });
+  // Raycaster for intersection detection - disabled when dialog is open
+  const interactionsEnabled = interactiveMeshes.length > 0 && !isDialogOpen;
+  const { intersects } = useSceneRaycaster({ interactiveMeshes, enabled: interactionsEnabled });
 
   // Click actions mapping
   const clickActions: ClickActions = React.useMemo(
@@ -128,8 +129,8 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
     [onSoftwareClick, onArtsClick, onAboutClick, onContactClick]
   );
 
-  // Handle interactions
-  useObjectInteractions({ intersects, clickActions, enabled: interactiveMeshes.length > 0 }); 
+  // Handle interactions - disabled when dialog is open
+  useObjectInteractions({ intersects, clickActions, enabled: interactionsEnabled }); 
 
   return (
     <>
@@ -188,11 +189,13 @@ type PortfolioSceneProps = {
   onArtsClick: () => void;
   onAboutClick: () => void;
   onContactClick: () => void;
+  isDialogOpen: boolean;
 };
 
-export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick }: PortfolioSceneProps) {
+export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen }: PortfolioSceneProps) {
+
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full" style={{ pointerEvents: isDialogOpen ? "none" : "auto" }}>
       <Canvas
         shadows
         dpr={[1, 1.5]}
@@ -204,7 +207,7 @@ export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onC
         }}
       >
         <RendererConfig />
-        <SceneContent onSoftwareClick={onSoftwareClick} onArtsClick={onArtsClick} onAboutClick={onAboutClick} onContactClick={onContactClick} />
+        <SceneContent onSoftwareClick={onSoftwareClick} onArtsClick={onArtsClick} onAboutClick={onAboutClick} onContactClick={onContactClick} isDialogOpen={isDialogOpen} />
         <LimitedOrbitControls />
       </Canvas>
     </div>

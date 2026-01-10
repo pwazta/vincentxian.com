@@ -10,33 +10,29 @@ import gsap from "gsap";
 import { applyAccentColor, restoreOriginalColors } from "../utils/materialUtils";
 import { getClickActionName, type ClickActions } from "../utils/sceneInteractions";
 
+const HOVER_SCALE = 1.08;
+const HOVER_OVEREXTEND_SCALE = 1.15;
+const DRAWER_SLIDE_DISTANCE = 100;
+const HOVER_UNHOVER_DELAY_MS = 100;
+
 interface UseObjectInteractionsOptions {
   intersects: THREE.Intersection[];
   clickActions: ClickActions;
   enabled?: boolean;
 }
 
-const HOVER_SCALE = 1.08;
-const HOVER_OVEREXTEND_SCALE = 1.15;
-const DRAWER_SLIDE_DISTANCE = 100;
-const HOVER_UNHOVER_DELAY_MS = 100;
+type HoverMetadata = {
+  originalObject: THREE.Object3D;
+  initialScale: THREE.Vector3;
+  initialPosition: THREE.Vector3;
+  interactionType: "hoverable" | "clickable" | "none";
+};
 
 export function useObjectInteractions({ intersects, clickActions, enabled = true }: UseObjectInteractionsOptions): void {
   const intersectsRef = React.useRef<THREE.Intersection[]>([]);
   const hoveredMeshRef = React.useRef<THREE.Mesh | null>(null);
   const unhoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-
-  type HoverMetadata = {
-    originalObject: THREE.Object3D;
-    initialScale: THREE.Vector3;
-    initialPosition: THREE.Vector3;
-    interactionType: "hoverable" | "clickable" | "none";
-  };
-
-  // Update intersects ref for click handler
-  React.useEffect(() => {
-    intersectsRef.current = intersects;
-  }, [intersects]);
+  const reenableCooldownRef = React.useRef<number | null>(null);
 
   // Handle click events
   React.useEffect(() => {
@@ -44,7 +40,7 @@ export function useObjectInteractions({ intersects, clickActions, enabled = true
 
     const handleClick = () => {
       const currentIntersects = intersectsRef.current;
-      if (currentIntersects.length === 0 || !currentIntersects[0]) return;
+      if (!currentIntersects[0]) return;
 
       const clickedMesh = currentIntersects[0].object as THREE.Mesh;
       const metadata = clickedMesh.userData.metadata as HoverMetadata | undefined;
@@ -138,83 +134,57 @@ export function useObjectInteractions({ intersects, clickActions, enabled = true
         gsap.killTweensOf(originalObject.position);
 
         if (isHovering) {
-          if (originalObject instanceof THREE.Mesh && originalObject.geometry) {
-            if (!originalObject.userData.originalWorldPosition) {
-              originalObject.updateMatrixWorld(true);
-              originalObject.userData.originalWorldPosition = originalObject.getWorldPosition(new THREE.Vector3()).clone();
-            }
-            
-            const geometry = originalObject.geometry as THREE.BufferGeometry;
-            geometry.computeBoundingBox();
-            const boundingBox = geometry.boundingBox;
-            
-            if (boundingBox) {
-              const localCenter = new THREE.Vector3();
-              boundingBox.getCenter(localCenter);
-              const offsetFromInitial = localCenter.clone().sub(initialPosition);
-              const scaleFactor = HOVER_SCALE;
-              const overextendFactor = HOVER_OVEREXTEND_SCALE;
-              const offsetAdjustment = offsetFromInitial.clone().multiplyScalar(scaleFactor - 1);
-              const newPosition = initialPosition.clone().sub(offsetAdjustment);
-              const tl = gsap.timeline();
-              const overextendOffsetAdjustment = offsetFromInitial.clone().multiplyScalar(overextendFactor - 1);
-              const overextendPosition = initialPosition.clone().sub(overextendOffsetAdjustment);
-              
-              tl.to(originalObject.scale, {
-                x: initialScale.x * HOVER_OVEREXTEND_SCALE,
-                y: initialScale.y * HOVER_OVEREXTEND_SCALE,
-                z: initialScale.z * HOVER_OVEREXTEND_SCALE,
-                duration: 0.1,
-                ease: "power2.out",
-              })
-              .to(originalObject.position, {
-                x: overextendPosition.x,
-                y: overextendPosition.y,
-                z: overextendPosition.z,
-                duration: 0.1,
-                ease: "power2.out",
-              }, 0)
-              .to(originalObject.scale, {
-                x: initialScale.x * HOVER_SCALE,
-                y: initialScale.y * HOVER_SCALE,
-                z: initialScale.z * HOVER_SCALE,
-                duration: 0.15,
-                ease: "back.out(1.5)",
-              })
-              .to(originalObject.position, {
-                x: newPosition.x,
-                y: newPosition.y,
-                z: newPosition.z,
-                duration: 0.15,
-                ease: "back.out(1.5)",
-              }, "-=0.15");
-            } else {
-              // Fallback to simple scaling if bounding box unavailable
-              const tl = gsap.timeline();
-              tl.to(originalObject.scale, {
-                x: initialScale.x * HOVER_OVEREXTEND_SCALE,
-                y: initialScale.y * HOVER_OVEREXTEND_SCALE,
-                z: initialScale.z * HOVER_OVEREXTEND_SCALE,
-                duration: 0.1,
-                ease: "power2.out",
-              }).to(originalObject.scale, {
-                x: initialScale.x * HOVER_SCALE,
-                y: initialScale.y * HOVER_SCALE,
-                z: initialScale.z * HOVER_SCALE,
-                duration: 0.15,
-                ease: "back.out(1.5)",
-              });
-            }
-          } else {
-            // Fallback for non-mesh objects
+          const mesh = originalObject as THREE.Mesh;
+          mesh.geometry.computeBoundingBox();
+          const boundingBox = mesh.geometry.boundingBox;
+          
+          if (boundingBox) {
+            const localCenter = new THREE.Vector3();
+            boundingBox.getCenter(localCenter);
+            const offsetFromInitial = localCenter.clone().sub(initialPosition);
+            const offsetAdjustment = offsetFromInitial.clone().multiplyScalar(HOVER_SCALE - 1);
+            const newPosition = initialPosition.clone().sub(offsetAdjustment);
             const tl = gsap.timeline();
-            tl.to(originalObject.scale, {
+            const overextendOffsetAdjustment = offsetFromInitial.clone().multiplyScalar(HOVER_OVEREXTEND_SCALE - 1);
+            const overextendPosition = initialPosition.clone().sub(overextendOffsetAdjustment);
+            
+            tl.to(mesh.scale, {
               x: initialScale.x * HOVER_OVEREXTEND_SCALE,
               y: initialScale.y * HOVER_OVEREXTEND_SCALE,
               z: initialScale.z * HOVER_OVEREXTEND_SCALE,
               duration: 0.1,
               ease: "power2.out",
-            }).to(originalObject.scale, {
+            })
+            .to(mesh.position, {
+              x: overextendPosition.x,
+              y: overextendPosition.y,
+              z: overextendPosition.z,
+              duration: 0.1,
+              ease: "power2.out",
+            }, 0)
+            .to(mesh.scale, {
+              x: initialScale.x * HOVER_SCALE,
+              y: initialScale.y * HOVER_SCALE,
+              z: initialScale.z * HOVER_SCALE,
+              duration: 0.15,
+              ease: "back.out(1.5)",
+            })
+            .to(mesh.position, {
+              x: newPosition.x,
+              y: newPosition.y,
+              z: newPosition.z,
+              duration: 0.15,
+              ease: "back.out(1.5)",
+            }, "-=0.15");
+          } else {
+            const tl = gsap.timeline();
+            tl.to(mesh.scale, {
+              x: initialScale.x * HOVER_OVEREXTEND_SCALE,
+              y: initialScale.y * HOVER_OVEREXTEND_SCALE,
+              z: initialScale.z * HOVER_OVEREXTEND_SCALE,
+              duration: 0.1,
+              ease: "power2.out",
+            }).to(mesh.scale, {
               x: initialScale.x * HOVER_SCALE,
               y: initialScale.y * HOVER_SCALE,
               z: initialScale.z * HOVER_SCALE,
@@ -238,53 +208,54 @@ export function useObjectInteractions({ intersects, clickActions, enabled = true
             duration: 0.25,
             ease: "power2.out",
           });
-          
-          // Clean up any stored world position
-          if (originalObject.userData.originalWorldPosition) {
-            delete originalObject.userData.originalWorldPosition;
-          }
         }
       }
-    },
-    []
+    }, []
   );
 
-  // USE THIS FUNCTION IF YOU WANT TO GROUP OBJECTS TOGETHER WHEN HOVERING / CLICKING
-  // const getGroupMetas = React.useCallback((meta: HoverMetadata | undefined): HoverMetadata[] => {
-  //   if (!meta) return [];
-  //   
-  //   const name = meta.originalObject.name;
+  React.useEffect(() => {
+    if (!enabled) {
+      document.body.style.cursor = "default";
+      if (reenableCooldownRef.current !== null) {
+        window.cancelAnimationFrame(reenableCooldownRef.current);
+        reenableCooldownRef.current = null;
+      }
+    } else {
+      if (hoveredMeshRef.current) {
+        const prevMeta = hoveredMeshRef.current.userData.metadata as HoverMetadata | undefined;
+        if (prevMeta) {
+          playHoverAnimation(prevMeta.originalObject, prevMeta.initialScale, prevMeta.initialPosition, false);
+          restoreOriginalColors(prevMeta.originalObject);
+        }
+        hoveredMeshRef.current = null;
+      }
+      if (unhoverTimeoutRef.current) {
+        clearTimeout(unhoverTimeoutRef.current);
+        unhoverTimeoutRef.current = null;
+      }
+      reenableCooldownRef.current = window.requestAnimationFrame(() => {
+        reenableCooldownRef.current = window.requestAnimationFrame(() => {
+          reenableCooldownRef.current = null;
+        });
+      });
+    }
+  }, [enabled, playHoverAnimation]);
 
-  //   // Helper to find all objects matching a pattern
-  //   const findGroup = (pattern: string): HoverMetadata[] => {
-  //     const group: HoverMetadata[] = [];
-  //     for (const mesh of interactiveMeshes) {
-  //       const m = mesh.userData.metadata as HoverMetadata | undefined;
-  //       if (m && mesh.name.includes(pattern)) group.push(m);
-  //     }
-  //     return group;
-  //   };
-
-  //   // Group all computer_* parts together, and group phone_base with phone_device (one-way: only when phone_base is hovered) 
-  //   if (name.includes("computer_")) return findGroup("computer_");
-  //   if (name.includes("phone_base")) return findGroup("phone_");
-
-  //   // Default: just this object (phone_device hovered alone, or any other object)
-  //   return [meta];
-  // }, [interactiveMeshes]);
-
-  // Animate hover effects with hysteresis to prevent jittering
   useFrame(() => {
-    if (!enabled) return;
+    intersectsRef.current = intersects;
 
-    const currentIntersects = intersectsRef.current;
-    const hoveredMesh = currentIntersects.length > 0 && currentIntersects[0] ? (currentIntersects[0].object as THREE.Mesh) : null;
+    if (!enabled || reenableCooldownRef.current !== null) return;
+
+    const hoveredMesh = intersects[0] ? (intersects[0].object as THREE.Mesh) : null;
     const prevMesh = hoveredMeshRef.current;
     const metadata = hoveredMesh?.userData.metadata as HoverMetadata | undefined;
 
-    // If nothing changed, keep current hover state (avoid re-scheduling unhover)
+    const updateCursor = (meta: HoverMetadata | undefined) => {
+      document.body.style.cursor = meta?.interactionType === "clickable" ? "pointer" : "default";
+    };
+
     if (hoveredMesh === prevMesh) {
-      document.body.style.cursor = metadata?.interactionType === "clickable" ? "pointer" : "default";
+      updateCursor(metadata);
       return;
     }
 
@@ -309,7 +280,7 @@ export function useObjectInteractions({ intersects, clickActions, enabled = true
       if (metadata.interactionType === "clickable") applyAccentColor(metadata.originalObject);
 
       hoveredMeshRef.current = hoveredMesh;
-      document.body.style.cursor = metadata.interactionType === "clickable" ? "pointer" : "default";
+      updateCursor(metadata);
       return;
     }
 
@@ -333,22 +304,19 @@ export function useObjectInteractions({ intersects, clickActions, enabled = true
         }, HOVER_UNHOVER_DELAY_MS);
       }
 
-      // Keep pointer cursor during unhover delay for clickables
       const prevMeta = prevMesh.userData.metadata as HoverMetadata | undefined;
-      if (prevMeta?.interactionType === "clickable") document.body.style.cursor = "pointer";
-      else document.body.style.cursor = "default";
+      updateCursor(prevMeta);
       return;
     }
 
     document.body.style.cursor = "default";
   });
 
-  // Cleanup timeout on unmount
+  // Cleanup timeout and cooldown on unmount
   React.useEffect(() => {
     return () => {
-      if (unhoverTimeoutRef.current) {
-        clearTimeout(unhoverTimeoutRef.current);
-      }
+      if (unhoverTimeoutRef.current) clearTimeout(unhoverTimeoutRef.current);
+      if (reenableCooldownRef.current !== null) window.cancelAnimationFrame(reenableCooldownRef.current);
     };
   }, []);
 }

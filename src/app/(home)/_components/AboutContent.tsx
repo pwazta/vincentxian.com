@@ -27,7 +27,7 @@ export function AboutContent() {
       <div className="flex-1 space-y-4">
         {/* Header and Paragraphs */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-0 justify-center">
+          <div className="flex items-center gap-2 mb-2 justify-center">
             <h2
               className="text-2xl font-semibold mb-1"
               style={{

@@ -22,6 +22,16 @@ export function useSceneRaycaster({ interactiveMeshes, enabled = true }: UseScen
   const raycaster = React.useRef(new THREE.Raycaster());
   const pointer = React.useRef(new THREE.Vector2());
   const [intersects, setIntersects] = React.useState<THREE.Intersection[]>([]);
+  const lastEnabledStateRef = React.useRef(enabled);
+  const requiresMouseMoveRef = React.useRef(false);
+
+  // Track when interactions are re-enabled to require mouse movement before detecting intersections
+  React.useEffect(() => {
+    if (!lastEnabledStateRef.current && enabled) {
+      requiresMouseMoveRef.current = true;
+    }
+    lastEnabledStateRef.current = enabled;
+  }, [enabled]);
 
   // Update pointer on mouse/touch move
   React.useEffect(() => {
@@ -30,6 +40,7 @@ export function useSceneRaycaster({ interactiveMeshes, enabled = true }: UseScen
     const updatePointer = (clientX: number, clientY: number) => {
       pointer.current.x = (clientX / size.width) * 2 - 1;
       pointer.current.y = -(clientY / size.height) * 2 + 1;
+      requiresMouseMoveRef.current = false;
     };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -52,9 +63,8 @@ export function useSceneRaycaster({ interactiveMeshes, enabled = true }: UseScen
     };
   }, [size.width, size.height, enabled]);
 
-  // Perform raycaster intersection tests in animation loop
   useFrame(() => {
-    if (!enabled || interactiveMeshes.length === 0) {
+    if (!enabled || interactiveMeshes.length === 0 || requiresMouseMoveRef.current) {
       setIntersects([]);
       return;
     }

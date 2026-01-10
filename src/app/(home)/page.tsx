@@ -21,6 +21,8 @@ export default function Home() {
   const [aboutOpen, setAboutOpen] = React.useState(false);
   const [contactOpen, setContactOpen] = React.useState(false);
 
+  const isAnyDialogOpen = softwareOpen || artsOpen || aboutOpen || contactOpen;
+
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-background">
       <Navbar
@@ -36,6 +38,7 @@ export default function Home() {
             onArtsClick={() => setArtsOpen(true)}
             onAboutClick={() => setAboutOpen(true)}
             onContactClick={() => setContactOpen(true)}
+            isDialogOpen={isAnyDialogOpen}
           />
         </Suspense>
       </div>
