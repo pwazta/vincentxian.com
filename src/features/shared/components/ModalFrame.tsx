@@ -18,7 +18,7 @@ type ModalFrameProps = {
 export function ModalFrame({open, onOpenChange, title, children, footer, className}: ModalFrameProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={className ?? "max-w-4xl"}>
+      <DialogContent className={className ?? "max-w-[820px]"}>
         <DialogTitle className="text-2xl font-semibold text-foreground">
           {title}
         </DialogTitle>

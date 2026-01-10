@@ -16,10 +16,10 @@ export function AboutContent() {
         <Image
           src="/headshot.webp"
           alt="Profile"
-          width={260}
-          height={260}
+          width={220}
+          height={220}
           className="rounded-full object-cover"
-          style={{ width: "280px", height: "280px" }}
+          style={{ width: "220px", height: "220px" }}
         />
       </div>
 
