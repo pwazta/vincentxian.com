@@ -16,10 +16,7 @@ interface RaycasterResult {
   intersects: THREE.Intersection[];
 }
 
-/**
- * Hook for raycaster-based pointer tracking and intersection detection
- * Raycasts directly against original meshes for accurate hit detection
- */
+/** Hook for raycaster-based pointer tracking and intersection detection */
 export function useSceneRaycaster({ interactiveMeshes, enabled = true }: UseSceneRaycasterOptions): RaycasterResult {
   const { camera, size } = useThree();
   const raycaster = React.useRef(new THREE.Raycaster());
@@ -69,4 +66,3 @@ export function useSceneRaycaster({ interactiveMeshes, enabled = true }: UseScen
 
   return { intersects };
 }
-

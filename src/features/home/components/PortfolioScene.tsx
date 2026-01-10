@@ -15,10 +15,7 @@ import { useObjectInteractions } from "../hooks/useObjectInteractions";
 import { storeOriginalColors } from "../utils/materialUtils";
 import type { ClickActions } from "../utils/sceneInteractions";
 
-/**
- * Configures renderer settings for grass shadows and rendering
- * Handles WebGL context loss gracefully
- */
+/** Configures renderer settings for grass shadows and rendering */
 function RendererConfig() {
 	const { gl } = useThree();
 	React.useEffect(() => {
@@ -30,10 +27,8 @@ function RendererConfig() {
 		// Handle WebGL context loss - don't preventDefault to allow browser restoration
 		const canvas = gl.domElement;
 		const handleContextLost = () => {
-			// Don't preventDefault - allows browser to restore context automatically
 			console.warn("WebGL context lost - browser will attempt to restore");
 		};
-		
 		const handleContextRestored = () => {
 			console.log("WebGL context restored");
 		};
@@ -49,46 +44,29 @@ function RendererConfig() {
 	return null;
 }
 
-/**
- * OrbitControls with pan limits - clamps target instead of camera to prevent rotation issues
- * Hard limit at y=1.5 to prevent camera from going under the island
- */
+/** OrbitControls with pan limits - clamps target instead of camera to prevent rotation issues */
 function LimitedOrbitControls() {
 	const { controls, camera } = useThree();
 	const ISLAND_FLOOR_Y = 1.5; // Hard limit - no camera below this
 
 	useFrame(() => {
 		if (!controls || !('target' in controls)) return;
-
-		// Clamp the target (pan center) to prevent panning beyond limits
-		// This prevents rotation issues that occur when clamping camera position
 		const target = (controls as { target: THREE.Vector3 }).target;
 		target.x = Math.max(-5, Math.min(8, target.x));
 		target.y = Math.max(ISLAND_FLOOR_Y, Math.min(5, target.y));
 		target.z = Math.max(-5, Math.min(5, target.z));
-
-		// Also clamp camera position to prevent it from going below island floor
 		camera.position.y = Math.max(ISLAND_FLOOR_Y, camera.position.y);
 	});
 
-	return (
-		<OrbitControls
-			makeDefault
-			enablePan={true}
-			enableZoom={true}
-			enableRotate={true}
-			minDistance={4}
-			maxDistance={12}
-		/>
-	);
+	return <OrbitControls makeDefault enablePan={true} enableZoom={true} enableRotate={true} minDistance={4} maxDistance={12} />;
 }
 
-function SceneContent({onSoftwareClick, onArtsClick, onAboutClick, onContactClick}: PortfolioSceneProps) {
+function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick }: PortfolioSceneProps) {
   const { scene } = useThree();
   const [interactiveMeshes, setInteractiveMeshes] = React.useState<THREE.Mesh[]>([]);
   const [primaryColor, setPrimaryColor] = React.useState<string>("#7c9082");
 
-  // Get primary color from CSS variables and watch for theme changes
+  /** Get primary color from CSS variables and watch for theme changes */
   React.useEffect(() => {
     const getPrimaryColor = () => {
       if (typeof window === "undefined") return "#7c9082";
@@ -98,8 +76,6 @@ function SceneContent({onSoftwareClick, onArtsClick, onAboutClick, onContactClic
     };
 
     setPrimaryColor(getPrimaryColor());
-
-    // Watch for theme changes
     const observer = new MutationObserver(() => {
       setPrimaryColor(getPrimaryColor());
     });
@@ -112,52 +88,39 @@ function SceneContent({onSoftwareClick, onArtsClick, onAboutClick, onContactClic
     return () => observer.disconnect();
   }, []);
 
-  // Scene setup
+  /** Scene setup */
   React.useEffect(() => {
     scene.fog = new THREE.FogExp2("#eeeeee", 0.02);
     scene.background = new THREE.Color("#eeeeee");
   }, [scene]);
 
-  // Load GLB models
   const computerModel = useGLTF("/models/computer.glb");
   const cabinetModel = useGLTF("/models/cabinet.glb");
   const phoneModel = useGLTF("/models/phone.glb");
 
-  // Setup interactive objects after models load
+  /** Setup interactive objects after models load */
   React.useEffect(() => {
     const timer = setTimeout(() => {
       const meshes = setupInteractiveObjects(scene);
-  
-      // Store original colors for all interactive objects
       for (const mesh of meshes) {
         storeOriginalColors(mesh);
       }
-  
       setInteractiveMeshes(meshes);
     }, 100);
   
-    return () => {
-      clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   }, [scene, computerModel.scene, cabinetModel.scene, phoneModel.scene]);
 
   // Raycaster for intersection detection
-  const { intersects } = useSceneRaycaster({
-    interactiveMeshes,
-    enabled: interactiveMeshes.length > 0,
-  });
+  const { intersects } = useSceneRaycaster({ interactiveMeshes, enabled: interactiveMeshes.length > 0 });
 
   // Click actions mapping
   const clickActions: ClickActions = React.useMemo(
     () => ({
       onPhoneClick: onContactClick,
       onComputerClick: onSoftwareClick,
-      onDiskLinkedInClick: () => {
-        // External link handled in useObjectInteractions
-      },
-      onDiskGithubClick: () => {
-        // External link handled in useObjectInteractions
-      },
+      onDiskLinkedInClick: () => { /* External link handled in useObjectInteractions */ },
+      onDiskGithubClick: () => { /* External link handled in useObjectInteractions */ },
       onDrawerAboutClick: onAboutClick,
       onDrawerSoftwareClick: onSoftwareClick,
       onDrawerArtsClick: onArtsClick,
@@ -166,12 +129,7 @@ function SceneContent({onSoftwareClick, onArtsClick, onAboutClick, onContactClic
   );
 
   // Handle interactions
-  useObjectInteractions({
-    intersects,
-    clickActions,
-    enabled: interactiveMeshes.length > 0,
-    interactiveMeshes,
-  });
+  useObjectInteractions({ intersects, clickActions, enabled: interactiveMeshes.length > 0 }); 
 
   return (
     <>
@@ -232,12 +190,12 @@ type PortfolioSceneProps = {
   onContactClick: () => void;
 };
 
-export function PortfolioScene({onSoftwareClick, onArtsClick, onAboutClick, onContactClick}: PortfolioSceneProps) {
+export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick }: PortfolioSceneProps) {
   return (
     <div className="h-full w-full">
       <Canvas
         shadows
-        dpr={[1, 1.5]} // clamp pixel ratio for performance / memory
+        dpr={[1, 1.5]}
         camera={{ position: [0, 10, 8], fov: 70 }}
         gl={{
           antialias: true,
@@ -246,19 +204,13 @@ export function PortfolioScene({onSoftwareClick, onArtsClick, onAboutClick, onCo
         }}
       >
         <RendererConfig />
-        <SceneContent 
-          onSoftwareClick={onSoftwareClick} 
-          onArtsClick={onArtsClick} 
-          onAboutClick={onAboutClick} 
-          onContactClick={onContactClick}
-        />
+        <SceneContent onSoftwareClick={onSoftwareClick} onArtsClick={onArtsClick} onAboutClick={onAboutClick} onContactClick={onContactClick} />
         <LimitedOrbitControls />
       </Canvas>
     </div>
   );
 }
 
-// Preload models for better performance
 useGLTF.preload("/models/computer.glb");
 useGLTF.preload("/models/cabinet.glb");
 useGLTF.preload("/models/phone.glb");

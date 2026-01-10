@@ -22,13 +22,7 @@ type GrassFieldProps = {
 	grassHeightScale?: number;
 };
 
-export function GrassField({
-	grassCount = 1000,
-	terrainScale = 2,
-	terrainHeightScale = 0.8,
-	grassScale = 5,
-	grassHeightScale = 0.4,
-}: GrassFieldProps) {
+export function GrassField({ grassCount = 1000, terrainScale = 2, terrainHeightScale = 0.8, grassScale = 5, grassHeightScale = 0.4 }: GrassFieldProps) {
 	const [grassInstancedMesh, setGrassInstancedMesh] = React.useState<THREE.InstancedMesh | null>(null);
 	const [grassMaterial, setGrassMaterial] = React.useState<GrassMaterial | null>(null);
 	const timeRef = React.useRef(0);
@@ -52,22 +46,12 @@ export function GrassField({
 	const islandModel = useGLTF("/models/island.glb");
 	const grassLODsModel = useGLTF("/models/grassLODs.glb");
 
-	/**
-	 * Loads grass alpha texture with error handling
-	 * Prevents WebGL context loss from failed texture loads
-	 */
+	/** Loads grass alpha texture with error handling */
 	const grassAlphaTexture = React.useMemo(() => {
 		const loader = new THREE.TextureLoader();
-		const texture = loader.load(
-			"/models/grass.jpeg",
-			() => {
-				// Success callback - texture loaded
-			},
-			undefined,
-			(error) => {
-				console.error("Failed to load grass alpha texture:", error);
-			}
-		);
+		const texture = loader.load("/models/grass.jpeg", undefined, undefined, (error) => {
+			console.error("Failed to load grass alpha texture:", error);
+		});
 		texture.generateMipmaps = true;
 		texture.minFilter = THREE.LinearMipmapLinearFilter;
 		texture.magFilter = THREE.LinearFilter;
@@ -75,22 +59,12 @@ export function GrassField({
 		return texture;
 	}, []);
 
-	/**
-	 * Loads noise texture with error handling
-	 * Prevents WebGL context loss from failed texture loads
-	 */
+	/** Loads noise texture with error handling */
 	const noiseTexture = React.useMemo(() => {
 		const loader = new THREE.TextureLoader();
-		const texture = loader.load(
-			"/models/perlinnoise.webp",
-			() => {
-				// Success callback - texture loaded
-			},
-			undefined,
-			(error) => {
-				console.error("Failed to load noise texture:", error);
-			}
-		);
+		const texture = loader.load("/models/perlinnoise.webp", undefined, undefined, (error) => {
+			console.error("Failed to load noise texture:", error);
+		});
 		texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 		texture.generateMipmaps = true;
 		texture.minFilter = THREE.LinearMipmapLinearFilter;
@@ -99,7 +73,7 @@ export function GrassField({
 		return texture;
 	}, []);
 
-	// Initialize grass material - only when textures are ready
+	/** Initialize grass material when textures are ready */
 	React.useEffect(() => {
 		if (!grassAlphaTexture || !noiseTexture) return;
 		
@@ -109,7 +83,6 @@ export function GrassField({
 		setGrassMaterial(material);
 		
 		return () => {
-			// Cleanup material first, before textures
 			if (materialRef.current?.material) {
 				materialRef.current.material.dispose();
 				materialRef.current = null;
@@ -117,16 +90,13 @@ export function GrassField({
 		};
 	}, [grassAlphaTexture, noiseTexture]);
 
-	// Cleanup all resources on unmount - in correct order
+	/** Cleanup all resources on unmount in correct order */
 	React.useEffect(() => {
 		isMountedRef.current = true;
-		// Capture refs at effect start to avoid lint warning about ref mutation during cleanup
 		const texturesRefSnapshot = texturesRef.current;
 		
 		return () => {
 			isMountedRef.current = false;
-
-			// Snapshot refs to avoid lint warning about ref mutation during cleanup
 			const material = materialRef.current?.material ?? null;
 			const grassTexture = texturesRefSnapshot.grassAlpha;
 			const noiseTex = texturesRefSnapshot.noise;
@@ -138,7 +108,6 @@ export function GrassField({
 				material.dispose();
 				materialRef.current = null;
 			}
-
 			if (grassTexture) {
 				grassTexture.dispose();
 				texturesRefSnapshot.grassAlpha = undefined;
@@ -147,7 +116,6 @@ export function GrassField({
 				noiseTex.dispose();
 				texturesRefSnapshot.noise = undefined;
 			}
-
 			if (grassGeom) {
 				grassGeom.dispose();
 				grassGeometryRef.current = null;
@@ -159,11 +127,7 @@ export function GrassField({
 		};
 	}, []);
 
-	/**
-	 * Setup terrain and grass after models load
-	 * Clones geometry before scaling to prevent mutation of original GLTF geometry
-	 * Uses memoization to avoid re-cloning when scale params haven't changed
-	 */
+	/** Setup terrain and grass after models load - clones geometry before scaling to prevent mutation */
 	React.useEffect(() => {
 		if (!islandModel.scene || !grassLODsModel.scene || !grassMaterial) return;
 
@@ -180,12 +144,8 @@ export function GrassField({
 			lastScaleParamsRef.current.grassScale !== grassScale ||
 			lastScaleParamsRef.current.grassHeightScale !== grassHeightScale;
 
-		// Create terrain material with darker green color
-		const terrainMaterial = new THREE.MeshPhongMaterial({
-			color: "#5e875e", // Lighter green
-		});
+		const terrainMaterial = new THREE.MeshPhongMaterial({ color: "#5e875e" });
 
-		// Find terrain mesh from island model
 		let terrainMesh: THREE.Mesh | null = null;
 		let terrainGeometry: THREE.BufferGeometry | null = null;
 		
@@ -193,10 +153,8 @@ export function GrassField({
 		if (scaleParamsChanged || !terrainGeometryRef.current) {
 			islandModel.scene.traverse((child) => {
 				if (child instanceof THREE.Mesh && child.geometry instanceof THREE.BufferGeometry) {
-					// Dispose old geometry if it exists
-					if (terrainGeometryRef.current) {
-						terrainGeometryRef.current.dispose();
-					}
+					if (terrainGeometryRef.current) terrainGeometryRef.current.dispose();
+					
 					// Clone geometry before scaling to prevent mutation
 					terrainGeometry = child.geometry.clone();
 					terrainGeometry.scale(terrainScale, terrainScale * terrainHeightScale, terrainScale);
@@ -208,7 +166,6 @@ export function GrassField({
 				}
 			});
 		} else {
-			// Reuse existing geometry, just update material
 			islandModel.scene.traverse((child) => {
 				if (child instanceof THREE.Mesh && child.geometry instanceof THREE.BufferGeometry) {
 					child.material = terrainMaterial;
@@ -226,29 +183,17 @@ export function GrassField({
 
 		// Find grass geometry from LODs model and clone before scaling
 		let grassGeometry: THREE.BufferGeometry | null = null;
-		
-		// Only clone grass geometry if scale params changed
 		if (scaleParamsChanged || !grassGeometryRef.current) {
 			grassLODsModel.scene.traverse((child) => {
 				if (child instanceof THREE.Mesh && child.name.includes("LOD00") && child.geometry instanceof THREE.BufferGeometry) {
-					// Dispose old geometry if it exists
-					if (grassGeometryRef.current) {
-						grassGeometryRef.current.dispose();
-					}
-					// Clone geometry before scaling to prevent mutation of original GLTF geometry
-					// This is critical to prevent WebGL context loss
+					if (grassGeometryRef.current) grassGeometryRef.current.dispose();
+
 					grassGeometry = child.geometry.clone();
-					// Scale width/depth uniformly, but height separately
-					grassGeometry.scale(
-						grassScale,
-						grassScale * grassHeightScale,
-						grassScale
-					);
+					grassGeometry.scale(grassScale, grassScale * grassHeightScale, grassScale);
 					grassGeometryRef.current = grassGeometry;
 				}
 			});
 		} else {
-			// Reuse existing geometry
 			grassGeometry = grassGeometryRef.current;
 		}
 
@@ -260,22 +205,13 @@ export function GrassField({
 		// Update scale params cache
 		lastScaleParamsRef.current = currentScaleParams;
 
-		// Create surface sampler - uniform distribution across entire terrain
 		const sampler = new MeshSurfaceSampler(terrainMesh).build();
-
-		// Create instanced mesh
-		const instancedMesh = new THREE.InstancedMesh(
-			grassGeometry,
-			grassMaterial.material,
-			grassCount
-		);
+		const instancedMesh = new THREE.InstancedMesh(grassGeometry, grassMaterial.material, grassCount);
 		instancedMesh.receiveShadow = true;
 
 		const position = new THREE.Vector3();
 		const quaternion = new THREE.Quaternion();
-		// Apply height scale to instance scale as well for additional control
-		// Increase width/depth scale to make blades thicker
-		const thicknessMultiplier = 1.2; // Makes blades 20% thicker
+		const thicknessMultiplier = 1.2;
 		const scale = new THREE.Vector3(thicknessMultiplier, grassHeightScale, thicknessMultiplier);
 		const normal = new THREE.Vector3();
 		const yAxis = new THREE.Vector3(0, 1, 0);
@@ -296,26 +232,15 @@ export function GrassField({
 
 			// Set the new scale in the matrix
 			matrix.compose(position, quaternion, scale);
-
 			instancedMesh.setMatrixAt(i, matrix);
 		}
 
 		instancedMesh.instanceMatrix.needsUpdate = true;
 		setGrassInstancedMesh(instancedMesh);
 
-		/**
-		 * Cleanup function - disposes all created resources
-		 * Prevents memory leaks and WebGL context loss
-		 * Cleanup order: meshes -> geometries -> materials
-		 */
 		return () => {
-			// Only cleanup if component is still mounted (prevents double cleanup in Strict Mode)
 			if (!isMountedRef.current) return;
-			
-			// Dispose instanced mesh first (also disposes its geometry reference)
 			instancedMesh.dispose();
-			
-			// Dispose materials last
 			if (terrainMaterial) {
 				terrainMaterial.dispose();
 			}
@@ -331,7 +256,7 @@ export function GrassField({
 		grassHeightScale,
 	]);
 
-	// Update grass animation
+	/** Update grass animation */
 	useFrame((state, delta) => {
 		if (grassMaterial) {
 			timeRef.current += delta;
@@ -341,23 +266,11 @@ export function GrassField({
 
 	return (
 		<>
-			{/* Terrain mesh */}
-			{islandModel.scene && (
-				<primitive
-					object={islandModel.scene}
-					receiveShadow
-				/>
-			)}
-
-			{/* Grass instanced mesh */}
-			{grassInstancedMesh && (
-				<primitive object={grassInstancedMesh} receiveShadow />
-			)}
+			{islandModel.scene && <primitive object={islandModel.scene} receiveShadow />}
+			{grassInstancedMesh && <primitive object={grassInstancedMesh} receiveShadow />}
 		</>
 	);
 }
 
-// Preload models
 useGLTF.preload("/models/island.glb");
 useGLTF.preload("/models/grassLODs.glb");
-

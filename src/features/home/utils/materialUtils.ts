@@ -10,9 +10,7 @@ import gsap from "gsap";
 const ACCENT_COLOR_LIGHT = "#ffffff";
 const ACCENT_COLOR_DARK = "#ffffff";
 
-/**
- * Gets the current accent color based on theme
- */
+/** Gets the current accent color based on theme */
 function getAccentColor(): string {
   if (typeof window === "undefined") return ACCENT_COLOR_LIGHT;
 
@@ -20,15 +18,12 @@ function getAccentColor(): string {
   return isDark ? ACCENT_COLOR_DARK : ACCENT_COLOR_LIGHT;
 }
 
-/**
- * Clones materials for objects that share materials (like keyboard keys)
- * This ensures each object has its own material instance
- */
+/** Clones materials for objects that share materials to ensure each object has its own material instance */
 function cloneMaterialsIfNeeded(object: THREE.Mesh): void {
   if (!object.material) return;
 
   const isPCube = object.name.includes("pCube");
-  if (!isPCube) return; // Only clone for pCube objects
+  if (!isPCube) return;
 
   const materials = Array.isArray(object.material) ? object.material : [object.material];
   const clonedMaterials: THREE.Material[] = [];
@@ -43,8 +38,7 @@ function cloneMaterialsIfNeeded(object: THREE.Mesh): void {
     }
   }
 
-  // Replace the shared material with cloned materials
-  if (clonedMaterials.length === 0) return; // Safety check
+  if (clonedMaterials.length === 0) return;
   
   if (clonedMaterials.length === 1) {
     object.material = clonedMaterials[0]!;
@@ -53,13 +47,10 @@ function cloneMaterialsIfNeeded(object: THREE.Mesh): void {
   }
 }
 
-/**
- * Stores original material colors in object userData
- */
+/** Stores original material colors in object userData */
 export function storeOriginalColors(object: THREE.Object3D): void {
   if (!(object instanceof THREE.Mesh) || !object.material) return;
 
-  // Clone materials for pCube objects to avoid shared material issues
   cloneMaterialsIfNeeded(object as THREE.Mesh<THREE.BufferGeometry, THREE.Material>);
 
   const materials: THREE.Material[] = Array.isArray(object.material) 
@@ -79,9 +70,7 @@ export function storeOriginalColors(object: THREE.Object3D): void {
   object.userData.originalColors = originalColors;
 }
 
-/**
- * Applies accent color to object materials with smooth animation
- */
+/** Applies accent color to object materials with smooth animation */
 export function applyAccentColor(object: THREE.Object3D, animated = true): void {
   if (!(object instanceof THREE.Mesh) || !object.material) return;
 
@@ -94,7 +83,6 @@ export function applyAccentColor(object: THREE.Object3D, animated = true): void 
 
   for (const material of materials) {
     if (material instanceof THREE.MeshStandardMaterial) {
-      // Store original color if not already stored
       if (!object.userData.originalColors) {
         storeOriginalColors(object);
       }
@@ -116,9 +104,7 @@ export function applyAccentColor(object: THREE.Object3D, animated = true): void 
   }
 }
 
-/**
- * Restores original material colors from userData with smooth animation
- */
+/** Restores original material colors from userData with smooth animation */
 export function restoreOriginalColors(object: THREE.Object3D, animated = true): void {
   if (!(object instanceof THREE.Mesh) || !object.material) return;
 
@@ -152,4 +138,3 @@ export function restoreOriginalColors(object: THREE.Object3D, animated = true): 
     }
   }
 }
-

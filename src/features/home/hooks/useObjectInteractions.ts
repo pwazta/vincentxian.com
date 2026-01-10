@@ -14,19 +14,14 @@ interface UseObjectInteractionsOptions {
   intersects: THREE.Intersection[];
   clickActions: ClickActions;
   enabled?: boolean;
-  interactiveMeshes: THREE.Mesh[];
 }
 
 const HOVER_SCALE = 1.08;
 const HOVER_OVEREXTEND_SCALE = 1.15;
-const DRAWER_SLIDE_DISTANCE = 100; // Distance to slide drawer outward
+const DRAWER_SLIDE_DISTANCE = 100;
+const HOVER_UNHOVER_DELAY_MS = 100;
 
-/**
- * Hook for managing hover and click interactions with 3D objects
- */
-const HOVER_UNHOVER_DELAY_MS = 100; // Delay before unhovering to prevent jittering
-
-export function useObjectInteractions({intersects, clickActions, enabled = true}: UseObjectInteractionsOptions): void {
+export function useObjectInteractions({ intersects, clickActions, enabled = true }: UseObjectInteractionsOptions): void {
   const intersectsRef = React.useRef<THREE.Intersection[]>([]);
   const hoveredMeshRef = React.useRef<THREE.Mesh | null>(null);
   const unhoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -89,8 +84,7 @@ export function useObjectInteractions({intersects, clickActions, enabled = true}
     };
   }, [clickActions, enabled]);
 
-  const playHoverAnimation = React.useCallback(
-    (originalObject: THREE.Object3D, initialScale: THREE.Vector3, initialPosition: THREE.Vector3, isHovering: boolean) => {
+  const playHoverAnimation = React.useCallback((originalObject: THREE.Object3D, initialScale: THREE.Vector3, initialPosition: THREE.Vector3, isHovering: boolean) => {
       const isDrawer = originalObject.name.includes("cabinet_drawer_");
       const isPCube = originalObject.name.includes("pCube");
 
@@ -144,15 +138,12 @@ export function useObjectInteractions({intersects, clickActions, enabled = true}
         gsap.killTweensOf(originalObject.position);
 
         if (isHovering) {
-          // Calculate world-space bounding box center for accurate scaling pivot
           if (originalObject instanceof THREE.Mesh && originalObject.geometry) {
-            // Store original world position if not already stored
             if (!originalObject.userData.originalWorldPosition) {
               originalObject.updateMatrixWorld(true);
               originalObject.userData.originalWorldPosition = originalObject.getWorldPosition(new THREE.Vector3()).clone();
             }
             
-            // Get bounding box center in local space
             const geometry = originalObject.geometry as THREE.BufferGeometry;
             geometry.computeBoundingBox();
             const boundingBox = geometry.boundingBox;
@@ -160,22 +151,12 @@ export function useObjectInteractions({intersects, clickActions, enabled = true}
             if (boundingBox) {
               const localCenter = new THREE.Vector3();
               boundingBox.getCenter(localCenter);
-              
-              // Calculate offset from initial position to bounding box center
               const offsetFromInitial = localCenter.clone().sub(initialPosition);
-              
-              // When scaling, we need to adjust position so the center stays fixed
-              // New position = initialPosition - (offset * (scaleFactor - 1))
               const scaleFactor = HOVER_SCALE;
               const overextendFactor = HOVER_OVEREXTEND_SCALE;
-              
               const offsetAdjustment = offsetFromInitial.clone().multiplyScalar(scaleFactor - 1);
               const newPosition = initialPosition.clone().sub(offsetAdjustment);
-              
-              // Bounce animation: overshoot to 1.05, then settle to 1.03
               const tl = gsap.timeline();
-              
-              // Overshoot phase
               const overextendOffsetAdjustment = offsetFromInitial.clone().multiplyScalar(overextendFactor - 1);
               const overextendPosition = initialPosition.clone().sub(overextendOffsetAdjustment);
               
@@ -193,7 +174,6 @@ export function useObjectInteractions({intersects, clickActions, enabled = true}
                 duration: 0.1,
                 ease: "power2.out",
               }, 0)
-              // Settle phase
               .to(originalObject.scale, {
                 x: initialScale.x * HOVER_SCALE,
                 y: initialScale.y * HOVER_SCALE,

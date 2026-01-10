@@ -48,32 +48,24 @@ export interface ClickActions {
   onDrawerArtsClick: () => void;
 }
 
-/**
- * Determines if an object name matches hoverable patterns
- */
+/** Determines if an object name matches hoverable patterns */
 export function isHoverable(name: string): boolean {
   return HOVERABLE_PATTERNS.some((pattern) => name.includes(pattern));
 }
 
-/**
- * Determines if an object name matches clickable patterns
- */
+/** Determines if an object name matches clickable patterns */
 export function isClickable(name: string): boolean {
   return CLICKABLE_PATTERNS.some((pattern) => name.includes(pattern));
 }
 
-/**
- * Classifies an object's interaction type based on its name
- */
+/** Classifies an object's interaction type based on its name */
 export function classifyObject(name: string): InteractionType {
   if (isClickable(name)) return "clickable";
   if (isHoverable(name)) return "hoverable";
   return "none";
 }
 
-/**
- * Gets the click action callback name for a given object name
- */
+/** Gets the click action callback name for a given object name */
 export function getClickActionName(name: string): keyof ClickActions | null {
   if (name.includes("phone")) return "onPhoneClick";
   if (name.includes("disk_linkedin")) return "onDiskLinkedInClick";
@@ -84,4 +76,3 @@ export function getClickActionName(name: string): keyof ClickActions | null {
   if (name.includes("cabinet_drawer_arts")) return "onDrawerArtsClick";
   return null;
 }
-
