@@ -6,14 +6,14 @@
 
 import * as React from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
-import { OrbitControls, useGLTF, Grid, Html } from "@react-three/drei";
+import { OrbitControls, useGLTF, Grid } from "@react-three/drei";
 import * as THREE from "three";
 import { GrassField } from "./GrassField";
 import { setupInteractiveObjects } from "../utils/sceneObjectSetup";
 import { useSceneRaycaster } from "../hooks/useSceneRaycaster";
 import { useObjectInteractions } from "../hooks/useObjectInteractions";
 import { storeOriginalColors } from "../utils/materialUtils";
-import type { ClickActions } from "./sceneInteractions";
+import type { ClickActions } from "../utils/sceneInteractions";
 
 /**
  * Configures renderer settings for grass shadows and rendering
@@ -83,80 +83,33 @@ function LimitedOrbitControls() {
 	);
 }
 
-/**
- * Grid axis labels component using Html overlays (GPU-friendly, no 3D geometry)
- */
-function GridLabels() {
-	const labelHeight = 0.05;
-	const range = 20; // Reduced range to limit labels
-	const step = 10; // Only major intervals to reduce count
-
-	const labels: Array<{ position: [number, number, number]; text: string }> = [];
-
-	// Origin label
-	labels.push({ position: [0, labelHeight, 0], text: "0,0" });
-
-	// X-axis labels (only major intervals, limited range)
-	for (let x = step; x <= range; x += step) {
-		labels.push({ position: [x, labelHeight, 0], text: `${x},0` });
-		labels.push({ position: [-x, labelHeight, 0], text: `-${x},0` });
-	}
-
-	// Z-axis labels (only major intervals, limited range)
-	for (let z = step; z <= range; z += step) {
-		labels.push({ position: [0, labelHeight, z], text: `0,${z}` });
-		labels.push({ position: [0, labelHeight, -z], text: `0,-${z}` });
-	}
-
-	return (
-		<>
-			{labels.map((label, index) => (
-				<Html
-					key={index}
-					position={label.position}
-					center
-					style={{
-						color: "#666",
-						fontSize: "12px",
-						fontFamily: "monospace",
-						pointerEvents: "none",
-						textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
-						userSelect: "none",
-					}}
-				>
-					{label.text}
-				</Html>
-			))}
-		</>
-	);
-}
-
-function SceneContent({
-  onSoftwareClick,
-  onArtsClick,
-  onAboutClick,
-  onContactClick,
-  showGrid = false,
-}: {
-  onSoftwareClick: () => void;
-  onArtsClick: () => void;
-  onAboutClick: () => void;
-  onContactClick: () => void;
-  showGrid?: boolean;
-}) {
+function SceneContent({onSoftwareClick, onArtsClick, onAboutClick, onContactClick}: PortfolioSceneProps) {
   const { scene } = useThree();
   const [interactiveMeshes, setInteractiveMeshes] = React.useState<THREE.Mesh[]>([]);
-  const [gridVisible, setGridVisible] = React.useState(showGrid);
+  const [primaryColor, setPrimaryColor] = React.useState<string>("#7c9082");
 
-  // Toggle grid with 'G' key
+  // Get primary color from CSS variables and watch for theme changes
   React.useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === "g" || e.key === "G") {
-        setGridVisible((prev) => !prev);
-      }
+    const getPrimaryColor = () => {
+      if (typeof window === "undefined") return "#7c9082";
+      const root = document.documentElement;
+      const color = getComputedStyle(root).getPropertyValue("--primary").trim();
+      return color || "#7c9082";
     };
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
+
+    setPrimaryColor(getPrimaryColor());
+
+    // Watch for theme changes
+    const observer = new MutationObserver(() => {
+      setPrimaryColor(getPrimaryColor());
+    });
+
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
   }, []);
 
   // Scene setup
@@ -224,42 +177,7 @@ function SceneContent({
     <>
       {/* Ambient light for overall scene illumination - reduces harsh shadows */}
       <ambientLight intensity={0.4} />
-      
-      {/* 
-        THREE.JS SHADOW SYSTEM EXPLAINED:
-        
-        1. SHADOW MAP BASICS:
-           - Three.js uses "shadow maps" - textures rendered from the light's perspective
-           - The shadow camera defines what area gets rendered into this texture
-           - Higher resolution = sharper shadows, but more GPU memory/performance cost
-        
-        2. SHADOW CAMERA FRUSTUM (the key to sharp shadows):
-           - The frustum (left/right/top/bottom/far) defines the "window" the light sees through
-           - SMALLER frustum = MORE detail (like zooming in with a camera)
-           - Scene bounds: X: ±5 units, Z: 0 to 15 units
-           - Frustum: X: ±6 (padding), Z: 0 to 16 (padding), Far: 70 (covers light distance)
-        
-        3. SHADOW MAP RESOLUTION:
-           - 2048x2048 = 4 million pixels total
-           - With frustum of 12x12 units, each pixel covers ~0.006 units (very sharp!)
-           - At 4096x4096, each pixel covers ~0.003 units (even sharper, but 4x more memory)
-        
-        4. SHADOW BIAS:
-           - shadow-bias: Prevents "shadow acne" (self-shadowing artifacts)
-           - shadow-normalBias: Additional bias along surface normals (helps with steep angles)
-        
-        5. SHADOW FILTERING (set in RendererConfig):
-           - PCFSoftShadowMap: Soft, smooth shadow edges (what you're using)
-           - PCFShadowMap: Harder edges, slightly faster
-           - BasicShadowMap: Hardest edges, fastest (not recommended)
-        
-        PERFORMANCE TIPS:
-        - Keep frustum as tight as possible around your scene
-        - 2048 resolution is usually sufficient for web
-        - Only objects with castShadow=true cast shadows
-        - Only objects with receiveShadow=true receive shadows
-        - Grass receiving shadows is fine, but don't let it CAST shadows (too many objects)
-      */}
+
       <directionalLight
         position={[3, 6, 8]}
         intensity={1}
@@ -271,27 +189,22 @@ function SceneContent({
         shadow-camera-right={10}
         shadow-camera-top={7}
         shadow-camera-bottom={-3}
-        shadow-bias={-0.0001}
+        shadow-bias={-0.001}
         shadow-normalBias={0.03}
       />
 
-      {/* Debug grid helper - Press 'G' to toggle */}
-      {gridVisible && (
-        <>
-          <Grid
-            args={[50, 50]}
-            cellColor="#6f6f6f"
-            sectionColor="#9d4b4b"
-            cellThickness={0.5}
-            sectionThickness={1}
-            fadeDistance={30}
-            fadeStrength={1}
-            position={[0, 0, 0]}
-          />
-          {/* Grid axis labels */}
-          <GridLabels />
-        </>
-      )}
+      {/* Grid */}
+      <Grid
+        scale={2}
+        args={[45, 45]}
+        cellColor={primaryColor}
+        sectionColor={primaryColor}
+        cellThickness={0.8}
+        sectionThickness={1.3}
+        fadeDistance={40}
+        fadeStrength={1}
+        position={[0, 0, 0]}
+      />
 
       {/* Grass field with terrain */}
       <GrassField
@@ -303,21 +216,10 @@ function SceneContent({
       />
 
       {/* GLB Models - scaled from cm to meters and positioned in a T layout */}
-      <group position={[0, 1, 0]} scale={1}>
-        {/* Center: computer, facing camera */}
-        <group>
-          <primitive object={computerModel.scene} />
-        </group>
-
-        {/* Left: phone, 45° rotated toward center/camera */}
-        <group position={[0, 0, 0]}>
-          <primitive object={phoneModel.scene} />
-        </group>
-
-        {/* Right: cabinet, 45° rotated toward center/camera */}
-        <group>
-          <primitive object={cabinetModel.scene} />
-        </group>
+      <group position={[0, 1, 0]}>
+        <primitive object={computerModel.scene} />
+        <primitive object={phoneModel.scene} />
+        <primitive object={cabinetModel.scene} />
       </group>
     </>
   );
@@ -328,16 +230,9 @@ type PortfolioSceneProps = {
   onArtsClick: () => void;
   onAboutClick: () => void;
   onContactClick: () => void;
-  showGrid?: boolean;
 };
 
-export function PortfolioScene({
-  onSoftwareClick,
-  onArtsClick,
-  onAboutClick,
-  onContactClick,
-  showGrid = false,
-}: PortfolioSceneProps) {
+export function PortfolioScene({onSoftwareClick, onArtsClick, onAboutClick, onContactClick}: PortfolioSceneProps) {
   return (
     <div className="h-full w-full">
       <Canvas
@@ -356,7 +251,6 @@ export function PortfolioScene({
           onArtsClick={onArtsClick} 
           onAboutClick={onAboutClick} 
           onContactClick={onContactClick}
-          showGrid={showGrid}
         />
         <LimitedOrbitControls />
       </Canvas>

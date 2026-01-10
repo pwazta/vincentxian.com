@@ -10,10 +10,10 @@ import { LoadingSpinner } from "~/features/shared/components/LoadingSpinner";
 import { Navbar } from "~/features/home/components/Navbar";
 import { PortfolioScene } from "~/features/home/components/PortfolioScene";
 import { ModalFrame } from "~/features/shared/components/ModalFrame";
-import { SoftwareContent } from "~/features/home/components/SoftwareContent";
-import { ArtsContent } from "~/features/home/components/ArtsContent";
-import { AboutContent } from "~/features/home/components/AboutContent";
-import { ContactContent } from "~/features/home/components/ContactContent";
+import { SoftwareContent } from "~/app/(home)/_components/SoftwareContent";
+import { ArtsContent } from "~/app/(home)/_components/ArtsContent";
+import { AboutContent } from "~/app/(home)/_components/AboutContent";
+import { ContactContent } from "~/app/(home)/_components/ContactContent";
 
 export default function Home() {
   const [softwareOpen, setSoftwareOpen] = React.useState(false);
@@ -32,7 +32,6 @@ export default function Home() {
       <div className="h-full w-full">
         <Suspense fallback={<LoadingSpinner />}>
           <PortfolioScene
-            showGrid={true}
             onSoftwareClick={() => setSoftwareOpen(true)}
             onArtsClick={() => setArtsOpen(true)}
             onAboutClick={() => setAboutOpen(true)}

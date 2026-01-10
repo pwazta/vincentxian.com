@@ -8,7 +8,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import gsap from "gsap";
 import { applyAccentColor, restoreOriginalColors } from "../utils/materialUtils";
-import { getClickActionName, type ClickActions } from "../components/sceneInteractions";
+import { getClickActionName, type ClickActions } from "../utils/sceneInteractions";
 
 interface UseObjectInteractionsOptions {
   intersects: THREE.Intersection[];
@@ -26,7 +26,7 @@ const DRAWER_SLIDE_DISTANCE = 100; // Distance to slide drawer outward
  */
 const HOVER_UNHOVER_DELAY_MS = 100; // Delay before unhovering to prevent jittering
 
-export function useObjectInteractions({intersects, clickActions, enabled = true, interactiveMeshes}: UseObjectInteractionsOptions): void {
+export function useObjectInteractions({intersects, clickActions, enabled = true}: UseObjectInteractionsOptions): void {
   const intersectsRef = React.useRef<THREE.Intersection[]>([]);
   const hoveredMeshRef = React.useRef<THREE.Mesh | null>(null);
   const unhoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -94,56 +94,46 @@ export function useObjectInteractions({intersects, clickActions, enabled = true,
       const isDrawer = originalObject.name.includes("cabinet_drawer_");
       const isPCube = originalObject.name.includes("pCube");
 
-      if (isDrawer) {
-        // Drawer animation: slide outward instead of scaling
+      const translationConfig = (() => {
+        if (isDrawer) {
+          return {
+            offset: new THREE.Vector3(0, 0, DRAWER_SLIDE_DISTANCE),
+            hoverDuration: 0.3,
+            restoreDuration: 0.25,
+            accent: false,
+          };
+        }
+        if (isPCube) {
+          return {
+            offset: new THREE.Vector3(0, -3.3, 0),
+            hoverDuration: 0.2,
+            restoreDuration: 0.2,
+            accent: true,
+          };
+        }
+        return null;
+      })();
+
+      if (translationConfig) {
         gsap.killTweensOf(originalObject.position);
         gsap.killTweensOf(originalObject.scale);
+        if (translationConfig.accent) applyAccentColor(originalObject);
 
         if (isHovering) {
-          // Slide drawer outward - try Z direction first (forward), fallback to X if needed
-          const slideDirection = new THREE.Vector3(0, 0, DRAWER_SLIDE_DISTANCE);
-          const targetPosition = initialPosition.clone().add(slideDirection);
-          
+          const targetPosition = initialPosition.clone().add(translationConfig.offset);
           gsap.to(originalObject.position, {
             x: targetPosition.x,
             y: targetPosition.y,
             z: targetPosition.z,
-            duration: 0.3,
+            duration: translationConfig.hoverDuration,
             ease: "back.out(1.5)",
           });
         } else {
-          // Restore drawer position
           gsap.to(originalObject.position, {
             x: initialPosition.x,
             y: initialPosition.y,
             z: initialPosition.z,
-            duration: 0.25,
-            ease: "power2.out",
-          });
-        }
-      } else if (isPCube) {
-        // pCube animation: translate up by 0.5, no scaling
-        gsap.killTweensOf(originalObject.position);
-        gsap.killTweensOf(originalObject.scale);
-        applyAccentColor(originalObject);
-        if (isHovering) {
-          // Translate up by 0.5
-          const targetPosition = initialPosition.clone().add(new THREE.Vector3(0, -3.3, 0));
-          
-          gsap.to(originalObject.position, {
-            x: targetPosition.x,
-            y: targetPosition.y,
-            z: targetPosition.z,
-            duration: 0.2,
-            ease: "back.out(1.5)",
-          });
-        } else {
-          // Restore original position
-          gsap.to(originalObject.position, {
-            x: initialPosition.x,
-            y: initialPosition.y,
-            z: initialPosition.z,
-            duration: 0.2,
+            duration: translationConfig.restoreDuration,
             ease: "power2.out",
           });
         }
@@ -279,28 +269,29 @@ export function useObjectInteractions({intersects, clickActions, enabled = true,
     []
   );
 
-  const getGroupMetas = React.useCallback((meta: HoverMetadata | undefined): HoverMetadata[] => {
-    if (!meta) return [];
-    
-    const name = meta.originalObject.name;
+  // USE THIS FUNCTION IF YOU WANT TO GROUP OBJECTS TOGETHER WHEN HOVERING / CLICKING
+  // const getGroupMetas = React.useCallback((meta: HoverMetadata | undefined): HoverMetadata[] => {
+  //   if (!meta) return [];
+  //   
+  //   const name = meta.originalObject.name;
 
-    // Helper to find all objects matching a pattern
-    const findGroup = (pattern: string): HoverMetadata[] => {
-      const group: HoverMetadata[] = [];
-      for (const mesh of interactiveMeshes) {
-        const m = mesh.userData.metadata as HoverMetadata | undefined;
-        if (m && mesh.name.includes(pattern)) group.push(m);
-      }
-      return group;
-    };
+  //   // Helper to find all objects matching a pattern
+  //   const findGroup = (pattern: string): HoverMetadata[] => {
+  //     const group: HoverMetadata[] = [];
+  //     for (const mesh of interactiveMeshes) {
+  //       const m = mesh.userData.metadata as HoverMetadata | undefined;
+  //       if (m && mesh.name.includes(pattern)) group.push(m);
+  //     }
+  //     return group;
+  //   };
 
-    // Group all computer_* parts together, and group phone_base with phone_device (one-way: only when phone_base is hovered) 
-    if (name.includes("computer_")) return findGroup("computer_");
-    if (name.includes("phone_base")) return findGroup("phone_");
+  //   // Group all computer_* parts together, and group phone_base with phone_device (one-way: only when phone_base is hovered) 
+  //   if (name.includes("computer_")) return findGroup("computer_");
+  //   if (name.includes("phone_base")) return findGroup("phone_");
 
-    // Default: just this object (phone_device hovered alone, or any other object)
-    return [meta];
-  }, [interactiveMeshes]);
+  //   // Default: just this object (phone_device hovered alone, or any other object)
+  //   return [meta];
+  // }, [interactiveMeshes]);
 
   // Animate hover effects with hysteresis to prevent jittering
   useFrame(() => {
@@ -317,8 +308,7 @@ export function useObjectInteractions({intersects, clickActions, enabled = true,
       return;
     }
 
-    // Hover target changed
-    // If a new mesh is hovered, cancel any pending unhover of the previous one
+    // Hover target changed: If a new mesh is hovered, cancel any pending unhover of the previous one
     if (hoveredMesh && unhoverTimeoutRef.current) {
       clearTimeout(unhoverTimeoutRef.current);
       unhoverTimeoutRef.current = null;
@@ -328,18 +318,14 @@ export function useObjectInteractions({intersects, clickActions, enabled = true,
       // Clear previous hover immediately
       if (prevMesh) {
         const prevMeta = prevMesh.userData.metadata as HoverMetadata | undefined;
-        const prevGroup = getGroupMetas(prevMeta);
-        for (const m of prevGroup) {
-          playHoverAnimation(m.originalObject, m.initialScale, m.initialPosition, false);
-          restoreOriginalColors(m.originalObject);
+        if (prevMeta) {
+          playHoverAnimation(prevMeta.originalObject, prevMeta.initialScale, prevMeta.initialPosition, false);
+          restoreOriginalColors(prevMeta.originalObject);
         }
       }
 
       // Apply hover to new target
-      const group = getGroupMetas(metadata);
-      for (const m of group) {
-        playHoverAnimation(m.originalObject, m.initialScale, m.initialPosition, true);
-      }
+      playHoverAnimation(metadata.originalObject, metadata.initialScale, metadata.initialPosition, true);
       if (metadata.interactionType === "clickable") applyAccentColor(metadata.originalObject);
 
       hoveredMeshRef.current = hoveredMesh;
@@ -356,10 +342,9 @@ export function useObjectInteractions({intersects, clickActions, enabled = true,
           const stillPrevMesh = hoveredMeshRef.current;
           if (stillPrevMesh && stillPrevMesh === prevMesh) {
             const prevMeta = stillPrevMesh.userData.metadata as HoverMetadata | undefined;
-            const prevGroup = getGroupMetas(prevMeta);
-            for (const m of prevGroup) {
-              playHoverAnimation(m.originalObject, m.initialScale, m.initialPosition, false);
-              restoreOriginalColors(m.originalObject);
+            if (prevMeta) {
+              playHoverAnimation(prevMeta.originalObject, prevMeta.initialScale, prevMeta.initialPosition, false);
+              restoreOriginalColors(prevMeta.originalObject);
             }
             hoveredMeshRef.current = null;
             document.body.style.cursor = "default";
@@ -375,7 +360,6 @@ export function useObjectInteractions({intersects, clickActions, enabled = true,
       return;
     }
 
-    // Fallback: default cursor
     document.body.style.cursor = "default";
   });
 

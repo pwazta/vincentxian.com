@@ -4,10 +4,7 @@
  */
 
 import * as THREE from "three";
-import {
-  classifyObject,
-  type HitboxMetadata,
-} from "../components/sceneInteractions";
+import { classifyObject, type HitboxMetadata } from "./sceneInteractions";
 
 /**
  * Recursively traverses a scene to find all mesh objects
