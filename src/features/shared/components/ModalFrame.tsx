@@ -3,7 +3,7 @@
  * Used in: Portfolio section modals (Coding, Arts, About, Contact)
  */
 import * as React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "./ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogFooter } from "./ui/dialog";
 import { Button } from "./ui/button";
 
 type ModalFrameProps = {
@@ -12,18 +12,17 @@ type ModalFrameProps = {
   title: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  className?: string;
 };
 
-export function ModalFrame({open, onOpenChange, title, children, footer}: ModalFrameProps) {
+export function ModalFrame({open, onOpenChange, title, children, footer, className}: ModalFrameProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader className="border-b border-accent/20 pb-4">
-          <DialogTitle className="text-2xl font-semibold text-foreground">
-            {title}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="py-4">{children}</div>
+      <DialogContent className={className ?? "max-w-4xl"}>
+        <DialogTitle className="text-2xl font-semibold text-foreground">
+          {title}
+        </DialogTitle>
+        <div>{children}</div>
         {footer && (
           <DialogFooter className="border-t border-accent/20 pt-4">
             {footer}
@@ -34,7 +33,7 @@ export function ModalFrame({open, onOpenChange, title, children, footer}: ModalF
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-accent/30 hover:bg-accent/10"
+              className="border-accent/30 hover:bg-accent/10 cursor-pointer"
             >
               Close
             </Button>

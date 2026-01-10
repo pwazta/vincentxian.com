@@ -2,16 +2,11 @@
 
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
-
 import { cn } from "~/lib/utils";
 
 const Dialog = DialogPrimitive.Root;
-
 const DialogTrigger = DialogPrimitive.Trigger;
-
 const DialogPortal = DialogPrimitive.Portal;
-
 const DialogClose = DialogPrimitive.Close;
 
 const DialogOverlay = React.forwardRef<
@@ -44,7 +39,7 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       <div className="bg-primary text-white px-3 flex items-center justify-between relative h-12">
-        <DialogPrimitive.Close className="opacity-90 hover:opacity-100 transition-opacity focus:outline-none disabled:pointer-events-none ml-auto">
+        <DialogPrimitive.Close className="opacity-90 hover:opacity-100 transition-opacity focus:outline-none disabled:pointer-events-none ml-auto cursor-pointer">
           <img 
             src="/close-box.svg" 
             alt="Close" 
@@ -53,7 +48,7 @@ const DialogContent = React.forwardRef<
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       </div>
-      <div className="p-6 [&>h2]:hidden">
+      <div className="p-6 [&>h2:not([data-dialog-title])]:hidden">
         {children}
       </div>
     </DialogPrimitive.Content>
@@ -95,6 +90,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
+    data-dialog-title
     className={cn(
       "font-semibold leading-none !text-white absolute left-5 -translate-y-16 m-0 pointer-events-none z-10",
       className
