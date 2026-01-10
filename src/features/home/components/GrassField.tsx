@@ -120,13 +120,16 @@ export function GrassField({
 	// Cleanup all resources on unmount - in correct order
 	React.useEffect(() => {
 		isMountedRef.current = true;
+		// Capture refs at effect start to avoid lint warning about ref mutation during cleanup
+		const texturesRefSnapshot = texturesRef.current;
+		
 		return () => {
 			isMountedRef.current = false;
 
 			// Snapshot refs to avoid lint warning about ref mutation during cleanup
 			const material = materialRef.current?.material ?? null;
-			const grassTexture = texturesRef.current.grassAlpha;
-			const noiseTex = texturesRef.current.noise;
+			const grassTexture = texturesRefSnapshot.grassAlpha;
+			const noiseTex = texturesRefSnapshot.noise;
 			const grassGeom = grassGeometryRef.current;
 			const terrainGeom = terrainGeometryRef.current;
 
@@ -138,11 +141,11 @@ export function GrassField({
 
 			if (grassTexture) {
 				grassTexture.dispose();
-				texturesRef.current.grassAlpha = undefined;
+				texturesRefSnapshot.grassAlpha = undefined;
 			}
 			if (noiseTex) {
 				noiseTex.dispose();
-				texturesRef.current.noise = undefined;
+				texturesRefSnapshot.noise = undefined;
 			}
 
 			if (grassGeom) {

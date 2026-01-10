@@ -163,8 +163,9 @@ export function useObjectInteractions({intersects, clickActions, enabled = true,
             }
             
             // Get bounding box center in local space
-            originalObject.geometry.computeBoundingBox();
-            const boundingBox = originalObject.geometry.boundingBox;
+            const geometry = originalObject.geometry as THREE.BufferGeometry;
+            geometry.computeBoundingBox();
+            const boundingBox = geometry.boundingBox;
             
             if (boundingBox) {
               const localCenter = new THREE.Vector3();
@@ -348,6 +349,8 @@ export function useObjectInteractions({intersects, clickActions, enabled = true,
 
     // No mesh currently hovered, schedule delayed unhover if not already scheduled
     if (!hoveredMesh && prevMesh) {
+      // The if check is necessary to avoid overwriting an existing timeout
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       if (!unhoverTimeoutRef.current) {
         unhoverTimeoutRef.current = setTimeout(() => {
           const stillPrevMesh = hoveredMeshRef.current;

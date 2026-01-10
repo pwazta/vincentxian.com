@@ -7,7 +7,6 @@ import * as THREE from "three";
 import {
   classifyObject,
   type HitboxMetadata,
-  type InteractionType,
 } from "../components/sceneInteractions";
 
 /**

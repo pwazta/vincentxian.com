@@ -60,9 +60,11 @@ export function storeOriginalColors(object: THREE.Object3D): void {
   if (!(object instanceof THREE.Mesh) || !object.material) return;
 
   // Clone materials for pCube objects to avoid shared material issues
-  cloneMaterialsIfNeeded(object);
+  cloneMaterialsIfNeeded(object as THREE.Mesh<THREE.BufferGeometry, THREE.Material>);
 
-  const materials: THREE.Material[] = Array.isArray(object.material) ? object.material : [object.material];
+  const materials: THREE.Material[] = Array.isArray(object.material) 
+    ? (object.material as THREE.Material[]) 
+    : [object.material as THREE.Material];
 
   const originalColors: string[] = [];
 
@@ -83,7 +85,9 @@ export function storeOriginalColors(object: THREE.Object3D): void {
 export function applyAccentColor(object: THREE.Object3D, animated = true): void {
   if (!(object instanceof THREE.Mesh) || !object.material) return;
 
-  const materials: THREE.Material[] = Array.isArray(object.material) ? object.material : [object.material];
+  const materials: THREE.Material[] = Array.isArray(object.material) 
+    ? (object.material as THREE.Material[]) 
+    : [object.material as THREE.Material];
 
   const accentColor = getAccentColor();
   const accentColorObj = new THREE.Color(accentColor);
@@ -122,7 +126,9 @@ export function restoreOriginalColors(object: THREE.Object3D, animated = true): 
 
   if (!originalColors) return;
 
-  const materials: THREE.Material[] = Array.isArray(object.material) ? object.material : [object.material];
+  const materials: THREE.Material[] = Array.isArray(object.material) 
+    ? (object.material as THREE.Material[]) 
+    : [object.material as THREE.Material];
 
   for (let i = 0; i < materials.length; i++) {
     const material = materials[i];
