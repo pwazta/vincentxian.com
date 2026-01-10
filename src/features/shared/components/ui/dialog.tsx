@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import Image from "next/image";
 import { cn } from "~/lib/utils";
 
 const Dialog = DialogPrimitive.Root;
@@ -40,11 +41,7 @@ const DialogContent = React.forwardRef<
     >
       <div className="bg-primary text-white px-3 flex items-center justify-between relative h-12">
         <DialogPrimitive.Close className="opacity-90 hover:opacity-100 transition-opacity focus:outline-none disabled:pointer-events-none ml-auto cursor-pointer">
-          <img 
-            src="/close-box.svg" 
-            alt="Close" 
-            className="h-8 w-8 brightness-0 invert"
-          />
+          <Image src="/close-box.svg" alt="Close" width={32} height={32} className="h-8 w-8 brightness-0 invert" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       </div>
