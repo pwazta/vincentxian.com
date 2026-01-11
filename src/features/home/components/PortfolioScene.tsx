@@ -9,6 +9,7 @@ import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Grid } from "@react-three/drei";
 import * as THREE from "three";
 import { GrassField } from "./GrassField";
+import { SceneLoader } from "./SceneLoader";
 import { setupInteractiveObjects } from "../utils/sceneObjectSetup";
 import { useSceneRaycaster } from "../hooks/useSceneRaycaster";
 import { useObjectInteractions } from "../hooks/useObjectInteractions";
@@ -18,19 +19,30 @@ import type { ClickActions } from "../utils/sceneInteractions";
 /** Configures renderer settings for grass shadows and rendering */
 function RendererConfig() {
 	const { gl } = useThree();
+	const [contextLost, setContextLost] = React.useState(false);
+	
 	React.useEffect(() => {
 		gl.shadowMap.enabled = true;
 		gl.shadowMap.type = THREE.PCFSoftShadowMap;
 		gl.outputColorSpace = THREE.SRGBColorSpace;
 		gl.toneMapping = THREE.ACESFilmicToneMapping;
 		
-		// Handle WebGL context loss - don't preventDefault to allow browser restoration
+		// Handle WebGL context loss with proper recovery
 		const canvas = gl.domElement;
-		const handleContextLost = () => {
+		const handleContextLost = (event: Event) => {
+			event.preventDefault(); // Prevent default to allow restoration
 			console.warn("WebGL context lost - browser will attempt to restore");
+			setContextLost(true);
 		};
+		
 		const handleContextRestored = () => {
-			console.log("WebGL context restored");
+			console.log("WebGL context restored - reinitializing renderer");
+			setContextLost(false);
+			// Reinitialize renderer settings after context restoration
+			gl.shadowMap.enabled = true;
+			gl.shadowMap.type = THREE.PCFSoftShadowMap;
+			gl.outputColorSpace = THREE.SRGBColorSpace;
+			gl.toneMapping = THREE.ACESFilmicToneMapping;
 		};
 		
 		canvas.addEventListener("webglcontextlost", handleContextLost);
@@ -41,6 +53,12 @@ function RendererConfig() {
 			canvas.removeEventListener("webglcontextrestored", handleContextRestored);
 		};
 	}, [gl]);
+	
+	// Show warning if context is lost
+	if (contextLost) {
+		return null; // Context restoration will be handled automatically
+	}
+	
 	return null;
 }
 
@@ -70,10 +88,11 @@ function LimitedOrbitControls() {
 	return <OrbitControls makeDefault enablePan={true} enableZoom={true} enableRotate={true} minDistance={2} maxDistance={12} />;
 }
 
-function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen }: PortfolioSceneProps) {
+function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen, isLoaderActive }: PortfolioSceneProps) {
   const { scene } = useThree();
   const [interactiveMeshes, setInteractiveMeshes] = React.useState<THREE.Mesh[]>([]);
   const [primaryColor, setPrimaryColor] = React.useState<string>("#7c9082");
+  const [resourcesReady, setResourcesReady] = React.useState(false);
 
   /** Get primary color from CSS variables and watch for theme changes */
   React.useEffect(() => {
@@ -107,8 +126,28 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
   const cabinetModel = useGLTF("/models/cabinet.glb");
   const phoneModel = useGLTF("/models/phone.glb");
 
+  /** Wait for main models before rendering heavy content (shadows, grass, etc.) */
+  /** SceneLoader ensures all resources are loaded globally, but this prevents heavy rendering */
+  /** until models are ready, even if SceneLoader timing is off */
+  React.useEffect(() => {
+    const allModelsLoaded = 
+      computerModel.scene && 
+      cabinetModel.scene && 
+      phoneModel.scene;
+
+    if (allModelsLoaded && !resourcesReady) {
+      // Small delay to ensure WebGL context is stable
+      const timer = setTimeout(() => {
+        setResourcesReady(true);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [computerModel.scene, cabinetModel.scene, phoneModel.scene, resourcesReady]);
+
   /** Setup interactive objects after models load */
   React.useEffect(() => {
+    if (!resourcesReady) return;
+    
     const timer = setTimeout(() => {
       const meshes = setupInteractiveObjects(scene);
       for (const mesh of meshes) {
@@ -118,10 +157,10 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
     }, 100);
   
     return () => clearTimeout(timer);
-  }, [scene, computerModel.scene, cabinetModel.scene, phoneModel.scene]);
+  }, [scene, resourcesReady]);
 
-  // Raycaster for intersection detection - disabled when dialog is open
-  const interactionsEnabled = interactiveMeshes.length > 0 && !isDialogOpen;
+  // Raycaster for intersection detection - disabled when dialog is open or loader is active
+  const interactionsEnabled = interactiveMeshes.length > 0 && !isDialogOpen && !isLoaderActive;
   const { intersects } = useSceneRaycaster({ interactiveMeshes, enabled: interactionsEnabled });
 
   // Click actions mapping
@@ -138,6 +177,16 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
 
   // Handle interactions - disabled when dialog is open
   useObjectInteractions({ intersects, clickActions, enabled: interactionsEnabled }); 
+
+  // Don't render heavy content until resources are ready
+  if (!resourcesReady) {
+    return (
+      <>
+        <ambientLight intensity={0.4} />
+        <directionalLight position={[3, 6, 8]} intensity={1} />
+      </>
+    );
+  }
 
   return (
     <>
@@ -197,12 +246,15 @@ type PortfolioSceneProps = {
   onAboutClick: () => void;
   onContactClick: () => void;
   isDialogOpen: boolean;
+  isLoaderActive: boolean;
 };
 
 export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen }: PortfolioSceneProps) {
+  const [showLoader, setShowLoader] = React.useState(true);
 
   return (
-    <div className="h-full w-full" style={{ pointerEvents: isDialogOpen ? "none" : "auto" }}>
+    <div className="relative h-full w-full" style={{ pointerEvents: isDialogOpen ? "none" : "auto" }}>
+      {showLoader && <SceneLoader onLoaded={() => setShowLoader(false)} />}
       <Canvas
         shadows
         dpr={[1, 1.5]}
@@ -211,10 +263,12 @@ export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onC
           antialias: true,
           powerPreference: "default",
           preserveDrawingBuffer: false,
+          // Prevent context loss by being more conservative
+          failIfMajorPerformanceCaveat: false,
         }}
       >
         <RendererConfig />
-        <SceneContent onSoftwareClick={onSoftwareClick} onArtsClick={onArtsClick} onAboutClick={onAboutClick} onContactClick={onContactClick} isDialogOpen={isDialogOpen} />
+        <SceneContent onSoftwareClick={onSoftwareClick} onArtsClick={onArtsClick} onAboutClick={onAboutClick} onContactClick={onContactClick} isDialogOpen={isDialogOpen} isLoaderActive={showLoader} />
         <LimitedOrbitControls />
       </Canvas>
     </div>

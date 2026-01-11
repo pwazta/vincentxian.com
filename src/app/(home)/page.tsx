@@ -5,8 +5,6 @@
 "use client";
 
 import * as React from "react";
-import { Suspense } from "react";
-import { LoadingSpinner } from "~/features/shared/components/LoadingSpinner";
 import { Navbar } from "~/features/home/components/Navbar";
 import { PortfolioScene } from "~/features/home/components/PortfolioScene";
 import { ModalFrame } from "~/features/shared/components/ModalFrame";
@@ -32,15 +30,13 @@ export default function Home() {
         onContactClick={() => setContactOpen(true)}
       />
       <div className="h-full w-full">
-        <Suspense fallback={<LoadingSpinner />}>
-          <PortfolioScene
-            onSoftwareClick={() => setSoftwareOpen(true)}
-            onArtsClick={() => setArtsOpen(true)}
-            onAboutClick={() => setAboutOpen(true)}
-            onContactClick={() => setContactOpen(true)}
-            isDialogOpen={isAnyDialogOpen}
-          />
-        </Suspense>
+        <PortfolioScene
+          onSoftwareClick={() => setSoftwareOpen(true)}
+          onArtsClick={() => setArtsOpen(true)}
+          onAboutClick={() => setAboutOpen(true)}
+          onContactClick={() => setContactOpen(true)}
+          isDialogOpen={isAnyDialogOpen}
+        />
       </div>
 
         <ModalFrame

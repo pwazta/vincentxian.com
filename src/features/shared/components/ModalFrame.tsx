@@ -3,7 +3,7 @@
  * Used in: Portfolio section modals (Coding, Arts, About, Contact)
  */
 import * as React from "react";
-import { Dialog, DialogContent, DialogTitle, DialogFooter } from "./ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
 import { Button } from "./ui/button";
 
 type ModalFrameProps = {
@@ -22,6 +22,9 @@ export function ModalFrame({open, onOpenChange, title, children, footer, classNa
         <DialogTitle className="text-2xl font-semibold text-foreground">
           {title}
         </DialogTitle>
+        <DialogDescription className="sr-only">
+          {title} section content
+        </DialogDescription>
         <div>{children}</div>
         {footer && (
           <DialogFooter className="border-t border-accent/20 pt-4">
