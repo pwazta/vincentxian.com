@@ -5,7 +5,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { Badge } from "~/features/shared/components/ui/badge";
-import { ExternalLink, ZoomIn } from "lucide-react";
+import { ExternalLink, ZoomIn, ImageOff } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, CarouselDots, type CarouselApi } from "~/features/shared/components/ui/carousel";
 import { ImageGalleryModal, type ImageGalleryImage } from "~/features/shared/components/ImageGalleryModal";
@@ -33,8 +33,6 @@ export function ProjectCard({title, description, images, technologies, links = [
     api.on("select", () => setCurrent(api.selectedScrollSnap()));
   }, [api]);
 
-  if (images.length === 0) return null;
-
   return (
     <>
       <div
@@ -43,49 +41,56 @@ export function ProjectCard({title, description, images, technologies, links = [
           className
         )}
       >
-        {/* Left: Image Carousel */}
+        {/* Left: Image Carousel or Placeholder */}
         <div className="flex-shrink-0 flex flex-col gap-2">
-          <Carousel setApi={setApi} className="w-[300px]">
-            <CarouselContent>
-              {images.map((image, index) => (
-                <CarouselItem key={index}>
-                  <div
-                    className="relative cursor-pointer group"
-                    onClick={() => setIsGalleryOpen(true)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setIsGalleryOpen(true);
-                      }
-                    }}
-                    aria-label="View image gallery"
-                  >
-                    <Image
-                      src={image.src}
-                      alt={image.alt}
-                      width={300}
-                      height={169}
-                      className="rounded object-cover transition-all group-hover:blur-xs"
-                      style={{ width: "300px", height: "169px" }}
-                    />
-                    {/* Hover overlay with magnify icon */}
-                    <div className="absolute inset-0 rounded bg-black/20 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <ZoomIn className="size-8" style={{ color: "var(--primary)" }} />
+          {images.length > 0 ? (
+            <Carousel setApi={setApi} className="w-[300px]">
+              <CarouselContent>
+                {images.map((image, index) => (
+                  <CarouselItem key={index}>
+                    <div
+                      className="relative cursor-pointer group rounded overflow-hidden"
+                      onClick={() => setIsGalleryOpen(true)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setIsGalleryOpen(true);
+                        }
+                      }}
+                      aria-label="View image gallery"
+                    >
+                      <Image
+                        src={image.src}
+                        alt={image.alt}
+                        width={300}
+                        height={169}
+                        quality={100}
+                        className="object-cover transition-all group-hover:blur-xs"
+                        style={{ width: "300px", height: "169px" }}
+                      />
+                      {/* Hover overlay with magnify icon */}
+                      <div className="absolute inset-0 bg-black/20 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <ZoomIn className="size-8" style={{ color: "var(--primary)" }} />
+                      </div>
                     </div>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            {images.length > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-2">
-                <CarouselPrevious className="static translate-y-0" />
-                <CarouselDots count={images.length} currentIndex={current} onDotClick={(index) => api?.scrollTo(index)} />
-                <CarouselNext className="static translate-y-0" />
-              </div>
-            )}
-          </Carousel>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {images.length > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <CarouselPrevious className="static translate-y-0" />
+                  <CarouselDots count={images.length} currentIndex={current} onDotClick={(index) => api?.scrollTo(index)} />
+                  <CarouselNext className="static translate-y-0" />
+                </div>
+              )}
+            </Carousel>
+          ) : (
+            <div className="w-[300px] h-[169px] rounded bg-muted/50 flex items-center justify-center">
+              <ImageOff className="size-12 text-muted-foreground/40" />
+            </div>
+          )}
         </div>
 
       {/* Right: Content */}

@@ -15,12 +15,7 @@ export function SoftwareContent() {
         "You're looking at it! - a three.js website powered by React Three Fiber and T3 stack, featuring a retro low-poly 3D environment I modeled myself. This interactive portfolio showcases all my work across software development, game design, and 3D art.",
       images: [
         {
-          src: "/3DVis_Library_1.png",
-          caption: "Amongus library amognus amognus asoigsaoiugnaognwqaiougnwiou gnqwuog bqwoughqwou ghb",
-          alt: "Personal Portfolio Website",
-        },
-        {
-          src: "/headshot2.png",
+          src: "/portfolio_website.webp",
           alt: "Personal Portfolio Website",
         },
       ],
@@ -33,24 +28,19 @@ export function SoftwareContent() {
         "A task-oriented life simulator where you play as a cat on a tropical island, completing tasks by farming, fishing, and foraging to gather resources for your family cafe's grand opening. Features a dynamic economy with markets and quest systems, progressively challenging daily objectives, and NPC animals you can befriend through dialogue.",
       images: [
         {
-          src: "/3DVis_Library_1.png",
+          src: "/whisker_isles_farming.webp",
+          alt: "Whisker Isles",
+        },
+        {
+          src: "/whisker_isles_trading_and_quests.webp",
+          alt: "Whisker Isles",
+        },
+        {
+          src: "/whisker_isles_fishing.webp",
           alt: "Whisker Isles",
         },
       ],
       technologies: ["Unreal Engine", "Blueprints"],
-      links: [],
-    },
-    {
-      title: "Endless Wave Survival Game",
-      description:
-        "An endless survival PVE game developed in C# Godot with extensive upgrade systems, economy and equipment progression. This ongoing passion project explores complex enemy AI with unique pathfinding and state-based behaviours including tracking, circling, patrolling and flock behaviour. Visuals and UI are hand-drawn and animated in Photoshop.",
-      images: [
-        {
-          src: "/3DVis_Library_1.png",
-          alt: "Endless Wave Survival Game",
-        },
-      ],
-      technologies: ["C#", "Godot", "Photoshop"],
       links: [],
     },
     {
@@ -59,11 +49,23 @@ export function SoftwareContent() {
         "A comedy-driven topdown game built in Unity using C# featuring turn-based PVE combat, smart inventory and dynamic item / enemy logic. Features fully handmade 2D graphics, VFX and UI with bone animations modelled in Unity.",
       images: [
         {
-          src: "/3DVis_Library_1.png",
+          src: "/EoL_1.webp",
+          alt: "East of Loving Strategy Game",
+        },
+        {
+          src: "/EoL_2.webp",
           alt: "East of Loving Strategy Game",
         },
       ],
       technologies: ["C#", "Unity", "Photoshop"],
+      links: [],
+    },
+    {
+      title: "Endless Wave Survival Game",
+      description:
+        "A proof of concept for an endless survival PVE game developed in C# Godot with extensive upgrade systems, economy and equipment progression. This ongoing passion project explores complex enemy AI with unique pathfinding and state-based behaviours including tracking, circling, patrolling and flock behaviour. Visuals and UI are hand-drawn and animated in Photoshop.",
+      images: [],
+      technologies: ["C#", "Godot", "Photoshop"],
       links: [],
     },
   ];

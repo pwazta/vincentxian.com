@@ -30,7 +30,6 @@ export function setupInteractiveObjects(scene: THREE.Scene): THREE.Mesh[] {
     const interactionType = classifyObject(mesh.name);
 
     if (interactionType !== "none") {
-      // Store metadata directly on the mesh
       const metadata: HitboxMetadata = {
         originalObject: mesh,
         interactionType,

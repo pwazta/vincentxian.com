@@ -88,7 +88,6 @@ export function applyAccentColor(object: THREE.Object3D, animated = true): void 
       }
 
       if (animated) {
-        // Animate color transition with GSAP
         gsap.killTweensOf(material.color);
         gsap.to(material.color, {
           r: accentColorObj.r,
@@ -123,7 +122,6 @@ export function restoreOriginalColors(object: THREE.Object3D, animated = true): 
       const originalColorObj = new THREE.Color(parseInt(originalColor, 16));
       
       if (animated) {
-        // Animate color transition back with GSAP
         gsap.killTweensOf(material.color);
         gsap.to(material.color, {
           r: originalColorObj.r,

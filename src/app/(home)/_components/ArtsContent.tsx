@@ -15,11 +15,18 @@ export function ArtsContent() {
         "A steampunk cityscape environment combining Victorian-era aesthetics with retro-futuristic steam-powered technology. The playable Unreal Engine map features a central winding street through a multi-story city with overhanging bridges and mechanical infrastructure, set at night with soft amber lighting guiding players toward a memorial plaza.",
       images: [
         {
-          src: "/3DVis_Library_1.png",
+          src: "/steampunk_city_plaza.webp",
+          caption: "Plaza with animated globe showcasing the central memorial area",
           alt: "Steampunk Cityscape Environment",
         },
         {
-          src: "/3DVis_Library_2.png",
+          src: "/steampunk_city_streets.webp",
+          caption: "Winding streets through the multi-story steampunk city",
+          alt: "Steampunk Cityscape Environment",
+        },
+        {
+          src: "/steampunk_city_factory.webp",
+          caption: "Factory district with mechanical infrastructure and steam-powered technology",
           alt: "Steampunk Cityscape Environment",
         },
       ],
@@ -32,11 +39,19 @@ export function ArtsContent() {
         "A fully custom-modeled 3D environment of an antique library room inspired by Gothic Revival and traditional European architecture. Set in a warm forest climate of 1800s Europe, the scene captures a quiet sunset with books and materials strewn across tables, emphasizing rich wooden textures and yellow-hued lighting to evoke peaceful, warm solitude.",
       images: [
         {
-          src: "/3DVis_Library_1.png",
+          src: "/3DVis_Library_1.webp",
           alt: "Antique Library Environment",
         },
         {
-          src: "/3DVis_Library_2.png",
+          src: "/3DVis_Library_2.webp",
+          alt: "Antique Library Environment",
+        },
+        {
+          src: "/3DVis_Library_Wireframe_1.webp",
+          alt: "Antique Library Environment",
+        },
+        {
+          src: "/3DVis_Library_Wireframe_2.webp",
           alt: "Antique Library Environment",
         },
       ],

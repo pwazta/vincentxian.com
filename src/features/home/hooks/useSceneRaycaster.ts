@@ -25,7 +25,7 @@ export function useSceneRaycaster({ interactiveMeshes, enabled = true }: UseScen
   const lastEnabledStateRef = React.useRef(enabled);
   const requiresMouseMoveRef = React.useRef(false);
 
-  // Track when interactions are re-enabled to require mouse movement before detecting intersections
+  /** Track when interactions are re-enabled to require mouse movement before detecting intersections */
   React.useEffect(() => {
     if (!lastEnabledStateRef.current && enabled) {
       requiresMouseMoveRef.current = true;
@@ -33,7 +33,7 @@ export function useSceneRaycaster({ interactiveMeshes, enabled = true }: UseScen
     lastEnabledStateRef.current = enabled;
   }, [enabled]);
 
-  // Update pointer on mouse/touch move
+  /** Update pointer on mouse/touch move */
   React.useEffect(() => {
     if (!enabled) return;
 

@@ -128,8 +128,7 @@ export function useObjectInteractions({ intersects, clickActions, enabled = true
           });
         }
       } else {
-        // Regular scale animation for non-drawer objects
-        // Scale around the mesh's local bounding box center to prevent scaling from world origin
+        /** Scale around the mesh's local bounding box center to prevent scaling from world origin */
         gsap.killTweensOf(originalObject.scale);
         gsap.killTweensOf(originalObject.position);
 

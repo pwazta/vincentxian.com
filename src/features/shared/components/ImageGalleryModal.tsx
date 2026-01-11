@@ -99,7 +99,7 @@ export function ImageGalleryModal({images, isOpen, onClose, initialIndex = 0, pr
             )}
             <div className="flex-1 flex flex-col items-center justify-center relative p-2">
               <div className="relative w-full h-full max-w-full max-h-full flex items-center justify-center">
-                <Image src={currentImage.src} alt={currentImage.alt} fill className="object-contain" priority sizes="(max-width: 1500px) 100vw, 1500px" />
+                <Image src={currentImage.src} alt={currentImage.alt} fill className="object-contain" priority quality={100} sizes="(max-width: 1500px) 100vw, 1500px" />
               </div>
               
               {/* Dots indicator - centered below image */}

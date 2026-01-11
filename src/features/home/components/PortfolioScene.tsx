@@ -27,16 +27,13 @@ function RendererConfig() {
 		gl.outputColorSpace = THREE.SRGBColorSpace;
 		gl.toneMapping = THREE.ACESFilmicToneMapping;
 		
-		// Handle WebGL context loss with proper recovery
 		const canvas = gl.domElement;
 		const handleContextLost = (event: Event) => {
-			event.preventDefault(); // Prevent default to allow restoration
-			console.warn("WebGL context lost - browser will attempt to restore");
+			event.preventDefault();
 			setContextLost(true);
 		};
 		
 		const handleContextRestored = () => {
-			console.log("WebGL context restored - reinitializing renderer");
 			setContextLost(false);
 			// Reinitialize renderer settings after context restoration
 			gl.shadowMap.enabled = true;
@@ -54,9 +51,8 @@ function RendererConfig() {
 		};
 	}, [gl]);
 	
-	// Show warning if context is lost
 	if (contextLost) {
-		return null; // Context restoration will be handled automatically
+		return null;
 	}
 	
 	return null;
@@ -73,8 +69,8 @@ function LimitedOrbitControls() {
 		const target = (controls as { target: THREE.Vector3 }).target;
 		
 		// Set initial target once (upwards and to the right)
-		if (!targetInitialized.current) {
-			target.set(0, 3, 0); // [x, y, z]
+		if (!targetInitialized.current) { // If camera initialised, set where it's looking at once
+			target.set(0, 3, 0);
 			targetInitialized.current = true;
 		}
 		
@@ -126,20 +122,15 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
   const cabinetModel = useGLTF("/models/cabinet.glb");
   const phoneModel = useGLTF("/models/phone.glb");
 
-  /** Wait for main models before rendering heavy content (shadows, grass, etc.) */
-  /** SceneLoader ensures all resources are loaded globally, but this prevents heavy rendering */
-  /** until models are ready, even if SceneLoader timing is off */
+  /** Wait for main models before rendering heavy content. SceneLoader handles global loading, but this ensures models are ready */
   React.useEffect(() => {
     const allModelsLoaded = 
       computerModel.scene && 
       cabinetModel.scene && 
       phoneModel.scene;
 
-    if (allModelsLoaded && !resourcesReady) {
-      // Small delay to ensure WebGL context is stable
-      const timer = setTimeout(() => {
-        setResourcesReady(true);
-      }, 200);
+    if (allModelsLoaded && !resourcesReady) { // Small delay to ensure WebGL context is stable
+      const timer = setTimeout(() => { setResourcesReady(true); }, 200);
       return () => clearTimeout(timer);
     }
   }, [computerModel.scene, cabinetModel.scene, phoneModel.scene, resourcesReady]);
@@ -159,7 +150,6 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
     return () => clearTimeout(timer);
   }, [scene, resourcesReady]);
 
-  // Raycaster for intersection detection - disabled when dialog is open or loader is active
   const interactionsEnabled = interactiveMeshes.length > 0 && !isDialogOpen && !isLoaderActive;
   const { intersects } = useSceneRaycaster({ interactiveMeshes, enabled: interactionsEnabled });
 
@@ -175,7 +165,6 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
     }), [onSoftwareClick, onArtsClick, onAboutClick, onContactClick]
   );
 
-  // Handle interactions - disabled when dialog is open
   useObjectInteractions({ intersects, clickActions, enabled: interactionsEnabled }); 
 
   // Don't render heavy content until resources are ready
@@ -230,7 +219,7 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
         grassHeightScale={0.4}
       />
 
-      {/* GLB Models - scaled from cm to meters and positioned in a T layout */}
+      {/* GLB Models */}
       <group position={[0, 1, 0]}>
         <primitive object={computerModel.scene} />
         <primitive object={phoneModel.scene} />
@@ -263,7 +252,6 @@ export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onC
           antialias: true,
           powerPreference: "default",
           preserveDrawingBuffer: false,
-          // Prevent context loss by being more conservative
           failIfMajorPerformanceCaveat: false,
         }}
       >

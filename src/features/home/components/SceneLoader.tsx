@@ -20,12 +20,12 @@ export function SceneLoader({ onLoaded }: SceneLoaderProps) {
   const hideTimerRef = React.useRef<NodeJS.Timeout | null>(null);
   const hasStartedTimerRef = React.useRef(false);
 
-  // Track max progress
+  /** Track maximum progress to prevent showing 0% if progress resets */
   React.useEffect(() => {
     if (progress > maxProgressSeen) setMaxProgressSeen(progress);
   }, [progress, maxProgressSeen]);
 
-  // Handle completion - separate effect that only runs when we reach 100%
+  /** Handle completion - separate effect that only runs when we reach 100% */
   React.useEffect(() => {
     const reachedHundred = (!active && progress === 100) || maxProgressSeen === 100;
     
@@ -39,7 +39,6 @@ export function SceneLoader({ onLoaded }: SceneLoaderProps) {
     }
 
     return () => {
-      // Only clear timer on unmount, not on every re-render
       if (buttonTimerRef.current && !hasStartedTimerRef.current) {
         clearTimeout(buttonTimerRef.current);
       }
@@ -50,14 +49,12 @@ export function SceneLoader({ onLoaded }: SceneLoaderProps) {
     if (isHiding) return;
     setIsHiding(true);
 
-    // Hide completely after fade-out animation completes
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     hideTimerRef.current = setTimeout(() => {
       onLoaded?.();
-    }, 600); // 600ms fade duration
+    }, 600);
   };
 
-  // Use maxProgressSeen to prevent showing 0% if progress resets
   const displayProgress = Math.max(maxProgressSeen, progress);
 
   return (
