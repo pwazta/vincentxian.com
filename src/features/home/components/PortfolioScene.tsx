@@ -84,7 +84,19 @@ function LimitedOrbitControls() {
 	return <OrbitControls makeDefault enablePan={true} enableZoom={true} enableRotate={true} minDistance={2} maxDistance={12} />;
 }
 
-function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen, isLoaderActive }: PortfolioSceneProps) {
+type PortfolioSceneProps = {
+  onSoftwareClick: () => void;
+  onArtsClick: () => void;
+  onAboutClick: () => void;
+  onContactClick: () => void;
+  isDialogOpen: boolean;
+};
+
+type SceneContentProps = PortfolioSceneProps & {
+  isLoaderActive: boolean;
+};
+
+function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen, isLoaderActive }: SceneContentProps) {
   const { scene } = useThree();
   const [interactiveMeshes, setInteractiveMeshes] = React.useState<THREE.Mesh[]>([]);
   const [primaryColor, setPrimaryColor] = React.useState<string>("#7c9082");
@@ -228,15 +240,6 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
     </>
   );
 }
-
-type PortfolioSceneProps = {
-  onSoftwareClick: () => void;
-  onArtsClick: () => void;
-  onAboutClick: () => void;
-  onContactClick: () => void;
-  isDialogOpen: boolean;
-  isLoaderActive: boolean;
-};
 
 export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen }: PortfolioSceneProps) {
   const [showLoader, setShowLoader] = React.useState(true);
