@@ -63,7 +63,7 @@ export function SoftwareContent() {
           alt: "East of Loving Strategy Game",
         },
       ],
-      technologies: ["C#", "Unity"],
+      technologies: ["C#", "Unity", "Photoshop"],
       links: [],
     },
   ];

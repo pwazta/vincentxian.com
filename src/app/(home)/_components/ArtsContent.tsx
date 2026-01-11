@@ -3,28 +3,74 @@
  * Used in: Portfolio modal for Arts section
  */
 import * as React from "react";
+import { Palette } from "lucide-react";
+import { ProjectCard } from "~/features/shared/components/ProjectCard";
+import { ScrollArea } from "~/features/shared/components/ui/scroll-area";
 
 export function ArtsContent() {
+  const artworks = [
+    {
+      title: "Steampunk Cityscape Environment",
+      description:
+        "A steampunk cityscape environment combining Victorian-era aesthetics with retro-futuristic steam-powered technology. The playable Unreal Engine map features a central winding street through a multi-story city with overhanging bridges and mechanical infrastructure, set at night with soft amber lighting guiding players toward a memorial plaza.",
+      images: [
+        {
+          src: "/3DVis_Library_1.png",
+          alt: "Steampunk Cityscape Environment",
+        },
+        {
+          src: "/3DVis_Library_2.png",
+          alt: "Steampunk Cityscape Environment",
+        },
+      ],
+      technologies: ["Maya", "Substance Painter", "Unreal Engine"],
+      links: [],
+    },
+    {
+      title: "Antique Library Environment",
+      description:
+        "A fully custom-modeled 3D environment of an antique library room inspired by Gothic Revival and traditional European architecture. Set in a warm forest climate of 1800s Europe, the scene captures a quiet sunset with books and materials strewn across tables, emphasizing rich wooden textures and yellow-hued lighting to evoke peaceful, warm solitude.",
+      images: [
+        {
+          src: "/3DVis_Library_1.png",
+          alt: "Antique Library Environment",
+        },
+        {
+          src: "/3DVis_Library_2.png",
+          alt: "Antique Library Environment",
+        },
+      ],
+      technologies: ["Maya", "Photoshop"],
+      links: [],
+    },
+  ];
+
   return (
-    <div className="space-y-4">
-      <p className="text-foreground/90">
-        Explore my creative work and artistic projects. This section features
-        visual design, illustrations, and digital art.
-      </p>
-      <div className="space-y-2">
-        <h3 className="font-semibold text-foreground">Featured Works:</h3>
-        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-          <li>Artwork placeholder 1</li>
-          <li>Artwork placeholder 2</li>
-          <li>Artwork placeholder 3</li>
-        </ul>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-2 justify-center">
+        <h2
+          className="text-2xl font-semibold mb-1"
+          style={{
+            color: "var(--foreground)",
+            fontFamily: "var(--font-mono)",
+            textShadow:
+              "2px 2px 0px color-mix(in srgb, var(--primary) 50%, transparent)",
+          }}
+        >
+          my artworks
+        </h2>
+        <Palette className="size-7 mb-2 ml-2 text-primary" />
       </div>
-      <div className="space-y-2">
-        <h3 className="font-semibold text-foreground">Mediums:</h3>
-        <p className="text-muted-foreground">
-          Digital art, 3D modeling, graphic design, and more...
-        </p>
-      </div>
+
+      {/* Artworks List */}
+      <ScrollArea className="h-[500px] w-full">
+        <div className="space-y-2 pr-4">
+          {artworks.map((artwork) => (
+            <ProjectCard key={artwork.title} {...artwork} />
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   );
 }
