@@ -239,3 +239,16 @@
 .animate-accordion-up {
   animation: accordion-up 0.2s ease-out;
 }
+
+@keyframes spin-once {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(270deg);
+  }
+}
+
+.animate-spin-once {
+  animation: spin-once 0.25s ease-in-out;
+}

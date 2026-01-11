@@ -48,17 +48,26 @@ function RendererConfig() {
 function LimitedOrbitControls() {
 	const { controls, camera } = useThree();
 	const ISLAND_FLOOR_Y = 1.5; // Hard limit - no camera below this
+	const targetInitialized = React.useRef(false);
 
 	useFrame(() => {
 		if (!controls || !('target' in controls)) return;
 		const target = (controls as { target: THREE.Vector3 }).target;
+		
+		// Set initial target once (upwards and to the right)
+		if (!targetInitialized.current) {
+			target.set(0, 3, 0); // [x, y, z]
+			targetInitialized.current = true;
+		}
+		
+		// Clamp target to limits
 		target.x = Math.max(-5, Math.min(8, target.x));
 		target.y = Math.max(ISLAND_FLOOR_Y, Math.min(5, target.y));
 		target.z = Math.max(-5, Math.min(5, target.z));
 		camera.position.y = Math.max(ISLAND_FLOOR_Y, camera.position.y);
 	});
 
-	return <OrbitControls makeDefault enablePan={true} enableZoom={true} enableRotate={true} minDistance={4} maxDistance={12} />;
+	return <OrbitControls makeDefault enablePan={true} enableZoom={true} enableRotate={true} minDistance={2} maxDistance={12} />;
 }
 
 function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen }: PortfolioSceneProps) {
@@ -116,8 +125,7 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
   const { intersects } = useSceneRaycaster({ interactiveMeshes, enabled: interactionsEnabled });
 
   // Click actions mapping
-  const clickActions: ClickActions = React.useMemo(
-    () => ({
+  const clickActions: ClickActions = React.useMemo(() => ({
       onPhoneClick: onContactClick,
       onComputerClick: onSoftwareClick,
       onDiskLinkedInClick: () => { /* External link handled in useObjectInteractions */ },
@@ -125,8 +133,7 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
       onDrawerAboutClick: onAboutClick,
       onDrawerSoftwareClick: onSoftwareClick,
       onDrawerArtsClick: onArtsClick,
-    }),
-    [onSoftwareClick, onArtsClick, onAboutClick, onContactClick]
+    }), [onSoftwareClick, onArtsClick, onAboutClick, onContactClick]
   );
 
   // Handle interactions - disabled when dialog is open
@@ -199,7 +206,7 @@ export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onC
       <Canvas
         shadows
         dpr={[1, 1.5]}
-        camera={{ position: [0, 10, 8], fov: 70 }}
+        camera={{ position: [-1, 8, 8], fov: 70 }}
         gl={{
           antialias: true,
           powerPreference: "default",

@@ -3,8 +3,8 @@
 import HomeRouteLayout from "./_components/HomeRouteLayout";
 
 export const metadata = {
-  title: "Home",
-  description: "Home",
+  title: "vx.dev",
+  description: "Vincent's stuff ^^",
 };
 
 export default function HomeLayout({children}: {children: React.ReactNode}) {
