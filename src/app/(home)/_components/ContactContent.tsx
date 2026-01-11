@@ -5,7 +5,7 @@
 "use client";
 
 import * as React from "react";
-import { Mail } from "lucide-react";
+import { Mail, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import emailjs from "@emailjs/browser";
 import { Input } from "~/features/shared/components/ui/input";
@@ -97,7 +97,7 @@ export function ContactContent() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 px-8">
       {/* Header */}
       <div className="flex items-center gap-2 justify-center">
         <h2
@@ -115,9 +115,8 @@ export function ContactContent() {
       </div>
 
       {/* Introductory Paragraph */}
-      <p className="text-foreground/90 text-center">
-        Have a question or want to work together? I&apos;m always happy to
-        discuss projects or other stuff!
+      <p className="text-foreground/90 text-center -mt-4">
+        Want to work together or have a question? My inbox is open to everyone!
       </p>
 
       {/* Contact Form */}
@@ -194,8 +193,8 @@ export function ContactContent() {
             aria-describedby={errors.message ? "message-error" : undefined}
             disabled={isSubmitting}
             placeholder="Type your message here"
-            rows={5}
-            className="resize-y"
+            rows={7}
+            className="resize-y min-h-[100px]"
           />
           {errors.message && (
             <p id="message-error" className="text-sm text-destructive">
@@ -210,8 +209,16 @@ export function ContactContent() {
             type="submit"
             disabled={isSubmitting}
             variant="default"
+            className="cursor-pointer"
           >
-            {isSubmitting ? "Sending..." : "Send"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              "Send"
+            )}
           </Button>
         </div>
       </form>

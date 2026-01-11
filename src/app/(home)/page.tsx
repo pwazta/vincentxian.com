@@ -67,7 +67,7 @@ export default function Home() {
           open={contactOpen}
           onOpenChange={setContactOpen}
           title="Contact"
-          className="max-w-[600px]"
+          className="max-w-[680px]"
         >
           <ContactContent />
         </ModalFrame>
