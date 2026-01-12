@@ -34,18 +34,20 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 w-full max-w-lg border border-[var(--foreground)] bg-background shadow-xl origin-center dialog-content-animated flex flex-col",
+        "fixed left-[50%] top-[50%] z-50 w-[95%] md:w-full max-w-lg max-h-[90vh]",
+        "border border-[var(--foreground)] bg-background shadow-xl",
+        "origin-center dialog-content-animated flex flex-col",
         className
       )}
       {...props}
     >
-      <div className="bg-primary text-white px-3 flex items-center justify-between relative h-12">
+      <div className="bg-primary text-white px-2 md:px-3 flex items-center justify-between relative h-10 md:h-12 flex-shrink-0">
         <DialogPrimitive.Close className="opacity-90 hover:opacity-100 transition-opacity focus:outline-none disabled:pointer-events-none ml-auto cursor-pointer">
-          <Image src="/close-box.svg" alt="Close" width={32} height={32} className="h-8 w-8 brightness-0 invert" />
+          <Image src="/close-box.svg" alt="Close" width={28} height={28} className="h-6 w-6 md:h-8 md:w-8 brightness-0 invert" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       </div>
-      <div className="p-6 [&>h2:not([data-dialog-title])]:hidden">
+      <div className="p-4 md:p-6 overflow-y-auto flex-1 min-h-0 [&>h2:not([data-dialog-title])]:hidden">
         {children}
       </div>
     </DialogPrimitive.Content>
@@ -89,7 +91,7 @@ const DialogTitle = React.forwardRef<
     ref={ref}
     data-dialog-title
     className={cn(
-      "font-semibold leading-none !text-white absolute left-5 -translate-y-16 m-0 pointer-events-none z-10",
+      "font-semibold leading-none !text-white absolute left-3 md:left-5 -translate-y-13 md:-translate-y-16 m-0 pointer-events-none z-10",
       className
     )}
     {...props}

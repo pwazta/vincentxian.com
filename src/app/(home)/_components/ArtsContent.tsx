@@ -86,7 +86,7 @@ export function ArtsContent() {
       </div>
 
       {/* Artworks List */}
-      <ScrollArea className="h-[500px] w-full">
+      <ScrollArea className="h-[60vh] md:h-[500px] w-full">
         <div className="space-y-2 pr-4">
           {artworks.map((artwork) => (
             <ProjectCard key={artwork.title} {...artwork} />

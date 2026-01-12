@@ -10,6 +10,7 @@ import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import { Dialog, DialogTitle, DialogDescription } from "~/features/shared/components/ui/dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cn } from "~/lib/utils";
+import { useIsMobile } from "~/features/shared/hooks/use-mobile";
 
 export interface ImageGalleryImage {
   src: string | StaticImageData;
@@ -26,6 +27,7 @@ export interface ImageGalleryModalProps {
 }
 
 export function ImageGalleryModal({images, isOpen, onClose, initialIndex = 0, projectTitle}: ImageGalleryModalProps) {
+  const isMobile = useIsMobile();
   const [currentIndex, setCurrentIndex] = React.useState(initialIndex);
 
   const goToPrevious = React.useCallback(() => setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1)), [images.length]);
@@ -79,7 +81,9 @@ export function ImageGalleryModal({images, isOpen, onClose, initialIndex = 0, pr
       <DialogPrimitive.Portal>
         <DialogPrimitive.Content
           className={cn(
-            "fixed left-[50%] top-[50%] z-[100] min-w-[820px] w-[90%] max-w-[1300px] h-[750px] border border-[var(--foreground)] bg-background shadow-xl p-0 flex flex-col",
+            "fixed left-[50%] top-[50%] z-[100]",
+            "max-w-[95vw] max-h-[95vh]",
+            "border border-[var(--foreground)] bg-background shadow-xl p-0 flex flex-col",
             "-translate-x-1/2 -translate-y-1/2",
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
             "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
@@ -92,36 +96,38 @@ export function ImageGalleryModal({images, isOpen, onClose, initialIndex = 0, pr
         >
           <DialogTitle className="sr-only">{projectTitle ?? "Image Gallery"} - Image {currentIndex + 1} of {images.length}</DialogTitle>
           <DialogDescription className="sr-only">{currentImage.caption ?? currentImage.alt}</DialogDescription>
-          <div className="bg-primary text-white px-3 flex items-center justify-between relative h-12">
+          <div className="bg-primary text-white px-2 md:px-3 flex items-center justify-between relative h-10 md:h-12 flex-shrink-0">
             <button
               onClick={onClose}
-              className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity"
+              className="flex items-center gap-1 md:gap-2 text-white hover:opacity-80 transition-opacity min-w-0 flex-shrink-0"
               aria-label="Back to projects"
             >
-              <ArrowLeft className="size-5" />
-              <span className="text-sm font-medium">Back to projects</span>
+              <ArrowLeft className="size-4 md:size-5 flex-shrink-0" />
+              <span className="text-xs md:text-sm font-medium truncate">Back to projects</span>
             </button>
             {projectTitle && (
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-sm md:text-lg font-semibold text-white absolute left-1/2 -translate-x-1/2 max-w-[40%] truncate hidden md:block">
                 {projectTitle}
               </h2>
             )}
-            <DialogPrimitive.Close className="opacity-90 hover:opacity-100 transition-opacity focus:outline-none disabled:pointer-events-none cursor-pointer">
-              <Image src="/close-box.svg" alt="Close" width={32} height={32} className="h-8 w-8 brightness-0 invert" />
+            <DialogPrimitive.Close className="opacity-90 hover:opacity-100 transition-opacity focus:outline-none disabled:pointer-events-none cursor-pointer flex-shrink-0">
+              <Image src="/close-box.svg" alt="Close" width={28} height={28} className="h-6 w-6 md:h-8 md:w-8 brightness-0 invert" />
               <span className="sr-only">Close</span>
             </DialogPrimitive.Close>
           </div>
 
-          {/* Main image container */}
-          <div className="flex-1 flex items-stretch relative bg-background">
+          {/* Main image container - 16:9 aspect ratio, fills to max viewport space */}
+          <div className="flex items-stretch relative bg-background" style={{ aspectRatio: '16/9', width: 'min(95vw, calc((95vh - 4.5rem) * 16 / 9))', height: 'min(95vh - 4.5rem, calc(95vw * 9 / 16))' }}>
             {/* Left column: Clickable previous area */}
-            {images.length > 1 && (
-              <button onClick={goToPrevious} className="flex items-center justify-center px-4 border-r border-accent/20 hover:bg-muted transition-colors cursor-pointer" aria-label="Previous image">
+            {images.length > 1 && !isMobile && (
+              <button onClick={goToPrevious} className="flex items-center justify-center w-12 flex-shrink-0 border-r border-accent/20 bg-background hover:bg-muted transition-colors cursor-pointer" aria-label="Previous image">
                 <ChevronLeft className="size-6" style={{ color: "var(--primary)" }} />
               </button>
             )}
-            <div className="flex-1 flex flex-col items-center justify-center relative p-2">
-              <div className="relative w-full h-full max-w-full max-h-full flex items-center justify-center">
+
+            {/* Center: Image + Dots with padding wrapper */}
+            <div className="flex-1 flex flex-col items-center justify-center relative min-w-0 px-2">
+              <div className="relative w-full flex-1 flex items-center justify-center">
                 <Image
                   src={currentImage.src}
                   alt={currentImage.alt}
@@ -129,19 +135,19 @@ export function ImageGalleryModal({images, isOpen, onClose, initialIndex = 0, pr
                   className="object-contain"
                   priority
                   quality={100}
-                  sizes="(max-width: 768px) 100vw, (max-width: 1300px) 90vw, 1300px"
+                  sizes="95vw"
                   placeholder={typeof currentImage.src !== "string" ? "blur" : undefined}
                 />
               </div>
-              
-              {/* Dots indicator - centered below image */}
+
+              {/* Dots indicator - no top padding, only bottom padding */}
               {images.length > 1 && (
-                <div className="flex items-center gap-3 mt-4 mb-2">
+                <div className="flex items-center gap-2 md:gap-3 pb-2 flex-shrink-0">
                   {images.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentIndex(index)}
-                      className={cn("h-2 w-2 rounded-full transition-all cursor-pointer", index === currentIndex ? "bg-primary" : "bg-muted-foreground/30 hover:bg-muted-foreground/50")}
+                      className={cn("h-2.5 w-2.5 md:h-2 md:w-2 rounded-full transition-all cursor-pointer", index === currentIndex ? "bg-primary" : "bg-muted-foreground/30 hover:bg-muted-foreground/50")}
                       style={index === currentIndex ? { backgroundColor: "var(--primary)" } : undefined}
                       aria-label={`Go to image ${index + 1}`}
                     />
@@ -151,16 +157,20 @@ export function ImageGalleryModal({images, isOpen, onClose, initialIndex = 0, pr
             </div>
 
             {/* Right column: Clickable next area */}
-            {images.length > 1 && (
-              <button onClick={goToNext} className="flex items-center justify-center px-4 border-l border-accent/20 hover:bg-muted transition-colors cursor-pointer" aria-label="Next image">
+            {images.length > 1 && !isMobile && (
+              <button onClick={goToNext} className="flex items-center justify-center w-12 flex-shrink-0 border-l border-accent/20 bg-background hover:bg-muted transition-colors cursor-pointer" aria-label="Next image">
                 <ChevronRight className="size-6" style={{ color: "var(--primary)" }} />
               </button>
             )}
           </div>
 
           {/* Footer with caption */}
-          <div className="h-[42px] px-6 flex items-center justify-center border-t border-accent/20 bg-background">
-            {currentImage.caption && <p className="text-sm text-foreground/90 text-center truncate w-full">{currentImage.caption}</p>}
+          <div className="min-h-[36px] md:h-[42px] px-3 md:px-6 py-2 md:py-0 flex items-center justify-center border-t border-accent/20 bg-background flex-shrink-0">
+            {currentImage.caption && (
+              <p className="text-xs md:text-sm text-foreground/90 text-center line-clamp-2 md:truncate w-full">
+                {currentImage.caption}
+              </p>
+            )}
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

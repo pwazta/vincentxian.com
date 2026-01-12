@@ -18,21 +18,21 @@ type ModalFrameProps = {
 export function ModalFrame({open, onOpenChange, title, children, footer, className}: ModalFrameProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={className ?? "max-w-[820px]"}>
+      <DialogContent className={className ?? "w-[95%] md:w-[90%] md:max-w-[820px] max-h-[90vh]"}>
         <DialogTitle className="text-2xl font-semibold text-foreground">
           {title}
         </DialogTitle>
         <DialogDescription className="sr-only">
           {title} section content
         </DialogDescription>
-        <div>{children}</div>
+        <div className="overflow-y-auto flex-1 min-h-0">{children}</div>
         {footer && (
-          <DialogFooter className="border-t border-accent/20 pt-4">
+          <DialogFooter className="border-t border-accent/20 pt-3 md:pt-4 flex-shrink-0">
             {footer}
           </DialogFooter>
         )}
         {!footer && (
-          <DialogFooter className="border-t border-accent/20 pt-4">
+          <DialogFooter className="border-t border-accent/20 pt-3 md:pt-4 flex-shrink-0">
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}

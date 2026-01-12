@@ -95,7 +95,7 @@ export function SoftwareContent() {
       </div>
 
       {/* Projects List */}
-      <ScrollArea className="h-[500px] w-full">
+      <ScrollArea className="h-[60vh] md:h-[500px] w-full">
         <div className="space-y-2 pr-4">
           {projects.map((project) => (
             <ProjectCard key={project.title} {...project} />
