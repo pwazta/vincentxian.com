@@ -6,6 +6,13 @@ import * as React from "react";
 import { Palette } from "lucide-react";
 import { ProjectCard } from "~/features/shared/components/ProjectCard";
 import { ScrollArea } from "~/features/shared/components/ui/scroll-area";
+import steampunkCityPlazaImage from "~/assets/images/projects/steampunk_city_plaza.webp";
+import steampunkCityStreetsImage from "~/assets/images/projects/steampunk_city_streets.webp";
+import steampunkCityFactoryImage from "~/assets/images/projects/steampunk_city_factory.webp";
+import library1Image from "~/assets/images/projects/3DVis_Library_1.webp";
+import library2Image from "~/assets/images/projects/3DVis_Library_2.webp";
+import libraryWireframe1Image from "~/assets/images/projects/3DVis_Library_Wireframe_1.webp";
+import libraryWireframe2Image from "~/assets/images/projects/3DVis_Library_Wireframe_2.webp";
 
 export function ArtsContent() {
   const artworks = [
@@ -15,17 +22,17 @@ export function ArtsContent() {
         "A steampunk cityscape environment combining Victorian-era aesthetics with retro-futuristic steam-powered technology. The playable Unreal Engine map features a central winding street through a multi-story city with overhanging bridges and mechanical infrastructure, set at night with soft amber lighting guiding players toward a memorial plaza.",
       images: [
         {
-          src: "/steampunk_city_plaza.webp",
+          src: steampunkCityPlazaImage,
           caption: "Plaza with animated globe showcasing the central memorial area",
           alt: "Steampunk Cityscape Environment",
         },
         {
-          src: "/steampunk_city_streets.webp",
+          src: steampunkCityStreetsImage,
           caption: "Winding streets through the multi-story steampunk city",
           alt: "Steampunk Cityscape Environment",
         },
         {
-          src: "/steampunk_city_factory.webp",
+          src: steampunkCityFactoryImage,
           caption: "Factory district with mechanical infrastructure and steam-powered technology",
           alt: "Steampunk Cityscape Environment",
         },
@@ -39,19 +46,19 @@ export function ArtsContent() {
         "A fully custom-modeled 3D environment of an antique library room inspired by Gothic Revival and traditional European architecture. Set in a warm forest climate of 1800s Europe, the scene captures a quiet sunset with books and materials strewn across tables, emphasizing rich wooden textures and yellow-hued lighting to evoke peaceful, warm solitude.",
       images: [
         {
-          src: "/3DVis_Library_1.webp",
+          src: library1Image,
           alt: "Antique Library Environment",
         },
         {
-          src: "/3DVis_Library_2.webp",
+          src: library2Image,
           alt: "Antique Library Environment",
         },
         {
-          src: "/3DVis_Library_Wireframe_1.webp",
+          src: libraryWireframe1Image,
           alt: "Antique Library Environment",
         },
         {
-          src: "/3DVis_Library_Wireframe_2.webp",
+          src: libraryWireframe2Image,
           alt: "Antique Library Environment",
         },
       ],

@@ -5,14 +5,14 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import { Dialog, DialogTitle, DialogDescription } from "~/features/shared/components/ui/dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cn } from "~/lib/utils";
 
 export interface ImageGalleryImage {
-  src: string;
+  src: string | StaticImageData;
   alt: string;
   caption?: string;
 }
@@ -34,6 +34,29 @@ export function ImageGalleryModal({images, isOpen, onClose, initialIndex = 0, pr
   React.useEffect(() => {
     if (isOpen) setCurrentIndex(Math.max(0, Math.min(initialIndex, images.length - 1)));
   }, [initialIndex, isOpen, images.length]);
+
+  // Preload adjacent images for faster navigation
+  React.useEffect(() => {
+    if (!isOpen || images.length <= 1) return;
+
+    const preloadImage = (index: number) => {
+      const img = images[index];
+      if (!img) return;
+      const imageSrc = typeof img.src === "string" ? img.src : img.src.src;
+      const preloadLink = document.createElement("link");
+      preloadLink.rel = "preload";
+      preloadLink.as = "image";
+      preloadLink.href = imageSrc;
+      document.head.appendChild(preloadLink);
+    };
+
+    // Preload next and previous images
+    const nextIndex = (currentIndex + 1) % images.length;
+    const prevIndex = (currentIndex - 1 + images.length) % images.length;
+
+    preloadImage(nextIndex);
+    preloadImage(prevIndex);
+  }, [currentIndex, isOpen, images]);
 
   React.useEffect(() => {
     if (!isOpen) return;
@@ -99,7 +122,16 @@ export function ImageGalleryModal({images, isOpen, onClose, initialIndex = 0, pr
             )}
             <div className="flex-1 flex flex-col items-center justify-center relative p-2">
               <div className="relative w-full h-full max-w-full max-h-full flex items-center justify-center">
-                <Image src={currentImage.src} alt={currentImage.alt} fill className="object-contain" priority quality={100} sizes="(max-width: 1500px) 100vw, 1500px" />
+                <Image
+                  src={currentImage.src}
+                  alt={currentImage.alt}
+                  fill
+                  className="object-contain"
+                  priority
+                  quality={100}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1300px) 90vw, 1300px"
+                  placeholder={typeof currentImage.src !== "string" ? "blur" : undefined}
+                />
               </div>
               
               {/* Dots indicator - centered below image */}

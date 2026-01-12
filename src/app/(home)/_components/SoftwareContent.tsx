@@ -6,6 +6,12 @@ import * as React from "react";
 import { Code } from "lucide-react";
 import { ProjectCard } from "~/features/shared/components/ProjectCard";
 import { ScrollArea } from "~/features/shared/components/ui/scroll-area";
+import portfolioWebsiteImage from "~/assets/images/projects/portfolio_website.webp";
+import whiskerIslesFarmingImage from "~/assets/images/projects/whisker_isles_farming.webp";
+import whiskerIslesTradingImage from "~/assets/images/projects/whisker_isles_trading_and_quests.webp";
+import whiskerIslesFishingImage from "~/assets/images/projects/whisker_isles_fishing.webp";
+import eolImage1 from "~/assets/images/projects/EoL_1.webp";
+import eolImage2 from "~/assets/images/projects/EoL_2.webp";
 
 export function SoftwareContent() {
   const projects = [
@@ -15,7 +21,7 @@ export function SoftwareContent() {
         "You're looking at it! - a three.js website powered by React Three Fiber and T3 stack, featuring a retro low-poly 3D environment I modeled myself. This interactive portfolio showcases all my work across software development, game design, and 3D art.",
       images: [
         {
-          src: "/portfolio_website.webp",
+          src: portfolioWebsiteImage,
           alt: "Personal Portfolio Website",
         },
       ],
@@ -28,15 +34,15 @@ export function SoftwareContent() {
         "A task-oriented life simulator where you play as a cat on a tropical island, completing tasks by farming, fishing, and foraging to gather resources for your family cafe's grand opening. Features a dynamic economy with markets and quest systems, progressively challenging daily objectives, and NPC animals you can befriend through dialogue.",
       images: [
         {
-          src: "/whisker_isles_farming.webp",
+          src: whiskerIslesFarmingImage,
           alt: "Whisker Isles",
         },
         {
-          src: "/whisker_isles_trading_and_quests.webp",
+          src: whiskerIslesTradingImage,
           alt: "Whisker Isles",
         },
         {
-          src: "/whisker_isles_fishing.webp",
+          src: whiskerIslesFishingImage,
           alt: "Whisker Isles",
         },
       ],
@@ -49,11 +55,11 @@ export function SoftwareContent() {
         "A comedy-driven topdown game built in Unity using C# featuring turn-based PVE combat, smart inventory and dynamic item / enemy logic. Features fully handmade 2D graphics, VFX and UI with bone animations modelled in Unity.",
       images: [
         {
-          src: "/EoL_1.webp",
+          src: eolImage1,
           alt: "East of Loving Strategy Game",
         },
         {
-          src: "/EoL_2.webp",
+          src: eolImage2,
           alt: "East of Loving Strategy Game",
         },
       ],

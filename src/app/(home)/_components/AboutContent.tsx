@@ -8,6 +8,7 @@ import { Badge } from "~/features/shared/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/features/shared/components/ui/accordion";
 import { Sticker } from "lucide-react";
 import { SocialLinks } from "~/features/shared/components/SocialLinks";
+import headshotImage from "~/assets/images/profile/headshot.webp";
 
 export function AboutContent() {
   return (
@@ -15,12 +16,14 @@ export function AboutContent() {
       {/* Left: Image only */}
       <div className="flex-shrink-0 flex justify-center md:justify-start mt-0 md:mt-5">
         <Image
-          src="/headshot.webp"
+          src={headshotImage}
           alt="Profile"
           width={220}
           height={220}
           className="rounded-full object-cover"
           style={{ width: "220px", height: "220px" }}
+          placeholder="blur"
+          priority
         />
       </div>
 
@@ -97,7 +100,6 @@ export function AboutContent() {
                   <Badge>NextJS</Badge>
                   <Badge>React</Badge>
                   <Badge>Tailwind</Badge>
-                  <Badge>Bootstrap</Badge>
                   <Badge>Prisma</Badge>
                   <Badge>Framer Motion</Badge>
                 </div>
@@ -107,6 +109,7 @@ export function AboutContent() {
                       Tech:
                     </span>
                     <span className="w-4 h-4 invisible" aria-hidden="true" />
+                    <Badge>Bootstrap</Badge>
                     <Badge>Unity</Badge>
                     <Badge>Godot</Badge>
                     <Badge>Unreal Engine</Badge>

@@ -69,6 +69,8 @@ export function ProjectCard({title, description, images, technologies, links = [
                         quality={100}
                         className="object-cover transition-all group-hover:blur-xs"
                         style={{ width: "300px", height: "169px" }}
+                        loading={index === 0 ? "eager" : "lazy"}
+                        placeholder={typeof image.src !== "string" ? "blur" : undefined}
                       />
                       {/* Hover overlay with magnify icon */}
                       <div className="absolute inset-0 bg-black/20 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
