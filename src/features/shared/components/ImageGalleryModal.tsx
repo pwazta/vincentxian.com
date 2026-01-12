@@ -117,7 +117,7 @@ export function ImageGalleryModal({images, isOpen, onClose, initialIndex = 0, pr
           </div>
 
           {/* Main image container - 16:9 aspect ratio, fills to max viewport space */}
-          <div className="flex items-stretch relative bg-background" style={{ aspectRatio: '16/9', width: 'min(95vw, calc((95vh - 4.5rem) * 16 / 9))', height: 'min(95vh - 4.5rem, calc(95vw * 9 / 16))' }}>
+          <div className="flex items-stretch relative bg-background w-full overflow-hidden" style={{ aspectRatio: '16/9', maxWidth: 'min(95vw, calc((95vh - 4.5rem) * 16 / 9))', height: 'min(95vh - 4.5rem, calc(95vw * 9 / 16))' }}>
             {/* Left column: Clickable previous area */}
             {images.length > 1 && !isMobile && (
               <button onClick={goToPrevious} className="flex items-center justify-center w-12 flex-shrink-0 border-r border-accent/20 bg-background hover:bg-muted transition-colors cursor-pointer" aria-label="Previous image">
