@@ -22,7 +22,6 @@ export function useIsMobile() {
       mql.addEventListener("change", onChange)
     } else {
       // Fallback for older browsers
-      // @ts-expect-error - addListener is deprecated but needed for older browsers
       mql.addListener(onChange)
     }
 
@@ -30,7 +29,7 @@ export function useIsMobile() {
       if (mql.removeEventListener) {
         mql.removeEventListener("change", onChange)
       } else {
-        // @ts-expect-error - removeListener is deprecated but needed for older browsers
+        // Fallback for older browsers
         mql.removeListener(onChange)
       }
     }
