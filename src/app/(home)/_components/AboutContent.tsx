@@ -1,16 +1,22 @@
 /**
- * About section content component
+ * About section content component with tabbed layout
  * Used in: Portfolio modal for About section
+ * Tabs: About | Experience | Activities
+ * Desktop: Vertical tabs on right with separator
+ * Mobile: Horizontal tabs below header
  */
 import * as React from "react";
 import Image from "next/image";
 import { Badge } from "~/features/shared/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/features/shared/components/ui/accordion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/features/shared/components/ui/tabs";
 import { Sticker } from "lucide-react";
 import { SocialLinks } from "~/features/shared/components/SocialLinks";
 import headshotImage from "~/assets/images/profile/headshot.webp";
+import { ExperienceContent } from "./ExperienceContent";
+import { ActivitiesContent } from "./ActivitiesContent";
 
-export function AboutContent() {
+function AboutMeContent() {
   return (
     <div className="flex flex-col md:flex-row gap-6">
       {/* Left: Image only */}
@@ -60,8 +66,9 @@ export function AboutContent() {
             >
               software engineer, game-dev and 3D artist
             </span>{" "}
-            based in Sydney. I specialize in full-stack development, with experience in game design, 
-            and study Computer Science & Fine Arts (Animation / 3DVis) at UNSW. 
+            based in Sydney. I specialize in full-stack development, with
+            experience in game design, and study Computer Science & Fine Arts
+            (Animation / 3DVis) at UNSW.
           </p>
           <p className="text-foreground/90">
             Whether it&apos;s designing AI systems in Unity, crunching code
@@ -130,3 +137,77 @@ export function AboutContent() {
   );
 }
 
+export function AboutContent() {
+  return (
+    <Tabs defaultValue="about" className="w-full">
+      {/* Mobile: Horizontal tabs */}
+      <TabsList className="md:hidden w-full flex justify-center gap-1 bg-transparent mb-4">
+        <TabsTrigger
+          value="about"
+          className="px-4 py-2 text-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-md"
+        >
+          About
+        </TabsTrigger>
+        <TabsTrigger
+          value="experience"
+          className="px-4 py-2 text-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-md"
+        >
+          Experience
+        </TabsTrigger>
+        <TabsTrigger
+          value="activities"
+          className="px-4 py-2 text-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-md"
+        >
+          Activities
+        </TabsTrigger>
+      </TabsList>
+
+      {/* Desktop: Content + Vertical tabs on right */}
+      <div className="flex">
+        {/* Tab content area */}
+        <div className="flex-1 min-w-0">
+          <TabsContent value="about" className="mt-0">
+            <AboutMeContent />
+          </TabsContent>
+          <TabsContent value="experience" className="mt-0">
+            <ExperienceContent />
+          </TabsContent>
+          <TabsContent value="activities" className="mt-0">
+            <ActivitiesContent />
+          </TabsContent>
+        </div>
+
+        {/* Desktop: Vertical separator + tabs on right */}
+        <div className="hidden md:flex items-stretch ml-4">
+          {/* Vertical separator */}
+          <div className="w-px bg-accent/30 mr-3" />
+
+          {/* Vertical tabs */}
+          <TabsList className="flex flex-col h-full justify-start gap-2 bg-transparent p-0">
+            <TabsTrigger
+              value="about"
+              className="px-2 py-3 text-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-l-2 data-[state=active]:border-primary rounded-none rounded-r-md"
+              style={{ writingMode: "vertical-rl" }}
+            >
+              About
+            </TabsTrigger>
+            <TabsTrigger
+              value="experience"
+              className="px-2 py-3 text-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-l-2 data-[state=active]:border-primary rounded-none rounded-r-md"
+              style={{ writingMode: "vertical-rl" }}
+            >
+              Experience
+            </TabsTrigger>
+            <TabsTrigger
+              value="activities"
+              className="px-2 py-3 text-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-l-2 data-[state=active]:border-primary rounded-none rounded-r-md"
+              style={{ writingMode: "vertical-rl" }}
+            >
+              Activities
+            </TabsTrigger>
+          </TabsList>
+        </div>
+      </div>
+    </Tabs>
+  );
+}

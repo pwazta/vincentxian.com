@@ -19,7 +19,7 @@ import type { ClickActions } from "../utils/sceneInteractions";
 /** Configures renderer settings for grass shadows and rendering */
 function RendererConfig() {
 	const { gl } = useThree();
-	const [contextLost, setContextLost] = React.useState(false);
+	const [_contextLost, setContextLost] = React.useState(false);
 	
 	React.useEffect(() => {
 		gl.shadowMap.enabled = true;
@@ -66,9 +66,7 @@ function CameraMove({ start, to, speed = 0.8, onComplete }: {
 	useFrame((_, delta) => {
 		if (start && !hasAnimated.current) {
 			// Capture current camera position on first frame of animation
-			if (!startPosition.current) {
-				startPosition.current = camera.position.clone();
-			}
+			startPosition.current ??= camera.position.clone();
 
 			animationProgress.current += delta * speed;
 			const t = Math.min(animationProgress.current, 1);
