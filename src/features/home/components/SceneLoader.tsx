@@ -9,9 +9,9 @@ import { useProgress } from "@react-three/drei";
 import { Button } from "~/features/shared/components/ui/button";
 import { Lightbulb } from "lucide-react";
 
-type SceneLoaderProps = { onLoaded?: () => void }
+type SceneLoaderProps = { onLoaded?: () => void; onEnterClick?: () => void }
 
-export function SceneLoader({ onLoaded }: SceneLoaderProps) {
+export function SceneLoader({ onLoaded, onEnterClick }: SceneLoaderProps) {
   const { progress, active } = useProgress();
   const [showEnterButton, setShowEnterButton] = React.useState(false);
   const [isHiding, setIsHiding] = React.useState(false);
@@ -48,6 +48,7 @@ export function SceneLoader({ onLoaded }: SceneLoaderProps) {
   const handleEnter = () => {
     if (isHiding) return;
     setIsHiding(true);
+    onEnterClick?.();
 
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     hideTimerRef.current = setTimeout(() => {
@@ -104,7 +105,7 @@ export function SceneLoader({ onLoaded }: SceneLoaderProps) {
       {/* Tip at bottom center */}
       <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex items-center gap-2 text-sm text-muted-foreground animate-in fade-in duration-500 delay-300" style={{ fontFamily: "var(--font-mono)", animation: "float 3s ease-in-out infinite" }}>
         <Lightbulb className="h-4 w-4 text-primary" />
-        <span>Click and drag to explore!</span>
+        <span>Tip: Click and drag to explore!</span>
       </div>
     </div>
   );

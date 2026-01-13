@@ -58,8 +58,41 @@ function RendererConfig() {
 	return null;
 }
 
+/** Animates camera zoom-in when entering the scene */
+function CameraZoomIn({ startZoom, onComplete }: { startZoom: boolean; onComplete: () => void }) {
+	const { camera } = useThree();
+	const hasAnimated = React.useRef(false);
+	const animationProgress = React.useRef(0);
+	const startPosition = React.useRef<THREE.Vector3 | null>(null);
+	const targetPosition = new THREE.Vector3(0.5, 7, 7);
+
+	useFrame((_, delta) => {
+		// Start animation when Enter is clicked
+		if (startZoom && !hasAnimated.current) {
+			// Capture current camera position on first frame of animation
+			if (!startPosition.current) {
+				startPosition.current = camera.position.clone();
+			}
+
+			animationProgress.current += delta * 0.8; // Adjust speed (0.8 = ~1.25 seconds)
+			const t = Math.min(animationProgress.current, 1);
+			// Smooth easing (ease-out cubic)
+			const eased = 1 - Math.pow(1 - t, 3);
+
+			camera.position.lerpVectors(startPosition.current, targetPosition, eased);
+
+			if (t >= 1) {
+				hasAnimated.current = true;
+				onComplete();
+			}
+		}
+	});
+
+	return null;
+}
+
 /** OrbitControls with pan limits - clamps target instead of camera to prevent rotation issues */
-function LimitedOrbitControls() {
+function LimitedOrbitControls({ zoomAnimationComplete }: { zoomAnimationComplete: boolean }) {
 	const { controls, camera } = useThree();
 	const ISLAND_FLOOR_Y = 1.5; // Hard limit - no camera below this
 	const targetInitialized = React.useRef(false);
@@ -67,21 +100,23 @@ function LimitedOrbitControls() {
 	useFrame(() => {
 		if (!controls || !('target' in controls)) return;
 		const target = (controls as { target: THREE.Vector3 }).target;
-		
-		// Set initial target once (upwards and to the right)
-		if (!targetInitialized.current) { // If camera initialised, set where it's looking at once
-			target.set(0, 3, 0);
-			targetInitialized.current = true;
-		}
-		
-		// Clamp target to limits
-		target.x = Math.max(-5, Math.min(8, target.x));
-		target.y = Math.max(ISLAND_FLOOR_Y, Math.min(5, target.y));
-		target.z = Math.max(-5, Math.min(5, target.z));
-		camera.position.y = Math.max(ISLAND_FLOOR_Y, camera.position.y);
+
+		// Only apply target and limits after zoom animation is complete
+			if (!targetInitialized.current) {
+				target.set(-0, 3, 0);
+				targetInitialized.current = true;
+			}
+
+			target.x = Math.max(-5, Math.min(8, target.x));
+			target.y = Math.max(ISLAND_FLOOR_Y, Math.min(5, target.y));
+			target.z = Math.max(-5, Math.min(5, target.z));
+			camera.position.y = Math.max(ISLAND_FLOOR_Y, camera.position.y);
 	});
 
-	return <OrbitControls makeDefault enablePan={true} enableZoom={true} enableRotate={true} minDistance={2} maxDistance={12} />;
+	// Disable distance limits during intro animation
+	const maxDist = zoomAnimationComplete ? 12 : 100;
+
+	return <OrbitControls makeDefault enablePan={true} enableZoom={true} enableRotate={true} minDistance={2} maxDistance={maxDist} />;
 }
 
 type PortfolioSceneProps = {
@@ -243,14 +278,15 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
 
 export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen }: PortfolioSceneProps) {
   const [showLoader, setShowLoader] = React.useState(true);
+  const [isZooming, setIsZooming] = React.useState(false);
 
   return (
     <div className="relative h-full w-full" style={{ pointerEvents: isDialogOpen ? "none" : "auto" }}>
-      {showLoader && <SceneLoader onLoaded={() => setShowLoader(false)} />}
+      {showLoader && <SceneLoader onLoaded={() => setShowLoader(false)} onEnterClick={() => setIsZooming(true)} />}
       <Canvas
         shadows
         dpr={[1, 1.5]}
-        camera={{ position: [-1, 8, 8], fov: 70 }}
+        camera={{ position: [-12, 20, 20], fov: 70 }}
         gl={{
           antialias: true,
           powerPreference: "default",
@@ -259,8 +295,9 @@ export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onC
         }}
       >
         <RendererConfig />
+        <CameraZoomIn startZoom={isZooming} onComplete={() => setIsZooming(false)} />
         <SceneContent onSoftwareClick={onSoftwareClick} onArtsClick={onArtsClick} onAboutClick={onAboutClick} onContactClick={onContactClick} isDialogOpen={isDialogOpen} isLoaderActive={showLoader} />
-        <LimitedOrbitControls />
+        <LimitedOrbitControls zoomAnimationComplete={!isZooming && !showLoader} />
       </Canvas>
     </div>
   );
