@@ -50,31 +50,27 @@ function RendererConfig() {
 			canvas.removeEventListener("webglcontextrestored", handleContextRestored);
 		};
 	}, [gl]);
-	
-	if (contextLost) {
-		return null;
-	}
-	
 	return null;
 }
 
-/** Animates camera zoom-in when entering the scene */
-function CameraZoomIn({ startZoom, onComplete }: { startZoom: boolean; onComplete: () => void }) {
+/** Animates camera movement to a target position */
+function CameraMove({ start, to, speed = 0.8, onComplete }: { 
+  start: boolean; to: [number, number, number]; speed?: number; onComplete?: () => void 
+}) {
 	const { camera } = useThree();
 	const hasAnimated = React.useRef(false);
 	const animationProgress = React.useRef(0);
 	const startPosition = React.useRef<THREE.Vector3 | null>(null);
-	const targetPosition = new THREE.Vector3(0.5, 7, 7);
+	const targetPosition = React.useMemo(() => new THREE.Vector3(...to), [to]);
 
 	useFrame((_, delta) => {
-		// Start animation when Enter is clicked
-		if (startZoom && !hasAnimated.current) {
+		if (start && !hasAnimated.current) {
 			// Capture current camera position on first frame of animation
 			if (!startPosition.current) {
 				startPosition.current = camera.position.clone();
 			}
 
-			animationProgress.current += delta * 0.8; // Adjust speed (0.8 = ~1.25 seconds)
+			animationProgress.current += delta * speed;
 			const t = Math.min(animationProgress.current, 1);
 			// Smooth easing (ease-out cubic)
 			const eased = 1 - Math.pow(1 - t, 3);
@@ -83,7 +79,7 @@ function CameraZoomIn({ startZoom, onComplete }: { startZoom: boolean; onComplet
 
 			if (t >= 1) {
 				hasAnimated.current = true;
-				onComplete();
+				onComplete?.();
 			}
 		}
 	});
@@ -92,7 +88,7 @@ function CameraZoomIn({ startZoom, onComplete }: { startZoom: boolean; onComplet
 }
 
 /** OrbitControls with pan limits - clamps target instead of camera to prevent rotation issues */
-function LimitedOrbitControls({ zoomAnimationComplete }: { zoomAnimationComplete: boolean }) {
+function LimitedOrbitControls({ limitMaxDistance }: { limitMaxDistance: boolean }) {
 	const { controls, camera } = useThree();
 	const ISLAND_FLOOR_Y = 1.5; // Hard limit - no camera below this
 	const targetInitialized = React.useRef(false);
@@ -103,7 +99,7 @@ function LimitedOrbitControls({ zoomAnimationComplete }: { zoomAnimationComplete
 
 		// Only apply target and limits after zoom animation is complete
 			if (!targetInitialized.current) {
-				target.set(-0, 3, 0);
+				target.set(0.5, 3, 0);
 				targetInitialized.current = true;
 			}
 
@@ -114,7 +110,7 @@ function LimitedOrbitControls({ zoomAnimationComplete }: { zoomAnimationComplete
 	});
 
 	// Disable distance limits during intro animation
-	const maxDist = zoomAnimationComplete ? 12 : 100;
+	const maxDist = limitMaxDistance ? 12 : 100;
 
 	return <OrbitControls makeDefault enablePan={true} enableZoom={true} enableRotate={true} minDistance={2} maxDistance={maxDist} />;
 }
@@ -164,7 +160,6 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
     scene.fog = new THREE.FogExp2("#eeeeee", 0.02);
     scene.background = new THREE.Color("#eeeeee");
   }, [scene]);
-
   const computerModel = useGLTF("/models/computer.glb");
   const cabinetModel = useGLTF("/models/cabinet.glb");
   const phoneModel = useGLTF("/models/phone.glb");
@@ -212,7 +207,7 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
     }), [onSoftwareClick, onArtsClick, onAboutClick, onContactClick]
   );
 
-  useObjectInteractions({ intersects, clickActions, enabled: interactionsEnabled }); 
+  useObjectInteractions({ intersects, clickActions, enabled: interactionsEnabled });
 
   // Don't render heavy content until resources are ready
   if (!resourcesReady) {
@@ -286,7 +281,7 @@ export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onC
       <Canvas
         shadows
         dpr={[1, 1.5]}
-        camera={{ position: [-12, 20, 20], fov: 70 }}
+        camera={{ position: [-12, 18, 18], fov: 70 }} // CameraMove function will move it to 0.5, 7, 7
         gl={{
           antialias: true,
           powerPreference: "default",
@@ -295,9 +290,9 @@ export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onC
         }}
       >
         <RendererConfig />
-        <CameraZoomIn startZoom={isZooming} onComplete={() => setIsZooming(false)} />
+        <CameraMove start={isZooming} to={[0.5, 7, 7]} onComplete={() => setIsZooming(false)} />
         <SceneContent onSoftwareClick={onSoftwareClick} onArtsClick={onArtsClick} onAboutClick={onAboutClick} onContactClick={onContactClick} isDialogOpen={isDialogOpen} isLoaderActive={showLoader} />
-        <LimitedOrbitControls zoomAnimationComplete={!isZooming && !showLoader} />
+        <LimitedOrbitControls limitMaxDistance={!isZooming && !showLoader} />
       </Canvas>
     </div>
   );
