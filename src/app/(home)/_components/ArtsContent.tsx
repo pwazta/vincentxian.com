@@ -24,17 +24,17 @@ export function ArtsContent() {
         {
           src: steampunkCityPlazaImage,
           caption: "Plaza with animated globe showcasing the central memorial area",
-          alt: "Steampunk Cityscape Environment",
+          alt: "Steampunk Cityscape Plaza",
         },
         {
           src: steampunkCityStreetsImage,
           caption: "Winding streets through the multi-story steampunk city",
-          alt: "Steampunk Cityscape Environment",
+          alt: "Steampunk Cityscape Streets",
         },
         {
           src: steampunkCityFactoryImage,
           caption: "Factory district with mechanical infrastructure and steam-powered technology",
-          alt: "Steampunk Cityscape Environment",
+          alt: "Steampunk Cityscape Factory",
         },
       ],
       technologies: ["Maya", "Substance Painter", "Unreal Engine"],
@@ -47,19 +47,19 @@ export function ArtsContent() {
       images: [
         {
           src: library1Image,
-          alt: "Antique Library Environment",
+          alt: "Antique Library Environment Render 1",
         },
         {
           src: library2Image,
-          alt: "Antique Library Environment",
+          alt: "Antique Library Environment Render 2",
         },
         {
           src: libraryWireframe1Image,
-          alt: "Antique Library Environment",
+          alt: "Antique Library Environment Wireframe 1",
         },
         {
           src: libraryWireframe2Image,
-          alt: "Antique Library Environment",
+          alt: "Antique Library Environment Wireframe 2",
         },
       ],
       technologies: ["Maya", "Photoshop"],

@@ -12,7 +12,7 @@ export function ActivitiesContent() {
   const activities = [
     {
       image: logoCgsoc,
-      imageAlt: "Computer Graphics Society",
+      imageAlt: "Computer Graphics Society Logo",
       title: "Computer Graphics Society (CGSoc)",
       role: "Game Development Committee",
       dates: "Mar 2025 - Dec 2025",
@@ -21,7 +21,7 @@ export function ActivitiesContent() {
     },
     {
       image: logoCadets,
-      imageAlt: "Australian Army Cadets",
+      imageAlt: "Australian Army Cadets Logo",
       title: "Australian Army Cadets (AAC)",
       role: "Cadet Under Officer (CUO)",
       dates: "5 years",

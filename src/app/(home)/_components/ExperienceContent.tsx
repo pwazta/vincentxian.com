@@ -12,7 +12,7 @@ export function ExperienceContent() {
   const experiences = [
     {
       image: logoLyra,
-      imageAlt: "Lyra",
+      imageAlt: "Lyra Logo",
       title: "Lyra",
       role: "Forward Deployed Engineer",
       dates: "Sep 2025 - Present",
@@ -21,7 +21,7 @@ export function ExperienceContent() {
     },
     {
       image: logoMykaion,
-      imageAlt: "MyKaion",
+      imageAlt: "MyKaion Logo",
       title: "MyKaion",
       role: "Software Engineer (Contract)",
       dates: "Sep 2025 - Dec 2025",

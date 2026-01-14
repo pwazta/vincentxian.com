@@ -35,15 +35,15 @@ export function SoftwareContent() {
       images: [
         {
           src: whiskerIslesFarmingImage,
-          alt: "Whisker Isles",
+          alt: "Whisker Isles Farming",
         },
         {
           src: whiskerIslesTradingImage,
-          alt: "Whisker Isles",
+          alt: "Whisker Isles Trading and Quests",
         },
         {
           src: whiskerIslesFishingImage,
-          alt: "Whisker Isles",
+          alt: "Whisker Isles Fishing",
         },
       ],
       technologies: ["Unreal Engine", "Blueprints"],
@@ -56,11 +56,11 @@ export function SoftwareContent() {
       images: [
         {
           src: eolImage1,
-          alt: "East of Loving Strategy Game",
+          alt: "East of Loving Strategy Game Image 1",
         },
         {
           src: eolImage2,
-          alt: "East of Loving Strategy Game",
+          alt: "East of Loving Strategy Game Image 2",
         },
       ],
       technologies: ["C#", "Unity", "Photoshop"],
