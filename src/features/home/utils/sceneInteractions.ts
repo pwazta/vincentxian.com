@@ -41,6 +41,7 @@ export interface HitboxMetadata {
 export interface ClickActions {
   onPhoneClick: () => void;
   onComputerClick: () => void;
+  onScreenClick: () => void;
   onDiskLinkedInClick: () => void;
   onDiskGithubClick: () => void;
   onDrawerAboutClick: () => void;
@@ -70,6 +71,7 @@ export function getClickActionName(name: string): keyof ClickActions | null {
   if (name.includes("phone")) return "onPhoneClick";
   if (name.includes("disk_linkedin")) return "onDiskLinkedInClick";
   if (name.includes("disk_github")) return "onDiskGithubClick";
+  if (name.includes("computer_screen")) return "onScreenClick";
   if (name.includes("computer")) return "onComputerClick";
   if (name.includes("cabinet_drawer_about")) return "onDrawerAboutClick";
   if (name.includes("cabinet_drawer_software")) return "onDrawerSoftwareClick";

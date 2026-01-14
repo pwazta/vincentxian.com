@@ -6,7 +6,7 @@
 
 import * as React from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
-import { OrbitControls, useGLTF, Grid } from "@react-three/drei";
+import { OrbitControls, useGLTF, Grid, useVideoTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { GrassField } from "./GrassField";
 import { SceneLoader } from "./SceneLoader";
@@ -15,6 +15,81 @@ import { useSceneRaycaster } from "../hooks/useSceneRaycaster";
 import { useObjectInteractions } from "../hooks/useObjectInteractions";
 import { storeOriginalColors } from "../utils/materialUtils";
 import type { ClickActions } from "../utils/sceneInteractions";
+
+/** Video sources for computer screen - add more videos here */
+const SCREEN_VIDEOS = [
+  "/Sad Get Well GIF.mp4",
+  "/pixel art arcade.mp4",
+] as const;
+
+/** Loads a video texture and manages playback based on active state */
+function VideoTextureLoader({ src, isActive, onTextureReady }: { src: string; isActive: boolean; onTextureReady: (texture: THREE.VideoTexture) => void }) {
+  const texture = useVideoTexture(src, { muted: true, loop: true, start: isActive });
+
+  React.useEffect(() => {
+    const video = texture.image as HTMLVideoElement;
+    if (isActive) video.play().catch(() => {});
+    else video.pause();
+  }, [isActive, texture]);
+
+  React.useEffect(() => {
+    if (isActive) onTextureReady(texture);
+  }, [isActive, texture, onTextureReady]);
+
+  return null;
+}
+
+/** Applies video texture to computer screen mesh, cycling through videos on click */
+function VideoScreen({ computerScene, currentVideoIndex }: { computerScene: THREE.Group; currentVideoIndex: number }) {
+  const [activeTexture, setActiveTexture] = React.useState<THREE.VideoTexture | null>(null);
+  const materialRef = React.useRef<THREE.MeshStandardMaterial | null>(null);
+
+  // Find screen mesh and setup material
+  React.useEffect(() => {
+    const screenMesh = computerScene.getObjectByName("computer_screen") as THREE.Mesh | undefined;
+    if (!screenMesh) return;
+
+    const geometry = screenMesh.geometry as THREE.BufferGeometry;
+    const uvAttr = geometry.getAttribute("uv");
+
+    // Generate planar UVs if mesh has none
+    if (!uvAttr || uvAttr.count === 0) {
+      geometry.computeBoundingBox();
+      const box = geometry.boundingBox!;
+      const size = new THREE.Vector3();
+      box.getSize(size);
+
+      const posAttr = geometry.getAttribute("position");
+      const uvs = new Float32Array(posAttr.count * 2);
+      for (let i = 0; i < posAttr.count; i++) {
+        uvs[i * 2] = (posAttr.getX(i) - box.min.x) / size.x;
+        uvs[i * 2 + 1] = (posAttr.getY(i) - box.min.y) / size.y;
+      }
+      geometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
+    }
+
+    materialRef.current = new THREE.MeshStandardMaterial({ toneMapped: false, emissiveIntensity: 0.8 });
+    screenMesh.material = materialRef.current;
+  }, [computerScene]);
+
+  // Update texture when active video changes
+  React.useEffect(() => {
+    if (materialRef.current && activeTexture) {
+      materialRef.current.map = activeTexture;
+      materialRef.current.needsUpdate = true;
+    }
+  }, [activeTexture]);
+
+  const handleTextureReady = React.useCallback((texture: THREE.VideoTexture) => setActiveTexture(texture), []);
+
+  return (
+    <>
+      {SCREEN_VIDEOS.map((src, index) => (
+        <VideoTextureLoader key={src} src={src} isActive={index === currentVideoIndex} onTextureReady={handleTextureReady} />
+      ))}
+    </>
+  );
+}
 
 /** Configures renderer settings for grass shadows and rendering */
 function RendererConfig() {
@@ -130,6 +205,11 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
   const [interactiveMeshes, setInteractiveMeshes] = React.useState<THREE.Mesh[]>([]);
   const [primaryColor, setPrimaryColor] = React.useState<string>("#7c9082");
   const [resourcesReady, setResourcesReady] = React.useState(false);
+  const [currentVideoIndex, setCurrentVideoIndex] = React.useState(0);
+
+  const handleScreenClick = React.useCallback(() => {
+    setCurrentVideoIndex((prev) => (prev + 1) % SCREEN_VIDEOS.length);
+  }, []);
 
   /** Get primary color from CSS variables and watch for theme changes */
   React.useEffect(() => {
@@ -197,12 +277,13 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
   const clickActions: ClickActions = React.useMemo(() => ({
       onPhoneClick: onContactClick,
       onComputerClick: onSoftwareClick,
+      onScreenClick: handleScreenClick,
       onDiskLinkedInClick: () => { /* External link handled in useObjectInteractions */ },
       onDiskGithubClick: () => { /* External link handled in useObjectInteractions */ },
       onDrawerAboutClick: onAboutClick,
       onDrawerSoftwareClick: onSoftwareClick,
       onDrawerArtsClick: onArtsClick,
-    }), [onSoftwareClick, onArtsClick, onAboutClick, onContactClick]
+    }), [onSoftwareClick, onArtsClick, onAboutClick, onContactClick, handleScreenClick]
   );
 
   useObjectInteractions({ intersects, clickActions, enabled: interactionsEnabled });
@@ -262,6 +343,7 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
       {/* GLB Models */}
       <group position={[0, 1, 0]}>
         <primitive object={computerModel.scene} />
+        <VideoScreen computerScene={computerModel.scene} currentVideoIndex={currentVideoIndex} />
         <primitive object={phoneModel.scene} />
         <primitive object={cabinetModel.scene} />
       </group>
