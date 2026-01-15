@@ -317,10 +317,11 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
       {isDarkMode ? (
         // Dark mode: Spotlight for dramatic moonlight effect
         <spotLight
-          position={[0, 9, 1]}
+          position={[-1, 8, 1]}
           angle={Math.PI / 1.5}
           penumbra={0.8}
-          intensity={40}
+          color={"#FFF"}
+          intensity={35}
           distance={25}
           castShadow
           shadow-mapSize-width={2048}
