@@ -6,40 +6,6 @@
 import * as THREE from "three";
 import gsap from "gsap";
 
-/** Gets the current accent color - white for both themes */
-function getAccentColor(): string {
-  return "#ffffff";
-}
-
-/** Clones materials for objects that share materials to ensure each object has its own material instance */
-function cloneMaterialsIfNeeded(object: THREE.Mesh): void {
-  if (!object.material) return;
-
-  const isPCube = object.name.includes("pCube");
-  if (!isPCube) return;
-
-  const materials = Array.isArray(object.material) ? object.material : [object.material];
-  const clonedMaterials: THREE.Material[] = [];
-
-  for (const material of materials) {
-    if (material instanceof THREE.MeshStandardMaterial) {
-      // Clone the material so each key has its own instance
-      const cloned = material.clone();
-      clonedMaterials.push(cloned);
-    } else {
-      clonedMaterials.push(material);
-    }
-  }
-
-  if (clonedMaterials.length === 0) return;
-  
-  if (clonedMaterials.length === 1) {
-    object.material = clonedMaterials[0]!;
-  } else {
-    object.material = clonedMaterials;
-  }
-}
-
 /** Stores original material colors in object userData */
 export function storeOriginalColors(object: THREE.Object3D): void {
   if (!(object instanceof THREE.Mesh) || !object.material) return;
@@ -71,7 +37,7 @@ export function applyAccentColor(object: THREE.Object3D, animated = true): void 
     ? (object.material as THREE.Material[]) 
     : [object.material as THREE.Material];
 
-  const accentColor = getAccentColor();
+  const accentColor = "#ffffff";
   const accentColorObj = new THREE.Color(accentColor);
 
   for (const material of materials) {
@@ -127,5 +93,34 @@ export function restoreOriginalColors(object: THREE.Object3D, animated = true): 
         material.color.setHex(parseInt(originalColor, 16));
       }
     }
+  }
+}
+
+/** Clones materials for objects that share materials to ensure each object has its own material instance */
+function cloneMaterialsIfNeeded(object: THREE.Mesh): void {
+  if (!object.material) return;
+
+  const isPCube = object.name.includes("pCube");
+  if (!isPCube) return;
+
+  const materials = Array.isArray(object.material) ? object.material : [object.material];
+  const clonedMaterials: THREE.Material[] = [];
+
+  for (const material of materials) {
+    if (material instanceof THREE.MeshStandardMaterial) {
+      // Clone the material so each key has its own instance
+      const cloned = material.clone();
+      clonedMaterials.push(cloned);
+    } else {
+      clonedMaterials.push(material);
+    }
+  }
+
+  if (clonedMaterials.length === 0) return;
+  
+  if (clonedMaterials.length === 1) {
+    object.material = clonedMaterials[0]!;
+  } else {
+    object.material = clonedMaterials;
   }
 }

@@ -13,6 +13,7 @@ import { SceneLoader } from "./SceneLoader";
 import { setupInteractiveObjects } from "../utils/sceneObjectSetup";
 import { useSceneRaycaster } from "../hooks/useSceneRaycaster";
 import { useObjectInteractions } from "../hooks/useObjectInteractions";
+import { useThemeSync } from "../hooks/useThemeSync";
 import { storeOriginalColors } from "../utils/materialUtils";
 import type { ClickActions } from "../utils/sceneInteractions";
 
@@ -93,32 +94,29 @@ function VideoScreen({ computerScene, currentVideoIndex }: { computerScene: THRE
 /** Configures renderer settings for grass shadows and rendering */
 function RendererConfig() {
 	const { gl } = useThree();
-	const [, setContextLost] = React.useState(false);
-	
+
 	React.useEffect(() => {
 		gl.shadowMap.enabled = true;
 		gl.shadowMap.type = THREE.PCFSoftShadowMap;
 		gl.outputColorSpace = THREE.SRGBColorSpace;
 		gl.toneMapping = THREE.ACESFilmicToneMapping;
-		
+
 		const canvas = gl.domElement;
 		const handleContextLost = (event: Event) => {
 			event.preventDefault();
-			setContextLost(true);
 		};
-		
+
 		const handleContextRestored = () => {
-			setContextLost(false);
 			// Reinitialize renderer settings after context restoration
 			gl.shadowMap.enabled = true;
 			gl.shadowMap.type = THREE.PCFSoftShadowMap;
 			gl.outputColorSpace = THREE.SRGBColorSpace;
 			gl.toneMapping = THREE.ACESFilmicToneMapping;
 		};
-		
+
 		canvas.addEventListener("webglcontextlost", handleContextLost);
 		canvas.addEventListener("webglcontextrestored", handleContextRestored);
-		
+
 		return () => {
 			canvas.removeEventListener("webglcontextlost", handleContextLost);
 			canvas.removeEventListener("webglcontextrestored", handleContextRestored);
@@ -170,15 +168,15 @@ function LimitedOrbitControls({ limitMaxDistance }: { limitMaxDistance: boolean 
 		const target = (controls as { target: THREE.Vector3 }).target;
 
 		// Only apply target and limits after zoom animation is complete
-			if (!targetInitialized.current) {
-				target.set(0.5, 3, 0);
-				targetInitialized.current = true;
-			}
+		if (!targetInitialized.current) {
+			target.set(0.5, 3, 0);
+			targetInitialized.current = true;
+		}
 
-			target.x = Math.max(-5, Math.min(8, target.x));
-			target.y = Math.max(ISLAND_FLOOR_Y, Math.min(5, target.y));
-			target.z = Math.max(-5, Math.min(5, target.z));
-			camera.position.y = Math.max(ISLAND_FLOOR_Y, camera.position.y);
+		target.x = Math.max(-5, Math.min(8, target.x));
+		target.y = Math.max(ISLAND_FLOOR_Y, Math.min(5, target.y));
+		target.z = Math.max(-5, Math.min(5, target.z));
+		camera.position.y = Math.max(ISLAND_FLOOR_Y, camera.position.y);
 	});
 
 	// Disable distance limits during intro animation
@@ -201,42 +199,13 @@ type SceneContentProps = PortfolioSceneProps & {
 function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen, isLoaderActive }: SceneContentProps) {
   const { scene } = useThree();
   const [interactiveMeshes, setInteractiveMeshes] = React.useState<THREE.Mesh[]>([]);
-  const [primaryColor, setPrimaryColor] = React.useState<string>("#7c9082");
-  const [isDarkMode, setIsDarkMode] = React.useState(false);
   const [resourcesReady, setResourcesReady] = React.useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = React.useState(0);
 
+  const { primaryColor, isDarkMode } = useThemeSync();
+
   const handleScreenClick = React.useCallback(() => {
     setCurrentVideoIndex((prev) => (prev + 1) % SCREEN_VIDEOS.length);
-  }, []);
-
-  /** Get primary color from CSS variables and watch for theme changes */
-  React.useEffect(() => {
-    const getPrimaryColor = () => {
-      if (typeof window === "undefined") return "#7c9082";
-      const root = document.documentElement;
-      const color = getComputedStyle(root).getPropertyValue("--primary").trim();
-      return color || "#7c9082";
-    };
-
-    const checkDarkMode = () => {
-      return document.documentElement.classList.contains("dark");
-    };
-
-    setPrimaryColor(getPrimaryColor());
-    setIsDarkMode(checkDarkMode());
-
-    const observer = new MutationObserver(() => {
-      setPrimaryColor(getPrimaryColor());
-      setIsDarkMode(checkDarkMode());
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
   }, []);
 
   /** Scene setup - update background and fog based on theme */
@@ -312,7 +281,7 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
   return (
     <>
       {/* Ambient light for overall scene illumination - reduces harsh shadows */}
-      <ambientLight intensity={isDarkMode ? 0.4 : 0.4} />
+      <ambientLight intensity={0.4} />
 
       {isDarkMode ? (
         // Dark mode: Spotlight for dramatic moonlight effect

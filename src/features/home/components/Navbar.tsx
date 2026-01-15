@@ -5,7 +5,6 @@
 "use client";
 
 import * as React from "react";
-// import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "~/features/shared/components/ui/button";
@@ -41,14 +40,6 @@ export function Navbar({
         }`}
       >
         <div className="text-xl font-semibold text-foreground">vx</div>
-        {/* <Image
-          src="/logo.svg"
-          alt="vx.dev"
-          width={40}
-          height={40}
-          className="h-8 w-auto"
-          priority
-        /> */}
 
         {/* Desktop: Horizontal slide-in menu buttons */}
         <div className="hidden sm:flex items-center gap-4">
