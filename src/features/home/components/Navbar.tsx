@@ -9,6 +9,7 @@ import * as React from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "~/features/shared/components/ui/button";
+import { ThemeToggle } from "~/features/shared/components/ThemeToggle";
 
 type NavbarProps = {
   onSoftwareClick: () => void;
@@ -42,7 +43,9 @@ export function Navbar({
         className="h-8 w-auto"
         priority
       /> */}
-      
+
+      <ThemeToggle />
+
       {/* Collapsible menu buttons - slide in horizontally with Framer Motion */}
       <div className="flex items-center gap-4">
         <AnimatePresence>

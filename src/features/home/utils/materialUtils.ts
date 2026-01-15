@@ -6,16 +6,9 @@
 import * as THREE from "three";
 import gsap from "gsap";
 
-/** Accent colors from CSS variables (light/dark mode) */
-const ACCENT_COLOR_LIGHT = "#ffffff";
-const ACCENT_COLOR_DARK = "#ffffff";
-
-/** Gets the current accent color based on theme */
+/** Gets the current accent color - white for both themes */
 function getAccentColor(): string {
-  if (typeof window === "undefined") return ACCENT_COLOR_LIGHT;
-
-  const isDark = document.body.classList.contains("dark");
-  return isDark ? ACCENT_COLOR_DARK : ACCENT_COLOR_LIGHT;
+  return "#ffffff";
 }
 
 /** Clones materials for objects that share materials to ensure each object has its own material instance */

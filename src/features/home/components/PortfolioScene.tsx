@@ -202,6 +202,7 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
   const { scene } = useThree();
   const [interactiveMeshes, setInteractiveMeshes] = React.useState<THREE.Mesh[]>([]);
   const [primaryColor, setPrimaryColor] = React.useState<string>("#7c9082");
+  const [isDarkMode, setIsDarkMode] = React.useState(false);
   const [resourcesReady, setResourcesReady] = React.useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = React.useState(0);
 
@@ -218,12 +219,19 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
       return color || "#7c9082";
     };
 
+    const checkDarkMode = () => {
+      return document.documentElement.classList.contains("dark");
+    };
+
     setPrimaryColor(getPrimaryColor());
+    setIsDarkMode(checkDarkMode());
+
     const observer = new MutationObserver(() => {
       setPrimaryColor(getPrimaryColor());
+      setIsDarkMode(checkDarkMode());
     });
 
-    observer.observe(document.body, {
+    observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["class"],
     });
@@ -231,11 +239,12 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
     return () => observer.disconnect();
   }, []);
 
-  /** Scene setup */
+  /** Scene setup - update background and fog based on theme */
   React.useEffect(() => {
-    scene.fog = new THREE.FogExp2("#eeeeee", 0.02);
-    scene.background = new THREE.Color("#eeeeee");
-  }, [scene]);
+    const bgColor = isDarkMode ? "#0a0a0a" : "#eeeeee";
+    scene.fog = new THREE.FogExp2(bgColor, 0.02);
+    scene.background = new THREE.Color(bgColor);
+  }, [scene, isDarkMode]);
   const computerModel = useGLTF("/models/computer.glb");
   const cabinetModel = useGLTF("/models/cabinet.glb");
   const phoneModel = useGLTF("/models/phone.glb");
@@ -290,8 +299,12 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
   if (!resourcesReady) {
     return (
       <>
-        <ambientLight intensity={0.4} />
-        <directionalLight position={[3, 6, 8]} intensity={1} />
+        <ambientLight intensity={isDarkMode ? 0.2 : 0.4} />
+        {isDarkMode ? (
+          <spotLight position={[0, 20, 0]} angle={Math.PI / 1.5} intensity={3} distance={50} />
+        ) : (
+          <directionalLight position={[3, 6, 8]} intensity={1} />
+        )}
       </>
     );
   }
@@ -299,22 +312,40 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
   return (
     <>
       {/* Ambient light for overall scene illumination - reduces harsh shadows */}
-      <ambientLight intensity={0.4} />
+      <ambientLight intensity={isDarkMode ? 0.4 : 0.4} />
 
-      <directionalLight
-        position={[3, 6, 8]}
-        intensity={1}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-far={20}
-        shadow-camera-left={-9}
-        shadow-camera-right={10}
-        shadow-camera-top={7}
-        shadow-camera-bottom={-3}
-        shadow-bias={-0.001}
-        shadow-normalBias={0.03}
-      />
+      {isDarkMode ? (
+        // Dark mode: Spotlight for dramatic moonlight effect
+        <spotLight
+          position={[0, 9, 1]}
+          angle={Math.PI / 1.5}
+          penumbra={0.8}
+          intensity={40}
+          distance={25}
+          castShadow
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          shadow-camera-far={40}
+          shadow-bias={-0.001}
+          shadow-normalBias={0.03}
+        />
+      ) : (
+        // Light mode: Directional light for natural sunlight
+        <directionalLight
+          position={[3, 6, 8]}
+          intensity={1}
+          castShadow
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          shadow-camera-far={20}
+          shadow-camera-left={-9}
+          shadow-camera-right={10}
+          shadow-camera-top={7}
+          shadow-camera-bottom={-3}
+          shadow-bias={-0.001}
+          shadow-normalBias={0.03}
+        />
+      )}
 
       {/* Grid */}
       <Grid

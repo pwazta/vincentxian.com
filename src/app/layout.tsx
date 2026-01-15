@@ -3,6 +3,7 @@ import "~/styles/globals.css";
 import { type Metadata } from "next";
 import { Albert_Sans, Aleo, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "next-themes";
 
 import { TRPCReactProvider } from "~/trpc/react";
 
@@ -34,10 +35,13 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${albertSans.variable} ${aleo.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
     >
       <body>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
-        <Toaster />
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <TRPCReactProvider>{children}</TRPCReactProvider>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
