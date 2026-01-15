@@ -64,9 +64,11 @@ export function Navbar({
                 >
                   <motion.div
                     initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
+                    animate={{ x: 0, opacity: 1, transition: { duration: 0.3, ease: "easeInOut", delay: 0.05 } }}
                     exit={{ x: -20, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut", delay: 0.05 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.92 }}
+                    style={{ originX: 0.5, originY: 0.5 }}
                   >
                     <Button variant="ghost" onClick={onAboutClick} className="hover:bg-accent/10 whitespace-nowrap cursor-pointer">
                       About
@@ -74,9 +76,11 @@ export function Navbar({
                   </motion.div>
                   <motion.div
                     initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
+                    animate={{ x: 0, opacity: 1, transition: { duration: 0.3, ease: "easeInOut", delay: 0.1 } }}
                     exit={{ x: -20, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut", delay: 0.1 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.92 }}
+                    style={{ originX: 0.5, originY: 0.5 }}
                   >
                     <Button variant="ghost" onClick={onSoftwareClick} className="hover:bg-accent/10 whitespace-nowrap cursor-pointer">
                       Software
@@ -84,9 +88,11 @@ export function Navbar({
                   </motion.div>
                   <motion.div
                     initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
+                    animate={{ x: 0, opacity: 1, transition: { duration: 0.3, ease: "easeInOut", delay: 0.15 } }}
                     exit={{ x: -20, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut", delay: 0.15 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.92 }}
+                    style={{ originX: 0.5, originY: 0.5 }}
                   >
                     <Button variant="ghost" onClick={onArtsClick} className="hover:bg-accent/10 whitespace-nowrap cursor-pointer">
                       Arts
@@ -94,9 +100,11 @@ export function Navbar({
                   </motion.div>
                   <motion.div
                     initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
+                    animate={{ x: 0, opacity: 1, transition: { duration: 0.3, ease: "easeInOut", delay: 0.2 } }}
                     exit={{ x: -20, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut", delay: 0.2 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.92 }}
+                    style={{ originX: 0.5, originY: 0.5 }}
                   >
                     <Button variant="ghost" onClick={onContactClick} className="hover:bg-accent/10 whitespace-nowrap cursor-pointer">
                       Contact
@@ -119,54 +127,62 @@ export function Navbar({
             )}
           </AnimatePresence>
 
-          <ThemeToggle />
+          <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
+            <ThemeToggle />
+          </motion.div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsOpen(!isOpen)}
-            className="hover:bg-accent/10 cursor-pointer"
-            aria-label="Toggle menu"
-          >
-            <motion.div
-              key={isOpen ? "open" : "closed"}
-              initial={{ rotate: isOpen ? 0 : -180 }}
-              animate={{ rotate: isOpen ? 180 : 0 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
+          <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsOpen(!isOpen)}
+              className="hover:bg-accent/10 cursor-pointer"
+              aria-label="Toggle menu"
             >
-              {isOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </motion.div>
-          </Button>
+              <motion.div
+                key={isOpen ? "open" : "closed"}
+                initial={{ rotate: isOpen ? 0 : -180 }}
+                animate={{ rotate: isOpen ? 180 : 0 }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+              >
+                {isOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
+              </motion.div>
+            </Button>
+          </motion.div>
         </div>
 
         {/* Mobile: Icons only */}
         <div className="flex sm:hidden items-center gap-4">
-          <ThemeToggle />
+          <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
+            <ThemeToggle />
+          </motion.div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsOpen(!isOpen)}
-            className="hover:bg-accent/10 cursor-pointer"
-            aria-label="Toggle menu"
-          >
-            <motion.div
-              key={isOpen ? "open" : "closed"}
-              initial={{ rotate: isOpen ? 0 : -180 }}
-              animate={{ rotate: isOpen ? 180 : 0 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
+          <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsOpen(!isOpen)}
+              className="hover:bg-accent/10 cursor-pointer"
+              aria-label="Toggle menu"
             >
-              {isOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </motion.div>
-          </Button>
+              <motion.div
+                key={isOpen ? "open" : "closed"}
+                initial={{ rotate: isOpen ? 0 : -180 }}
+                animate={{ rotate: isOpen ? 180 : 0 }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+              >
+                {isOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
+              </motion.div>
+            </Button>
+          </motion.div>
         </div>
       </nav>
 
@@ -183,9 +199,11 @@ export function Navbar({
             <div className="flex flex-col py-2">
               <motion.div
                 initial={{ y: -10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
+                animate={{ y: 0, opacity: 1, transition: { duration: 0.2, delay: 0.05 } }}
                 exit={{ y: -10, opacity: 0 }}
-                transition={{ duration: 0.2, delay: 0.05 }}
+                whileHover={{ scale: 1.07, x: 8 }}
+                whileTap={{ scale: 0.97 }}
+                style={{ originX: 0 }}
               >
                 <Button
                   variant="ghost"
@@ -197,9 +215,11 @@ export function Navbar({
               </motion.div>
               <motion.div
                 initial={{ y: -10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
+                animate={{ y: 0, opacity: 1, transition: { duration: 0.2, delay: 0.1 } }}
                 exit={{ y: -10, opacity: 0 }}
-                transition={{ duration: 0.2, delay: 0.1 }}
+                whileHover={{ scale: 1.07, x: 8 }}
+                whileTap={{ scale: 0.97 }}
+                style={{ originX: 0 }}
               >
                 <Button
                   variant="ghost"
@@ -211,9 +231,11 @@ export function Navbar({
               </motion.div>
               <motion.div
                 initial={{ y: -10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
+                animate={{ y: 0, opacity: 1, transition: { duration: 0.2, delay: 0.15 } }}
                 exit={{ y: -10, opacity: 0 }}
-                transition={{ duration: 0.2, delay: 0.15 }}
+                whileHover={{ scale: 1.07, x: 8 }}
+                whileTap={{ scale: 0.97 }}
+                style={{ originX: 0 }}
               >
                 <Button
                   variant="ghost"
@@ -225,9 +247,11 @@ export function Navbar({
               </motion.div>
               <motion.div
                 initial={{ y: -10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
+                animate={{ y: 0, opacity: 1, transition: { duration: 0.2, delay: 0.2 } }}
                 exit={{ y: -10, opacity: 0 }}
-                transition={{ duration: 0.2, delay: 0.2 }}
+                whileHover={{ scale: 1.07, x: 8 }}
+                whileTap={{ scale: 0.97 }}
+                style={{ originX: 0 }}
               >
                 <Button
                   variant="ghost"
