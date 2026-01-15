@@ -44,8 +44,6 @@ export function Navbar({
         priority
       /> */}
 
-      <ThemeToggle />
-
       {/* Collapsible menu buttons - slide in horizontally with Framer Motion */}
       <div className="flex items-center gap-4">
         <AnimatePresence>
@@ -100,6 +98,8 @@ export function Navbar({
             </motion.div>
           )}
         </AnimatePresence>
+
+        <ThemeToggle />
 
         <Button
           variant="ghost"
