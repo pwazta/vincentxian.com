@@ -15,5 +15,6 @@ CODE QUALITY:
 - don't hardcode types.
 - On every file, 1st line describes the file's purpose. 2nd line defines where the file is used.
 - use semantic headers.
+- if code could fit on 1 line, use one line (e.g: function parameters or function params).
 <!-- - IGNORE THIS LINE never write text using <p> or <h1>/<h2>... use <Text> and <Heading>: refer to typography.ts's comments for where to use each variant / size. -->
 - never use any for types.

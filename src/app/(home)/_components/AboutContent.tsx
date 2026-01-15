@@ -5,8 +5,11 @@
  * Desktop: Vertical tabs on right with separator
  * Mobile: Horizontal tabs below header
  */
+"use client";
+
 import * as React from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { Badge } from "~/features/shared/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/features/shared/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/features/shared/components/ui/tabs";
@@ -138,32 +141,55 @@ function AboutMeContent() {
 }
 
 export function AboutContent() {
+  const [activeTab, setActiveTab] = React.useState("about");
+
   return (
-    <Tabs defaultValue="about" className="w-full">
-      {/* Mobile: Horizontal tabs */}
-      <TabsList className="md:hidden w-full flex justify-center gap-1 bg-transparent mb-4">
+    <Tabs defaultValue="about" value={activeTab} onValueChange={setActiveTab} className="w-full">
+      {/* Mobile: Horizontal tabs with sliding indicator */}
+      <TabsList className="md:hidden w-full flex justify-center gap-1 bg-transparent mb-4 relative">
         <TabsTrigger
           value="about"
-          className="px-4 py-2 text-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-md"
+          className="px-4 py-2 text-sm rounded-md relative z-10 cursor-pointer hover:bg-accent/20 transition-colors"
         >
-          About
+          {activeTab === "about" && (
+            <motion.div
+              layoutId="mobile-active-tab"
+              className="absolute inset-0 bg-primary/10 rounded-md"
+              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+            />
+          )}
+          <span className="relative z-10">About</span>
         </TabsTrigger>
         <TabsTrigger
           value="experience"
-          className="px-4 py-2 text-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-md"
+          className="px-4 py-2 text-sm rounded-md relative z-10 cursor-pointer hover:bg-accent/20 transition-colors"
         >
-          Experience
+          {activeTab === "experience" && (
+            <motion.div
+              layoutId="mobile-active-tab"
+              className="absolute inset-0 bg-primary/10 rounded-md"
+              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+            />
+          )}
+          <span className="relative z-10">Experience</span>
         </TabsTrigger>
         <TabsTrigger
           value="activities"
-          className="px-4 py-2 text-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-md"
+          className="px-4 py-2 text-sm rounded-md relative z-10 cursor-pointer hover:bg-accent/20 transition-colors"
         >
-          Activities
+          {activeTab === "activities" && (
+            <motion.div
+              layoutId="mobile-active-tab"
+              className="absolute inset-0 bg-primary/10 rounded-md"
+              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+            />
+          )}
+          <span className="relative z-10">Activities</span>
         </TabsTrigger>
       </TabsList>
 
       {/* Desktop: Content + Vertical tabs on right */}
-      <div className="flex">
+      <div className="flex overflow-hidden">
         {/* Tab content area */}
         <div className="flex-1 min-w-0">
           <TabsContent value="about" className="mt-0">
@@ -177,36 +203,66 @@ export function AboutContent() {
           </TabsContent>
         </div>
 
-        {/* Desktop: Vertical separator + tabs on right */}
-        <div className="hidden md:flex items-stretch ml-4">
+        {/* Desktop: Vertical separator + tabs on right with slide-from-top animation */}
+        <motion.div
+          className="hidden md:flex items-stretch ml-4"
+          initial={{ y: -30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{
+            duration: 0.4,
+            ease: [0.34, 1.56, 0.64, 1],
+            delay: 0.25
+          }}
+        >
           {/* Vertical separator */}
           <div className="w-px bg-accent/30 mr-3" />
 
-          {/* Vertical tabs */}
-          <TabsList className="flex flex-col h-full justify-start gap-2 bg-transparent p-0">
+          {/* Vertical tabs with sliding indicator */}
+          <TabsList className="flex flex-col h-full justify-start gap-2 bg-transparent p-0 relative">
             <TabsTrigger
               value="about"
-              className="px-2 py-3 text-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-l-2 data-[state=active]:border-primary rounded-none rounded-r-md"
+              className="px-2 py-3 text-sm rounded-none rounded-r-md relative z-10 transition-colors cursor-pointer hover:bg-accent/20"
               style={{ writingMode: "vertical-rl" }}
             >
-              About
+              {activeTab === "about" && (
+                <motion.div
+                  layoutId="desktop-active-tab"
+                  className="absolute inset-0 bg-primary/10 border-l-2 border-primary rounded-none rounded-r-md"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              <span className="relative z-10">About</span>
             </TabsTrigger>
             <TabsTrigger
               value="experience"
-              className="px-2 py-3 text-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-l-2 data-[state=active]:border-primary rounded-none rounded-r-md"
+              className="px-2 py-3 text-sm rounded-none rounded-r-md relative z-10 transition-colors cursor-pointer hover:bg-accent/20"
               style={{ writingMode: "vertical-rl" }}
             >
-              Experience
+              {activeTab === "experience" && (
+                <motion.div
+                  layoutId="desktop-active-tab"
+                  className="absolute inset-0 bg-primary/10 border-l-2 border-primary rounded-none rounded-r-md"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              <span className="relative z-10">Experience</span>
             </TabsTrigger>
             <TabsTrigger
               value="activities"
-              className="px-2 py-3 text-sm data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-l-2 data-[state=active]:border-primary rounded-none rounded-r-md"
+              className="px-2 py-3 text-sm rounded-none rounded-r-md relative z-10 transition-colors cursor-pointer hover:bg-accent/20"
               style={{ writingMode: "vertical-rl" }}
             >
-              Activities
+              {activeTab === "activities" && (
+                <motion.div
+                  layoutId="desktop-active-tab"
+                  className="absolute inset-0 bg-primary/10 border-l-2 border-primary rounded-none rounded-r-md"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              <span className="relative z-10">Activities</span>
             </TabsTrigger>
           </TabsList>
-        </div>
+        </motion.div>
       </div>
     </Tabs>
   );

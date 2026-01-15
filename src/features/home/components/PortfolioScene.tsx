@@ -27,9 +27,8 @@ function VideoTextureLoader({ src, isActive, onTextureReady }: { src: string; is
   const texture = useVideoTexture(src, { muted: true, loop: true, start: isActive });
 
   React.useEffect(() => {
-    const video = texture.image as HTMLVideoElement;
-    if (isActive) video.play().catch(() => {});
-    else video.pause();
+    if (isActive) void texture.image.play().catch(() => { /* Video play failures are expected and safe to ignore */ });
+    else texture.image.pause();
   }, [isActive, texture]);
 
   React.useEffect(() => {
@@ -49,7 +48,7 @@ function VideoScreen({ computerScene, currentVideoIndex }: { computerScene: THRE
     const screenMesh = computerScene.getObjectByName("computer_screen") as THREE.Mesh | undefined;
     if (!screenMesh) return;
 
-    const geometry = screenMesh.geometry as THREE.BufferGeometry;
+    const geometry = screenMesh.geometry;
     const uvAttr = geometry.getAttribute("uv");
 
     // Generate planar UVs if mesh has none
@@ -94,7 +93,7 @@ function VideoScreen({ computerScene, currentVideoIndex }: { computerScene: THRE
 /** Configures renderer settings for grass shadows and rendering */
 function RendererConfig() {
 	const { gl } = useThree();
-	const [_contextLost, setContextLost] = React.useState(false);
+	const [, setContextLost] = React.useState(false);
 	
 	React.useEffect(() => {
 		gl.shadowMap.enabled = true;
@@ -184,7 +183,6 @@ function LimitedOrbitControls({ limitMaxDistance }: { limitMaxDistance: boolean 
 
 	// Disable distance limits during intro animation
 	const maxDist = limitMaxDistance ? 12 : 100;
-
 	return <OrbitControls makeDefault enablePan={true} enableZoom={true} enableRotate={true} minDistance={2} maxDistance={maxDist} />;
 }
 

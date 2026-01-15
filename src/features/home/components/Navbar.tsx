@@ -7,6 +7,7 @@
 import * as React from "react";
 // import Image from "next/image";
 import { Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "~/features/shared/components/ui/button";
 
 type NavbarProps = {
@@ -42,29 +43,61 @@ export function Navbar({
         priority
       /> */}
       
-      {/* Collapsible menu buttons - slide in horizontally */}
+      {/* Collapsible menu buttons - slide in horizontally with Framer Motion */}
       <div className="flex items-center gap-4">
-        <div
-          className={`flex items-center gap-4 transition-all duration-300 ease-in-out overflow-hidden ${
-            isOpen
-              ? "max-w-[500px] opacity-100"
-              : "max-w-0 opacity-0 pointer-events-none"
-          }`}
-        >
-          <Button variant="ghost" onClick={onAboutClick} className="hover:bg-accent/10 whitespace-nowrap cursor-pointer">
-            About
-          </Button>
-          <Button variant="ghost" onClick={onSoftwareClick} className="hover:bg-accent/10 whitespace-nowrap cursor-pointer">
-            Software
-          </Button>
-          <Button variant="ghost" onClick={onArtsClick} className="hover:bg-accent/10 whitespace-nowrap cursor-pointer">
-            Arts
-          </Button>
-          <Button variant="ghost" onClick={onContactClick} className="hover:bg-accent/10 whitespace-nowrap cursor-pointer">
-            Contact
-          </Button>
-        </div>
-        
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              className="flex items-center gap-4"
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: "auto", opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -20, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut", delay: 0.05 }}
+              >
+                <Button variant="ghost" onClick={onAboutClick} className="hover:bg-accent/10 whitespace-nowrap cursor-pointer">
+                  About
+                </Button>
+              </motion.div>
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -20, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut", delay: 0.1 }}
+              >
+                <Button variant="ghost" onClick={onSoftwareClick} className="hover:bg-accent/10 whitespace-nowrap cursor-pointer">
+                  Software
+                </Button>
+              </motion.div>
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -20, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut", delay: 0.15 }}
+              >
+                <Button variant="ghost" onClick={onArtsClick} className="hover:bg-accent/10 whitespace-nowrap cursor-pointer">
+                  Arts
+                </Button>
+              </motion.div>
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -20, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut", delay: 0.2 }}
+              >
+                <Button variant="ghost" onClick={onContactClick} className="hover:bg-accent/10 whitespace-nowrap cursor-pointer">
+                  Contact
+                </Button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <Button
           variant="ghost"
           size="icon"
@@ -72,13 +105,18 @@ export function Navbar({
           className="hover:bg-accent/10 cursor-pointer"
           aria-label="Toggle menu"
         >
-          <div key={isOpen ? "open" : "closed"} className="animate-spin-once">
+          <motion.div
+            key={isOpen ? "open" : "closed"}
+            initial={{ rotate: isOpen ? 0 : -180 }}
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+          >
             {isOpen ? (
               <X className="h-5 w-5" />
             ) : (
               <Menu className="h-5 w-5" />
             )}
-          </div>
+          </motion.div>
         </Button>
       </div>
     </nav>
