@@ -21,9 +21,10 @@ type GrassFieldProps = {
 	terrainHeightScale?: number;
 	grassScale?: number;
 	grassHeightScale?: number;
+	isDarkMode?: boolean;
 };
 
-export function GrassField({ grassCount = 1000, terrainScale = 2, terrainHeightScale = 0.8, grassScale = 5, grassHeightScale = 0.4 }: GrassFieldProps) {
+export function GrassField({ grassCount = 1000, terrainScale = 2, terrainHeightScale = 0.8, grassScale = 5, grassHeightScale = 0.4, isDarkMode = false }: GrassFieldProps) {
 	const [grassInstancedMesh, setGrassInstancedMesh] = React.useState<THREE.InstancedMesh | null>(null);
 	const [grassMaterial, setGrassMaterial] = React.useState<GrassMaterial | null>(null);
 	const timeRef = React.useRef(0);
@@ -91,6 +92,13 @@ export function GrassField({ grassCount = 1000, terrainScale = 2, terrainHeightS
 		};
 	}, [grassAlphaTexture, noiseTexture]);
 
+	/** Update grass colors based on dark mode */
+	React.useEffect(() => {
+		if (grassMaterial) {
+			grassMaterial.setDarkMode(isDarkMode);
+		}
+	}, [grassMaterial, isDarkMode]);
+
 	/** Cleanup all resources on unmount in correct order */
 	React.useEffect(() => {
 		isMountedRef.current = true;
@@ -145,7 +153,8 @@ export function GrassField({ grassCount = 1000, terrainScale = 2, terrainHeightS
 			lastScaleParamsRef.current.grassScale !== grassScale ||
 			lastScaleParamsRef.current.grassHeightScale !== grassHeightScale;
 
-		const terrainMaterial = new THREE.MeshPhongMaterial({ color: "#5e875e" });
+		const terrainColor = isDarkMode ? "#2a3d2a" : "#5e875e";
+		const terrainMaterial = new THREE.MeshPhongMaterial({ color: terrainColor });
 
 		let terrainMesh: THREE.Mesh | null = null;
 		let terrainGeometry: THREE.BufferGeometry | null = null;
@@ -255,6 +264,7 @@ export function GrassField({ grassCount = 1000, terrainScale = 2, terrainHeightS
 		terrainHeightScale,
 		grassScale,
 		grassHeightScale,
+		isDarkMode,
 	]);
 
 	/** Update grass animation */

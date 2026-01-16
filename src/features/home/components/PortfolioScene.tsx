@@ -278,6 +278,7 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
         terrainHeightScale={0.5}
         grassScale={8}
         grassHeightScale={0.4}
+        isDarkMode={isDarkMode}
       />
 
       {/* GLB Models */}

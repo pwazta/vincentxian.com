@@ -25,9 +25,16 @@ export class GrassMaterial {
 	material: THREE.Material;
 
 	private grassColorProps = {
-		baseColor: "#313f1b",
-		tipColor1: "#9bd38d",
-		tipColor2: "#1f352a",
+		light: {
+			baseColor: "#232e13",
+			tipColor1: "#9bd38d",
+			tipColor2: "#1f352a",
+		},
+		dark: {
+			baseColor: "#1a2310",
+			tipColor1: "#587a52",
+			tipColor2: "#152218",
+		},
 	};
 
 	uniforms: Record<string, { value: unknown }> = {
@@ -35,10 +42,10 @@ export class GrassMaterial {
 		uEnableShadows: { value: true },
 		uShadowDarkness: { value: 0.5 },
 		uGrassLightIntensity: { value: 1 },
-		uNoiseScale: { value: 1.5 },
-		baseColor: { value: new THREE.Color(this.grassColorProps.baseColor) },
-		tipColor1: { value: new THREE.Color(this.grassColorProps.tipColor1) },
-		tipColor2: { value: new THREE.Color(this.grassColorProps.tipColor2) },
+		uNoiseScale: { value: 4.0 },
+		baseColor: { value: new THREE.Color(this.grassColorProps.light.baseColor) },
+		tipColor1: { value: new THREE.Color(this.grassColorProps.light.tipColor1) },
+		tipColor2: { value: new THREE.Color(this.grassColorProps.light.tipColor2) },
 		noiseTexture: { value: new THREE.Texture() },
 		grassAlphaTexture: { value: new THREE.Texture() },
 	};
@@ -74,6 +81,16 @@ export class GrassMaterial {
 		if (shadowUniform) {
 			shadowUniform.value = high;
 		}
+	}
+
+	public setDarkMode(isDark: boolean) {
+		const colors = isDark ? this.grassColorProps.dark : this.grassColorProps.light;
+		const baseUniform = this.uniforms.baseColor;
+		const tip1Uniform = this.uniforms.tipColor1;
+		const tip2Uniform = this.uniforms.tipColor2;
+		if (baseUniform) (baseUniform.value as THREE.Color).set(colors.baseColor);
+		if (tip1Uniform) (tip1Uniform.value as THREE.Color).set(colors.tipColor1);
+		if (tip2Uniform) (tip2Uniform.value as THREE.Color).set(colors.tipColor2);
 	}
 
 	update(delta: number) {
