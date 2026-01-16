@@ -196,6 +196,7 @@ type SceneContentProps = PortfolioSceneProps & {
   isLoaderActive: boolean;
 };
 
+/** Inner scene component - renders all 3D content inside Canvas (lights, models, grass) */
 function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen, isLoaderActive }: SceneContentProps) {
   const { scene } = useThree();
   const [interactiveMeshes, setInteractiveMeshes] = React.useState<THREE.Mesh[]>([]);
@@ -253,6 +254,7 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
   const clickActions: ClickActions = React.useMemo(() => ({
       onPhoneClick: onContactClick,
       onComputerClick: onSoftwareClick,
+      onComputerFrameClick: onAboutClick,
       onScreenClick: handleScreenClick,
       onDiskLinkedInClick: () => { /* External link handled in useObjectInteractions */ },
       onDiskGithubClick: () => { /* External link handled in useObjectInteractions */ },
@@ -364,6 +366,7 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
   );
 }
 
+/** Main exported component - sets up Canvas, loader, and camera animation */
 export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen }: PortfolioSceneProps) {
   const [showLoader, setShowLoader] = React.useState(true);
   const [isZooming, setIsZooming] = React.useState(false);

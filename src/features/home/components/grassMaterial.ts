@@ -1,9 +1,10 @@
 /**
- * Grass shader material implementation adapted from Codrops article
- * Used in: GrassField component for rendering animated grass
- * 
- * MIT License - Copyright (c) 2023 Ebenezer
- * Original article: https://tympanus.net/codrops/2025/02/04/how-to-make-the-fluffiest-grass-with-three-js/
+ * Grass shader material for rendering animated instanced grass
+ * Used in: GrassField component
+ *
+ * Adapted from "How to Make the Fluffiest Grass with Three.js" by Ebenezer
+ * https://tympanus.net/codrops/2025/02/04/how-to-make-the-fluffiest-grass-with-three-js/
+ * Original code: MIT License - Copyright (c) 2023 Ebenezer
  */
 import * as THREE from "three";
 
@@ -13,14 +14,11 @@ interface GrassUniformsInterface {
 	uShadowDarkness?: { value: number };
 	uGrassLightIntensity?: { value: number };
 	uNoiseScale?: { value: number };
-	uPlayerPosition?: { value: THREE.Vector3 };
 	baseColor?: { value: THREE.Color };
 	tipColor1?: { value: THREE.Color };
 	tipColor2?: { value: THREE.Color };
 	noiseTexture?: { value: THREE.Texture };
 	grassAlphaTexture?: { value: THREE.Texture };
-	fogColor2?: { value: THREE.Color };
-	fogColor3?: { value: THREE.Color };
 }
 
 export class GrassMaterial {
@@ -38,7 +36,6 @@ export class GrassMaterial {
 		uShadowDarkness: { value: 0.5 },
 		uGrassLightIntensity: { value: 1 },
 		uNoiseScale: { value: 1.5 },
-		uPlayerPosition: { value: new THREE.Vector3() },
 		baseColor: { value: new THREE.Color(this.grassColorProps.baseColor) },
 		tipColor1: { value: new THREE.Color(this.grassColorProps.tipColor1) },
 		tipColor2: { value: new THREE.Color(this.grassColorProps.tipColor2) },
@@ -102,8 +99,6 @@ export class GrassMaterial {
 				uNoiseScale: this.uniforms.uNoiseScale as THREE.IUniform,
 				uNoiseTexture: this.uniforms.noiseTexture as THREE.IUniform,
 				uGrassAlphaTexture: this.uniforms.grassAlphaTexture as THREE.IUniform,
-				fogColor2: this.uniforms.fogColor2 as THREE.IUniform,
-				fogColor3: this.uniforms.fogColor3 as THREE.IUniform,
 			};
 
 			shader.vertexShader = `
@@ -196,7 +191,6 @@ export class GrassMaterial {
       
       uniform float uGrassLightIntensity;
       uniform float uShadowDarkness;
-      uniform float uDayTime;
       varying vec3 vColor;
       
       varying vec2 vUv;

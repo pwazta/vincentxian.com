@@ -96,7 +96,7 @@ export function restoreOriginalColors(object: THREE.Object3D, animated = true): 
   }
 }
 
-/** Clones materials for objects that share materials to ensure each object has its own material instance */
+/** Clones materials for objects that share materials (keyboard keys) to ensure each object has its own material instance */
 function cloneMaterialsIfNeeded(object: THREE.Mesh): void {
   if (!object.material) return;
 

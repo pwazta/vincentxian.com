@@ -1,0 +1,5 @@
+{
+  "prisma.fileWatcher": false,
+  "css.validate": false,
+  "tailwindCSS.validate": true
+}

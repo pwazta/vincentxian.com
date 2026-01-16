@@ -3,6 +3,7 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { cn } from "~/lib/utils";
 
 const Dialog = DialogPrimitive.Root;
@@ -43,7 +44,9 @@ const DialogContent = React.forwardRef<
     >
       <div className="bg-primary text-white px-2 md:px-3 flex items-center justify-between relative h-10 md:h-12 flex-shrink-0">
         <DialogPrimitive.Close className="opacity-90 hover:opacity-100 transition-opacity focus:outline-none disabled:pointer-events-none ml-auto cursor-pointer">
-          <Image src="/close-box.svg" alt="Close" width={28} height={28} className="h-6 w-6 md:h-8 md:w-8 brightness-0 invert" />
+          <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
+            <Image src="/close-box.svg" alt="Close" width={28} height={28} className="h-6 w-6 md:h-8 md:w-8 brightness-0 invert" />
+          </motion.div>
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       </div>

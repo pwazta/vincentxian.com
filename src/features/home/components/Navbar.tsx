@@ -19,12 +19,7 @@ type NavbarProps = {
   onContactClick: () => void;
 };
 
-export function Navbar({
-  onSoftwareClick,
-  onArtsClick,
-  onAboutClick,
-  onContactClick,
-}: NavbarProps) {
+export function Navbar({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick }: NavbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleMenuClick = (callback: () => void) => {

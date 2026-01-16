@@ -149,4 +149,3 @@ export function SceneLoader({ onLoaded, onEnterClick }: SceneLoaderProps) {
     </motion.div>
   );
 }
-

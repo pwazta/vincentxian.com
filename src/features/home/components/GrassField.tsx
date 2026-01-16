@@ -1,9 +1,10 @@
 /**
  * Grass field component using instanced grass meshes on terrain surface
  * Used in: PortfolioScene for rendering animated grass field
- * 
- * MIT License - Copyright (c) 2023 Ebenezer
- * Original article: https://tympanus.net/codrops/2025/02/04/how-to-make-the-fluffiest-grass-with-three-js/
+ *
+ * Adapted from "How to Make the Fluffiest Grass with Three.js" by Ebenezer
+ * https://tympanus.net/codrops/2025/02/04/how-to-make-the-fluffiest-grass-with-three-js/
+ * Original code: MIT License - Copyright (c) 2023 Ebenezer
  */
 "use client";
 
