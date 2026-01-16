@@ -20,6 +20,7 @@ interface UseObjectInteractionsOptions {
   intersects: THREE.Intersection[];
   clickActions: ClickActions;
   enabled?: boolean;
+  onScreenHoverChange?: (isHovered: boolean) => void;
 }
 
 type HoverMetadata = {
@@ -29,11 +30,12 @@ type HoverMetadata = {
   interactionType: "hoverable" | "clickable" | "none";
 };
 
-export function useObjectInteractions({ intersects, clickActions, enabled = true }: UseObjectInteractionsOptions): void {
+export function useObjectInteractions({ intersects, clickActions, enabled = true, onScreenHoverChange }: UseObjectInteractionsOptions): void {
   const intersectsRef = React.useRef<THREE.Intersection[]>([]);
   const hoveredMeshRef = React.useRef<THREE.Mesh | null>(null);
   const unhoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const reenableCooldownRef = React.useRef<number | null>(null);
+  const isScreenHoveredRef = React.useRef(false);
 
   // Handle click events
   React.useEffect(() => {
@@ -252,6 +254,13 @@ export function useObjectInteractions({ intersects, clickActions, enabled = true
     const hoveredMesh = intersects[0] ? (intersects[0].object as THREE.Mesh) : null;
     const prevMesh = hoveredMeshRef.current;
     const metadata = hoveredMesh?.userData.metadata as HoverMetadata | undefined;
+
+    // Track screen hover state for credit overlay
+    const isNowHoveringScreen = hoveredMesh?.name.includes("computer_screen") ?? false;
+    if (isNowHoveringScreen !== isScreenHoveredRef.current) {
+      isScreenHoveredRef.current = isNowHoveringScreen;
+      onScreenHoverChange?.(isNowHoveringScreen);
+    }
 
     const updateCursor = (meta: HoverMetadata | undefined) => {
       document.body.style.cursor = meta?.interactionType === "clickable" ? "pointer" : "default";

@@ -6,7 +6,7 @@
 
 import * as React from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
-import { OrbitControls, useGLTF, Grid, useVideoTexture } from "@react-three/drei";
+import { OrbitControls, useGLTF, Grid } from "@react-three/drei";
 import * as THREE from "three";
 import { GrassField } from "./GrassField";
 import { SceneLoader } from "./SceneLoader";
@@ -15,81 +15,8 @@ import { useSceneRaycaster } from "../hooks/useSceneRaycaster";
 import { useObjectInteractions } from "../hooks/useObjectInteractions";
 import { useThemeSync } from "../hooks/useThemeSync";
 import { storeOriginalColors } from "../utils/materialUtils";
+import { VideoScreen, VIDEO_COUNT, getVideoCredit } from "./VideoScreen";
 import type { ClickActions } from "../utils/sceneInteractions";
-
-/** Video sources for computer screen - add more videos here */
-const SCREEN_VIDEOS = [
-  "/Sad Get Well GIF.mp4",
-  "/pixel art arcade.mp4",
-] as const;
-
-/** Loads a video texture and manages playback based on active state */
-function VideoTextureLoader({ src, isActive, onTextureReady }: { src: string; isActive: boolean; onTextureReady: (texture: THREE.VideoTexture) => void }) {
-  const texture = useVideoTexture(src, { muted: true, loop: true, start: isActive });
-
-  React.useEffect(() => {
-    if (isActive) void texture.image.play().catch(() => { /* Video play failures are expected and safe to ignore */ });
-    else texture.image.pause();
-  }, [isActive, texture]);
-
-  React.useEffect(() => {
-    if (isActive) onTextureReady(texture);
-  }, [isActive, texture, onTextureReady]);
-
-  return null;
-}
-
-/** Applies video texture to computer screen mesh, cycling through videos on click */
-function VideoScreen({ computerScene, currentVideoIndex }: { computerScene: THREE.Group; currentVideoIndex: number }) {
-  const [activeTexture, setActiveTexture] = React.useState<THREE.VideoTexture | null>(null);
-  const materialRef = React.useRef<THREE.MeshStandardMaterial | null>(null);
-
-  // Find screen mesh and setup material
-  React.useEffect(() => {
-    const screenMesh = computerScene.getObjectByName("computer_screen") as THREE.Mesh | undefined;
-    if (!screenMesh) return;
-
-    const geometry = screenMesh.geometry;
-    const uvAttr = geometry.getAttribute("uv");
-
-    // Generate planar UVs if mesh has none
-    if (!uvAttr || uvAttr.count === 0) {
-      geometry.computeBoundingBox();
-      const box = geometry.boundingBox!;
-      const size = new THREE.Vector3();
-      box.getSize(size);
-
-      const posAttr = geometry.getAttribute("position");
-      const uvs = new Float32Array(posAttr.count * 2);
-      for (let i = 0; i < posAttr.count; i++) {
-        uvs[i * 2] = (posAttr.getX(i) - box.min.x) / size.x;
-        uvs[i * 2 + 1] = (posAttr.getY(i) - box.min.y) / size.y;
-      }
-      geometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
-    }
-
-    materialRef.current = new THREE.MeshStandardMaterial({ toneMapped: false, emissiveIntensity: 0.8 });
-    screenMesh.material = materialRef.current;
-  }, [computerScene]);
-
-  // Update texture when active video changes
-  React.useEffect(() => {
-    if (materialRef.current && activeTexture) {
-      materialRef.current.map = activeTexture;
-      materialRef.current.needsUpdate = true;
-    }
-  }, [activeTexture]);
-
-  const handleTextureReady = React.useCallback((texture: THREE.VideoTexture) => setActiveTexture(texture), []);
-
-  return (
-    <>
-      {SCREEN_VIDEOS.map((src, index) => (
-        <VideoTextureLoader key={src} src={src} isActive={index === currentVideoIndex} onTextureReady={handleTextureReady} />
-      ))}
-    </>
-  );
-}
 
 /** Configures renderer settings for grass shadows and rendering */
 function RendererConfig() {
@@ -194,20 +121,18 @@ type PortfolioSceneProps = {
 
 type SceneContentProps = PortfolioSceneProps & {
   isLoaderActive: boolean;
+  onScreenHoverChange: (isHovered: boolean) => void;
+  currentVideoIndex: number;
+  onVideoIndexChange: () => void;
 };
 
 /** Inner scene component - renders all 3D content inside Canvas (lights, models, grass) */
-function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen, isLoaderActive }: SceneContentProps) {
+function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen, isLoaderActive, onScreenHoverChange, currentVideoIndex, onVideoIndexChange }: SceneContentProps) {
   const { scene } = useThree();
   const [interactiveMeshes, setInteractiveMeshes] = React.useState<THREE.Mesh[]>([]);
   const [resourcesReady, setResourcesReady] = React.useState(false);
-  const [currentVideoIndex, setCurrentVideoIndex] = React.useState(0);
 
   const { primaryColor, isDarkMode } = useThemeSync();
-
-  const handleScreenClick = React.useCallback(() => {
-    setCurrentVideoIndex((prev) => (prev + 1) % SCREEN_VIDEOS.length);
-  }, []);
 
   /** Scene setup - update background and fog based on theme */
   React.useEffect(() => {
@@ -255,16 +180,16 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
       onPhoneClick: onContactClick,
       onComputerClick: onSoftwareClick,
       onComputerFrameClick: onAboutClick,
-      onScreenClick: handleScreenClick,
+      onScreenClick: onVideoIndexChange,
       onDiskLinkedInClick: () => { /* External link handled in useObjectInteractions */ },
       onDiskGithubClick: () => { /* External link handled in useObjectInteractions */ },
       onDrawerAboutClick: onAboutClick,
       onDrawerSoftwareClick: onSoftwareClick,
       onDrawerArtsClick: onArtsClick,
-    }), [onSoftwareClick, onArtsClick, onAboutClick, onContactClick, handleScreenClick]
+    }), [onSoftwareClick, onArtsClick, onAboutClick, onContactClick, onVideoIndexChange]
   );
 
-  useObjectInteractions({ intersects, clickActions, enabled: interactionsEnabled });
+  useObjectInteractions({ intersects, clickActions, enabled: interactionsEnabled, onScreenHoverChange });
 
   // Don't render heavy content until resources are ready
   if (!resourcesReady) {
@@ -366,14 +291,113 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
   );
 }
 
+/** Credit toast that appears when hovering the computer screen */
+function CreditToast({ isVisible, artist, artistUrl, onMouseEnter, onMouseLeave }: { isVisible: boolean; artist?: string; artistUrl?: string; onMouseEnter: () => void; onMouseLeave: () => void }) {
+  if (!artist) return null;
+
+  return (
+    <div
+      className={`absolute bottom-4 right-4 z-10 transition-opacity duration-200 ${isVisible ? "opacity-70 hover:opacity-100" : "opacity-0 pointer-events-none"}`}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      <div className="border border-foreground bg-background">
+        <div className="bg-primary px-2 py-0.5 flex items-center justify-between gap-2">
+          <span className="text-[10px] text-white font-medium">Credit</span>
+          <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div className="px-2 py-1.5">
+          {artistUrl ? (
+            <a
+              href={artistUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-mono text-foreground hover:text-primary hover:underline transition-colors flex items-center gap-1"
+            >
+              Art by @{artist}
+              <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          ) : (
+            <span className="text-xs font-mono text-foreground">Art by @{artist}</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** Main exported component - sets up Canvas, loader, and camera animation */
 export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen }: PortfolioSceneProps) {
   const [showLoader, setShowLoader] = React.useState(true);
   const [isZooming, setIsZooming] = React.useState(false);
+  const [currentVideoIndex, setCurrentVideoIndex] = React.useState(0);
+  const [, setIsScreenHovered] = React.useState(false);
+  const [isCreditHovered, setIsCreditHovered] = React.useState(false);
+  const [showCredit, setShowCredit] = React.useState(false);
+  const hoverDelayRef = React.useRef<NodeJS.Timeout | null>(null);
+  const hideDelayRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const handleVideoIndexChange = React.useCallback(() => {
+    setCurrentVideoIndex((prev) => (prev + 1) % VIDEO_COUNT);
+  }, []);
+
+  const handleScreenHoverChange = React.useCallback((isHovered: boolean) => {
+    setIsScreenHovered(isHovered);
+
+    if (hoverDelayRef.current) {
+      clearTimeout(hoverDelayRef.current);
+      hoverDelayRef.current = null;
+    }
+    if (hideDelayRef.current) {
+      clearTimeout(hideDelayRef.current);
+      hideDelayRef.current = null;
+    }
+
+    if (isHovered) {
+      hoverDelayRef.current = setTimeout(() => {
+        setShowCredit(true);
+      }, 600);
+    } else {
+      // Delay hiding to allow moving to the credit toast
+      hideDelayRef.current = setTimeout(() => {
+        if (!isCreditHovered) {
+          setShowCredit(false);
+        }
+      }, 500);
+    }
+  }, [isCreditHovered]);
+
+  const handleCreditMouseEnter = React.useCallback(() => {
+    setIsCreditHovered(true);
+    if (hideDelayRef.current) {
+      clearTimeout(hideDelayRef.current);
+      hideDelayRef.current = null;
+    }
+  }, []);
+
+  const handleCreditMouseLeave = React.useCallback(() => {
+    setIsCreditHovered(false);
+    setShowCredit(false);
+  }, []);
+
+  // Cleanup timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (hoverDelayRef.current) clearTimeout(hoverDelayRef.current);
+      if (hideDelayRef.current) clearTimeout(hideDelayRef.current);
+    };
+  }, []);
+
+  const currentCredit = getVideoCredit(currentVideoIndex);
 
   return (
     <div className="relative h-full w-full" style={{ pointerEvents: isDialogOpen ? "none" : "auto" }}>
       {showLoader && <SceneLoader onLoaded={() => setShowLoader(false)} onEnterClick={() => setIsZooming(true)} />}
+      <CreditToast isVisible={showCredit || isCreditHovered} artist={currentCredit?.artist} artistUrl={currentCredit?.artistUrl} onMouseEnter={handleCreditMouseEnter} onMouseLeave={handleCreditMouseLeave} />
       <Canvas
         shadows
         dpr={[1, 1.5]}
@@ -387,7 +411,17 @@ export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onC
       >
         <RendererConfig />
         <CameraMove start={isZooming} to={[0.5, 7, 7]} onComplete={() => setIsZooming(false)} />
-        <SceneContent onSoftwareClick={onSoftwareClick} onArtsClick={onArtsClick} onAboutClick={onAboutClick} onContactClick={onContactClick} isDialogOpen={isDialogOpen} isLoaderActive={showLoader} />
+        <SceneContent
+          onSoftwareClick={onSoftwareClick}
+          onArtsClick={onArtsClick}
+          onAboutClick={onAboutClick}
+          onContactClick={onContactClick}
+          isDialogOpen={isDialogOpen}
+          isLoaderActive={showLoader}
+          onScreenHoverChange={handleScreenHoverChange}
+          currentVideoIndex={currentVideoIndex}
+          onVideoIndexChange={handleVideoIndexChange}
+        />
         <LimitedOrbitControls limitMaxDistance={!isZooming && !showLoader} />
       </Canvas>
     </div>
