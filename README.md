@@ -10,6 +10,7 @@ Come visit me: [vincentxian.com](https://vincentxian.com/)
 - **React Three Fiber** - React renderer for three.js, powering the 3D scene
 - **GSAP & Framer Motion** - Animations and transitions
 - **EmailJS** - Contact form integration
+- **Howler.js** - Sound effects
 - **Prisma** - Database ORM
 - **Maya & Substance Painter** - All 3D objects (except terrain blocks) custom modeled and textured
 
