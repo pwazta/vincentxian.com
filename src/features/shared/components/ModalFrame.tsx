@@ -17,8 +17,16 @@ type ModalFrameProps = {
 };
 
 export function ModalFrame({open, onOpenChange, title, children, footer, className}: ModalFrameProps) {
+  const handleOpenChange = (newOpen: boolean) => {
+    // Play click sound when closing (escape key, click outside, or close button)
+    if (!newOpen && open) {
+      playSound("click");
+    }
+    onOpenChange(newOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className={className ?? "w-[95%] md:w-[90%] md:max-w-[820px] max-h-[90vh]"}>
         <DialogTitle className="text-2xl font-semibold text-foreground">
           {title}
@@ -36,7 +44,7 @@ export function ModalFrame({open, onOpenChange, title, children, footer, classNa
           <DialogFooter className="border-t border-accent/20 pt-3 md:pt-4 flex-shrink-0">
             <Button
               variant="outline"
-              onClick={() => { playSound("click"); onOpenChange(false); }}
+              onClick={() => handleOpenChange(false)}
               className="border-accent/30 hover:bg-accent/10 cursor-pointer"
             >
               Close

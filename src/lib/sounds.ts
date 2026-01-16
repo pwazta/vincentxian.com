@@ -24,7 +24,7 @@ function initSounds() {
   };
 }
 
-let isMuted = false; // Start muted by default
+let isMuted = false; // Start unmuted by default
 let hasEnteredScene = false; // Track if user has entered the scene
 
 export function playSound(name: "pop" | "click" | "whoosh") {
@@ -41,12 +41,6 @@ export function startAmbient() {
   hasEnteredScene = true;
   if (!isMuted && sounds && !sounds.wind.playing()) {
     sounds.wind.play();
-  }
-}
-
-export function stopAmbient() {
-  if (sounds) {
-    sounds.wind.stop();
   }
 }
 
