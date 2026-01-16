@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { getMuted, setMuted, playSound } from "~/lib/sounds";
 
 export function SoundToggle() {
-  const [muted, setMutedState] = useState(true);
+  const [muted, setMutedState] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
