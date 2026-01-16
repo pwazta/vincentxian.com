@@ -11,6 +11,7 @@ import { Dialog, DialogTitle, DialogDescription } from "~/features/shared/compon
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cn } from "~/lib/utils";
 import { useIsMobile } from "~/features/shared/hooks/use-mobile";
+import { playSound } from "~/lib/sounds";
 
 export interface ImageGalleryImage {
   src: string | StaticImageData;
@@ -30,6 +31,11 @@ export function ImageGalleryModal({images, isOpen, onClose, initialIndex = 0, pr
   const isMobile = useIsMobile();
   const [currentIndex, setCurrentIndex] = React.useState(initialIndex);
 
+  const handleClose = React.useCallback(() => {
+    playSound("click");
+    onClose();
+  }, [onClose]);
+
   const goToPrevious = React.useCallback(() => setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1)), [images.length]);
   const goToNext = React.useCallback(() => setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1)), [images.length]);
 
@@ -37,39 +43,26 @@ export function ImageGalleryModal({images, isOpen, onClose, initialIndex = 0, pr
     if (isOpen) setCurrentIndex(Math.max(0, Math.min(initialIndex, images.length - 1)));
   }, [initialIndex, isOpen, images.length]);
 
-  // Preload adjacent images for faster navigation
+  // Preload all images when gallery opens for instant navigation
   React.useEffect(() => {
     if (!isOpen || images.length <= 1) return;
 
-    const preloadImage = (index: number) => {
-      const img = images[index];
-      if (!img) return;
+    images.forEach((img) => {
       const imageSrc = typeof img.src === "string" ? img.src : img.src.src;
-      const preloadLink = document.createElement("link");
-      preloadLink.rel = "preload";
-      preloadLink.as = "image";
-      preloadLink.href = imageSrc;
-      document.head.appendChild(preloadLink);
-    };
-
-    // Preload next and previous images
-    const nextIndex = (currentIndex + 1) % images.length;
-    const prevIndex = (currentIndex - 1 + images.length) % images.length;
-
-    preloadImage(nextIndex);
-    preloadImage(prevIndex);
-  }, [currentIndex, isOpen, images]);
+      new window.Image().src = imageSrc;
+    });
+  }, [isOpen, images]);
 
   React.useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") goToPrevious();
       else if (e.key === "ArrowRight") goToNext();
-      else if (e.key === "Escape") onClose();
+      else if (e.key === "Escape") handleClose();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, goToPrevious, goToNext, onClose]);
+  }, [isOpen, goToPrevious, goToNext, handleClose]);
 
   if (images.length === 0) return null;
   
@@ -77,7 +70,7 @@ export function ImageGalleryModal({images, isOpen, onClose, initialIndex = 0, pr
   if (!currentImage) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Content
           className={cn(
@@ -98,7 +91,7 @@ export function ImageGalleryModal({images, isOpen, onClose, initialIndex = 0, pr
           <DialogDescription className="sr-only">{currentImage.caption ?? currentImage.alt}</DialogDescription>
           <div className="bg-primary text-white px-2 md:px-3 flex items-center justify-between relative h-10 md:h-12 flex-shrink-0">
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="flex items-center gap-1 md:gap-2 text-white hover:opacity-80 transition-opacity min-w-0 flex-shrink-0"
               aria-label="Back to projects"
             >

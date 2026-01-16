@@ -9,6 +9,7 @@ import { ExternalLink, ZoomIn, ImageOff } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, CarouselDots, type CarouselApi } from "~/features/shared/components/ui/carousel";
 import { ImageGalleryModal, type ImageGalleryImage } from "~/features/shared/components/ImageGalleryModal";
+import { playSound } from "~/lib/sounds";
 
 export interface ProjectCardProps {
   title: string;
@@ -50,12 +51,13 @@ export function ProjectCard({title, description, images, technologies, links = [
                   <CarouselItem key={index}>
                     <div
                       className="relative cursor-pointer group rounded overflow-hidden"
-                      onClick={() => setIsGalleryOpen(true)}
+                      onClick={() => { playSound("click"); setIsGalleryOpen(true); }}
                       role="button"
                       tabIndex={0}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
+                          playSound("click");
                           setIsGalleryOpen(true);
                         }
                       }}
