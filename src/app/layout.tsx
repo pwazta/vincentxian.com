@@ -9,7 +9,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
   title: "vx.dev",
-  description: "Vincent's stuff ^^",
+  description: "Vincent's 3D portfolio site 🍀",
   icons: [{ rel: "icon", url: "/logo.svg" }],
 };
 

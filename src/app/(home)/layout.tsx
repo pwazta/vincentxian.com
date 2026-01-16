@@ -1,6 +1,6 @@
 export const metadata = {
   title: "vx.dev",
-  description: "Vincent's stuff ^^",
+  description: "Vincent's 3D portfolio site 🍀",
 };
 
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
