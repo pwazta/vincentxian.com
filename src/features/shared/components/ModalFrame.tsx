@@ -5,6 +5,7 @@
 import * as React from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
 import { Button } from "./ui/button";
+import { playSound } from "~/lib/sounds";
 
 type ModalFrameProps = {
   open: boolean;
@@ -35,7 +36,7 @@ export function ModalFrame({open, onOpenChange, title, children, footer, classNa
           <DialogFooter className="border-t border-accent/20 pt-3 md:pt-4 flex-shrink-0">
             <Button
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => { playSound("click"); onOpenChange(false); }}
               className="border-accent/30 hover:bg-accent/10 cursor-pointer"
             >
               Close

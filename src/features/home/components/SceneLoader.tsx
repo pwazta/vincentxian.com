@@ -9,6 +9,7 @@ import { useProgress } from "@react-three/drei";
 import { motion } from "framer-motion";
 import { Button } from "~/features/shared/components/ui/button";
 import { Lightbulb } from "lucide-react";
+import { playSound, startAmbient } from "~/lib/sounds";
 
 type SceneLoaderProps = { onLoaded?: () => void; onEnterClick?: () => void }
 
@@ -49,7 +50,14 @@ export function SceneLoader({ onLoaded, onEnterClick }: SceneLoaderProps) {
   const handleEnter = () => {
     if (isHiding) return;
     setIsHiding(true);
+    playSound("click");
+    playSound("whoosh");
     onEnterClick?.();
+
+    // Start ambient after the transition
+    setTimeout(() => {
+      startAmbient();
+    }, 200);
 
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     hideTimerRef.current = setTimeout(() => {

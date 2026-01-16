@@ -9,6 +9,8 @@ import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "~/features/shared/components/ui/button";
 import { ThemeToggle } from "~/features/shared/components/ThemeToggle";
+import { SoundToggle } from "~/features/shared/components/SoundToggle";
+import { playSound } from "~/lib/sounds";
 
 type NavbarProps = {
   onSoftwareClick: () => void;
@@ -119,6 +121,10 @@ export function Navbar({
           </AnimatePresence>
 
           <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
+            <SoundToggle />
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
             <ThemeToggle />
           </motion.div>
 
@@ -126,7 +132,7 @@ export function Navbar({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={() => { playSound("click"); setIsOpen(!isOpen); }}
               className="hover:bg-accent/10 cursor-pointer"
               aria-label="Toggle menu"
             >
@@ -149,6 +155,10 @@ export function Navbar({
         {/* Mobile: Icons only */}
         <div className="flex sm:hidden items-center gap-4">
           <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
+            <SoundToggle />
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
             <ThemeToggle />
           </motion.div>
 
@@ -156,7 +166,7 @@ export function Navbar({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={() => { playSound("click"); setIsOpen(!isOpen); }}
               className="hover:bg-accent/10 cursor-pointer"
               aria-label="Toggle menu"
             >

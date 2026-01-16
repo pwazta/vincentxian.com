@@ -8,6 +8,7 @@ import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
+import { playSound } from "~/lib/sounds";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -23,7 +24,7 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={() => { playSound("click"); setTheme(theme === "dark" ? "light" : "dark"); }}
       className="hover:bg-accent/10 cursor-pointer"
       aria-label="Toggle theme"
     >

@@ -8,6 +8,7 @@ import * as React from "react";
 import { Navbar } from "~/features/home/components/Navbar";
 import { PortfolioScene } from "~/features/home/components/PortfolioScene";
 import { ModalFrame } from "~/features/shared/components/ModalFrame";
+import { playSound } from "~/lib/sounds";
 import { SoftwareContent } from "~/app/(home)/_components/SoftwareContent";
 import { ArtsContent } from "~/app/(home)/_components/ArtsContent";
 import { AboutContent } from "~/app/(home)/_components/AboutContent";
@@ -24,10 +25,10 @@ export default function Home() {
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-background">
       <Navbar
-        onSoftwareClick={() => setSoftwareOpen(true)}
-        onArtsClick={() => setArtsOpen(true)}
-        onAboutClick={() => setAboutOpen(true)}
-        onContactClick={() => setContactOpen(true)}
+        onSoftwareClick={() => { playSound("click"); setSoftwareOpen(true); }}
+        onArtsClick={() => { playSound("click"); setArtsOpen(true); }}
+        onAboutClick={() => { playSound("click"); setAboutOpen(true); }}
+        onContactClick={() => { playSound("click"); setContactOpen(true); }}
       />
       <div className="h-full w-full">
         <PortfolioScene

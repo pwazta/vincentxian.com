@@ -9,6 +9,7 @@ import * as THREE from "three";
 import gsap from "gsap";
 import { applyAccentColor, restoreOriginalColors } from "../utils/materialUtils";
 import { getClickActionName, type ClickActions } from "../utils/sceneInteractions";
+import { playSound } from "~/lib/sounds";
 
 const HOVER_SCALE = 1.08;
 const HOVER_OVEREXTEND_SCALE = 1.15;
@@ -51,10 +52,12 @@ export function useObjectInteractions({ intersects, clickActions, enabled = true
 
       // Handle external links
       if (objectName.includes("disk_linkedin")) {
+        playSound("click");
         window.open("https://www.linkedin.com/in/vincent-xian/", "_blank");
         return;
       }
       if (objectName.includes("disk_github")) {
+        playSound("click");
         window.open("https://github.com/pwazta", "_blank");
         return;
       }
@@ -62,6 +65,7 @@ export function useObjectInteractions({ intersects, clickActions, enabled = true
       // Handle modal actions
       const actionName = getClickActionName(objectName);
       if (actionName && clickActions[actionName]) {
+        playSound("click");
         clickActions[actionName]();
       }
     };
@@ -276,6 +280,7 @@ export function useObjectInteractions({ intersects, clickActions, enabled = true
 
       // Apply hover to new target
       playHoverAnimation(metadata.originalObject, metadata.initialScale, metadata.initialPosition, true);
+      playSound("pop");
       if (metadata.interactionType === "clickable") applyAccentColor(metadata.originalObject);
 
       hoveredMeshRef.current = hoveredMesh;
