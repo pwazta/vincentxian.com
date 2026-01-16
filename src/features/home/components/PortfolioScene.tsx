@@ -281,26 +281,34 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
   return (
     <>
       {/* Ambient light for overall scene illumination - reduces harsh shadows */}
-      <ambientLight intensity={0.4} />
+      <ambientLight intensity={ 0.3 } />
 
       {isDarkMode ? (
         // Dark mode: Spotlight for dramatic moonlight effect
-        <spotLight
-          position={[-1, 8, 1]}
-          angle={Math.PI / 1.5}
-          penumbra={0.8}
-          color={"#FFF"}
-          intensity={35}
-          distance={25}
-          castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
-          shadow-camera-far={40}
-          shadow-bias={-0.001}
-          shadow-normalBias={0.03}
-        />
+        <>
+          <spotLight
+            position={[-1, 8, 2]}
+            angle={Math.PI / 1.5}
+            penumbra={0.8}
+            color={"#FFF"}
+            intensity={25}
+            distance={25}
+            castShadow
+            shadow-mapSize-width={2048}
+            shadow-mapSize-height={2048}
+            shadow-camera-far={40}
+            shadow-bias={-0.001}
+            shadow-normalBias={0.03}
+          />
+          <directionalLight
+            position={[-2, 6, -1]}
+            intensity={0.8}
+            castShadow={false}
+          />
+        </>
       ) : (
         // Light mode: Directional light for natural sunlight
+        <>
         <directionalLight
           position={[3, 6, 8]}
           intensity={1}
@@ -315,6 +323,12 @@ function SceneContent({ onSoftwareClick, onArtsClick, onAboutClick, onContactCli
           shadow-bias={-0.001}
           shadow-normalBias={0.03}
         />
+        <directionalLight
+          position={[2, 5, -5]}
+          intensity={0.4}
+          castShadow={false}
+        />
+        </>
       )}
 
       {/* Grid */}
