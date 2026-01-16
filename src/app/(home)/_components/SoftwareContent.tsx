@@ -26,7 +26,12 @@ export function SoftwareContent() {
         },
       ],
       technologies: ["NextJS", "React Three Fiber", "T3", "GSAP"],
-      links: [],
+      links: [
+        {
+          url: "https://github.com/pwazta/vincentxian.com",
+          label: "GitHub",
+        },
+      ],
     },
     {
       title: "Whisker Isles",
