@@ -16,7 +16,7 @@ Come visit me: [vincentxian.com](https://vincentxian.com/)
 
 ### Credits
 
-- [PixelJeff](https://www.deviantart.com/pixeljeff) - Art displayed on the computer screen
+- [PixelJeff](https://www.deviantart.com/pixeljeff) - 2D Art displayed on the computer screen
 - [Ebenezer](https://tympanus.net/codrops/2025/02/04/how-to-make-the-fluffiest-grass-with-three-js/) - Grass field rendering (MIT License)
 
 ---
