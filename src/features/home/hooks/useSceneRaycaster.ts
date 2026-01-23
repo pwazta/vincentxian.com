@@ -33,7 +33,7 @@ export function useSceneRaycaster({ interactiveMeshes, enabled = true }: UseScen
     lastEnabledStateRef.current = enabled;
   }, [enabled]);
 
-  /** Update pointer on mouse/touch move */
+  /** Update pointer on pointer move/down (unified mouse + touch) */
   React.useEffect(() => {
     if (!enabled) return;
 
@@ -43,23 +43,20 @@ export function useSceneRaycaster({ interactiveMeshes, enabled = true }: UseScen
       requiresMouseMoveRef.current = false;
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handlePointerMove = (e: PointerEvent) => {
       updatePointer(e.clientX, e.clientY);
     };
 
-    const handleTouchMove = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      if (touch) {
-        updatePointer(touch.clientX, touch.clientY);
-      }
+    const handlePointerDown = (e: PointerEvent) => {
+      updatePointer(e.clientX, e.clientY);
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerdown", handlePointerDown);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerdown", handlePointerDown);
     };
   }, [size.width, size.height, enabled]);
 

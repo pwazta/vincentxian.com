@@ -177,6 +177,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  canvas {
+    touch-action: manipulation;
+  }
 }
 
 @keyframes dialog-in {

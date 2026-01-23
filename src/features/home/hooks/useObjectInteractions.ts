@@ -37,7 +37,7 @@ export function useObjectInteractions({ intersects, clickActions, enabled = true
   const reenableCooldownRef = React.useRef<number | null>(null);
   const isScreenHoveredRef = React.useRef(false);
 
-  // Handle click events
+  // Handle click events (works for both mouse and touch via pointer events)
   React.useEffect(() => {
     if (!enabled) return;
 
@@ -72,17 +72,10 @@ export function useObjectInteractions({ intersects, clickActions, enabled = true
       }
     };
 
-    const handleTouchEnd = (e: TouchEvent) => {
-      e.preventDefault();
-      handleClick();
-    };
-
     window.addEventListener("click", handleClick);
-    window.addEventListener("touchend", handleTouchEnd, { passive: false });
 
     return () => {
       window.removeEventListener("click", handleClick);
-      window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [clickActions, enabled]);
 
