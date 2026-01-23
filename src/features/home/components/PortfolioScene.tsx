@@ -65,7 +65,9 @@ function CameraMove({ start, to, speed = 0.8, onComplete }: {
 	useFrame((_, delta) => {
 		if (start && !hasAnimated.current) {
 			// Capture current camera position on first frame of animation
-			startPosition.current ??= camera.position.clone();
+			if (!startPosition.current) {
+				startPosition.current = camera.position.clone();
+			}
 
 			animationProgress.current += delta * speed;
 			const t = Math.min(animationProgress.current, 1);
