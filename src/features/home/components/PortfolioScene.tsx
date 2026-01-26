@@ -65,6 +65,8 @@ function CameraMove({ start, to, speed = 0.8, onComplete }: {
 	useFrame((_, delta) => {
 		if (start && !hasAnimated.current) {
 			// Capture current camera position on first frame of animation
+			// NOTE: Do not remove this eslint-disable - using ??= here causes camera animation jitter
+			// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
 			if (!startPosition.current) {
 				startPosition.current = camera.position.clone();
 			}
