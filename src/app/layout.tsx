@@ -5,6 +5,7 @@ import { Albert_Sans, Aleo, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "next-themes";
 
+import { Analytics } from "@vercel/analytics/next";
 import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
@@ -41,6 +42,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <TRPCReactProvider>{children}</TRPCReactProvider>
           <Toaster />
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
