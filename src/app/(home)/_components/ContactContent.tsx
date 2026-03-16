@@ -1,23 +1,25 @@
-/**
- * Contact section content component
- * Used in: Portfolio modal for Contact section
- */
+// Contact section content component
+// Used in: Portfolio modal for Contact section
+
 "use client";
 
 import * as React from "react";
 import { Mail, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import emailjs from "@emailjs/browser";
 import { Input } from "~/features/shared/components/ui/input";
 import { Textarea } from "~/features/shared/components/ui/textarea";
 import { Button } from "~/features/shared/components/ui/button";
 import { SocialLinks } from "~/features/shared/components/SocialLinks";
+
+// ── Types ───────────────────────────────────────────────────────────────────
 
 interface FormErrors {
   name?: string;
   email?: string;
   message?: string;
 }
+
+// ── Component ───────────────────────────────────────────────────────────────
 
 export function ContactContent() {
   const [name, setName] = React.useState("");
@@ -26,29 +28,16 @@ export function ContactContent() {
   const [errors, setErrors] = React.useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const validateEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    if (!name.trim()) {
-      newErrors.name = "Name is required";
-    }
-
-    if (!email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!validateEmail(email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
-    if (!message.trim()) {
-      newErrors.message = "Message is required";
-    } else if (message.trim().length < 10) {
-      newErrors.message = "Message must be at least 10 characters";
-    }
+    if (!name.trim()) newErrors.name = "Name is required";
+    if (!email.trim()) newErrors.email = "Email is required";
+    else if (!validateEmail(email)) newErrors.email = "Please enter a valid email address";
+    if (!message.trim()) newErrors.message = "Message is required";
+    else if (message.trim().length < 10) newErrors.message = "Message must be at least 10 characters";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -56,32 +45,25 @@ export function ContactContent() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
 
     try {
-      const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
-      const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
-      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
-
-      if (!serviceId || !templateId || !publicKey) {
-        throw new Error("EmailJS configuration is missing");
-      }
-
-      await emailjs.send(
-        serviceId,
-        templateId,
-        {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           name: name.trim(),
           email: email.trim(),
           message: message.trim(),
-        },
-        publicKey
-      );
+        }),
+      });
+
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        throw new Error(data.error ?? "Failed to send message");
+      }
 
       toast.success("Message sent successfully! I'll get back to you soon.");
       setName("");
@@ -89,8 +71,8 @@ export function ContactContent() {
       setMessage("");
       setErrors({});
     } catch (error) {
-      console.error("EmailJS error:", error);
-      toast.error("Failed to send message. Please try again later.");
+      const msg = error instanceof Error ? error.message : "Failed to send message";
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -132,9 +114,7 @@ export function ContactContent() {
             value={name}
             onChange={(e) => {
               setName(e.target.value);
-              if (errors.name) {
-                setErrors({ ...errors, name: undefined });
-              }
+              if (errors.name) setErrors({ ...errors, name: undefined });
             }}
             aria-invalid={errors.name ? "true" : "false"}
             aria-describedby={errors.name ? "name-error" : undefined}
@@ -142,9 +122,7 @@ export function ContactContent() {
             placeholder="Enter your name"
           />
           {errors.name && (
-            <p id="name-error" className="text-sm text-destructive">
-              {errors.name}
-            </p>
+            <p id="name-error" className="text-sm text-destructive">{errors.name}</p>
           )}
         </div>
 
@@ -159,9 +137,7 @@ export function ContactContent() {
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
-              if (errors.email) {
-                setErrors({ ...errors, email: undefined });
-              }
+              if (errors.email) setErrors({ ...errors, email: undefined });
             }}
             aria-invalid={errors.email ? "true" : "false"}
             aria-describedby={errors.email ? "email-error" : undefined}
@@ -169,9 +145,7 @@ export function ContactContent() {
             placeholder="xxx@xxx"
           />
           {errors.email && (
-            <p id="email-error" className="text-sm text-destructive">
-              {errors.email}
-            </p>
+            <p id="email-error" className="text-sm text-destructive">{errors.email}</p>
           )}
         </div>
 
@@ -185,9 +159,7 @@ export function ContactContent() {
             value={message}
             onChange={(e) => {
               setMessage(e.target.value);
-              if (errors.message) {
-                setErrors({ ...errors, message: undefined });
-              }
+              if (errors.message) setErrors({ ...errors, message: undefined });
             }}
             aria-invalid={errors.message ? "true" : "false"}
             aria-describedby={errors.message ? "message-error" : undefined}
@@ -197,20 +169,13 @@ export function ContactContent() {
             className="resize-y min-h-[100px]"
           />
           {errors.message && (
-            <p id="message-error" className="text-sm text-destructive">
-              {errors.message}
-            </p>
+            <p id="message-error" className="text-sm text-destructive">{errors.message}</p>
           )}
         </div>
 
         {/* Submit Button */}
         <div className="flex justify-start">
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            variant="default"
-            className="cursor-pointer"
-          >
+          <Button type="submit" disabled={isSubmitting} variant="default" className="cursor-pointer">
             {isSubmitting ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
