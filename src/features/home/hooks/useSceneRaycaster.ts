@@ -24,6 +24,8 @@ export function useSceneRaycaster({ interactiveMeshes, enabled = true }: UseScen
   const [intersects, setIntersects] = React.useState<THREE.Intersection[]>([]);
   const lastEnabledStateRef = React.useRef(enabled);
   const requiresMouseMoveRef = React.useRef(false);
+  // Skips setIntersects when the closest hit is unchanged. Consumers only read intersects[0].
+  const prevHitUuidRef = React.useRef<string | null>(null);
 
   /** Track when interactions are re-enabled to require mouse movement before detecting intersections */
   React.useEffect(() => {
@@ -62,13 +64,20 @@ export function useSceneRaycaster({ interactiveMeshes, enabled = true }: UseScen
 
   useFrame(() => {
     if (!enabled || interactiveMeshes.length === 0 || requiresMouseMoveRef.current) {
-      setIntersects([]);
+      if (prevHitUuidRef.current !== null) {
+        prevHitUuidRef.current = null;
+        setIntersects([]);
+      }
       return;
     }
 
     raycaster.current.setFromCamera(pointer.current, camera);
     const intersections = raycaster.current.intersectObjects(interactiveMeshes, false);
-    setIntersects(intersections);
+    const nextHitUuid = intersections[0]?.object.uuid ?? null;
+    if (nextHitUuid !== prevHitUuidRef.current) {
+      prevHitUuidRef.current = nextHitUuid;
+      setIntersects(intersections);
+    }
   });
 
   return { intersects };

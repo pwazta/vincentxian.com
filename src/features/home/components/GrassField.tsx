@@ -44,6 +44,14 @@ export function GrassField({ grassCount = 1000, terrainScale = 2, terrainHeightS
 		grassHeightScale: number;
 	} | null>(null);
 
+	// Held in a ref so theme toggles mutate color in place instead of re-running the heavy setup effect.
+	const terrainMaterialRef = React.useRef<THREE.MeshPhongMaterial | null>(null);
+	// Mirrors isDarkMode without being a setup-effect dep, so theme changes don't trigger a rebuild.
+	const isDarkModeRef = React.useRef(isDarkMode);
+	React.useEffect(() => {
+		isDarkModeRef.current = isDarkMode;
+	}, [isDarkMode]);
+
 	// Load terrain model
 	const islandModel = useGLTF("/models/island.glb");
 	const grassLODsModel = useGLTF("/models/grassLODs.glb");
@@ -99,6 +107,12 @@ export function GrassField({ grassCount = 1000, terrainScale = 2, terrainHeightS
 		}
 	}, [grassMaterial, isDarkMode]);
 
+	/** Update terrain color on theme change without rebuilding the grass instances */
+	React.useEffect(() => {
+		const terrainColor = isDarkMode ? "#2a3d2a" : "#5e875e";
+		terrainMaterialRef.current?.color.set(terrainColor);
+	}, [isDarkMode]);
+
 	/** Cleanup all resources on unmount in correct order */
 	React.useEffect(() => {
 		isMountedRef.current = true;
@@ -153,8 +167,9 @@ export function GrassField({ grassCount = 1000, terrainScale = 2, terrainHeightS
 			lastScaleParamsRef.current.grassScale !== grassScale ||
 			lastScaleParamsRef.current.grassHeightScale !== grassHeightScale;
 
-		const terrainColor = isDarkMode ? "#2a3d2a" : "#5e875e";
+		const terrainColor = isDarkModeRef.current ? "#2a3d2a" : "#5e875e";
 		const terrainMaterial = new THREE.MeshPhongMaterial({ color: terrainColor });
+		terrainMaterialRef.current = terrainMaterial;
 
 		let terrainMesh: THREE.Mesh | null = null;
 		let terrainGeometry: THREE.BufferGeometry | null = null;
@@ -253,6 +268,9 @@ export function GrassField({ grassCount = 1000, terrainScale = 2, terrainHeightS
 			instancedMesh.dispose();
 			if (terrainMaterial) {
 				terrainMaterial.dispose();
+				if (terrainMaterialRef.current === terrainMaterial) {
+					terrainMaterialRef.current = null;
+				}
 			}
 		};
 	}, [
@@ -264,7 +282,6 @@ export function GrassField({ grassCount = 1000, terrainScale = 2, terrainHeightS
 		terrainHeightScale,
 		grassScale,
 		grassHeightScale,
-		isDarkMode,
 	]);
 
 	/** Update grass animation */
