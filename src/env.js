@@ -16,10 +16,6 @@ export const env = createEnv({
       .enum(["development", "test", "production"])
       .default("development"),
 
-    // Rate limiting (Upstash Redis) — optional, rate limiting disabled without these
-    UPSTASH_REDIS_REST_URL: z.string().url().optional(),
-    UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
-
     // EmailJS — server-side only, used by /api/contact route
     EMAILJS_SERVICE_ID: z.string(),
     EMAILJS_TEMPLATE_ID: z.string(),
@@ -40,8 +36,6 @@ export const env = createEnv({
     EMAILJS_SERVICE_ID: process.env.EMAILJS_SERVICE_ID,
     EMAILJS_TEMPLATE_ID: process.env.EMAILJS_TEMPLATE_ID,
     EMAILJS_PUBLIC_KEY: process.env.EMAILJS_PUBLIC_KEY,
-    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
-    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     EMAILJS_PRIVATE_KEY: process.env.EMAILJS_PRIVATE_KEY,
   },
   /**
