@@ -19,6 +19,8 @@ export default function Home() {
   const [artsOpen, setArtsOpen] = React.useState(false);
   const [aboutOpen, setAboutOpen] = React.useState(false);
   const [contactOpen, setContactOpen] = React.useState(false);
+  const [sceneReady, setSceneReady] = React.useState(false);
+  const [userInteracted, setUserInteracted] = React.useState(false);
 
   const isAnyDialogOpen = softwareOpen || artsOpen || aboutOpen || contactOpen;
 
@@ -29,6 +31,8 @@ export default function Home() {
         onArtsClick={() => { playSound("click"); setArtsOpen(true); }}
         onAboutClick={() => { playSound("click"); setAboutOpen(true); }}
         onContactClick={() => { playSound("click"); setContactOpen(true); }}
+        sceneReady={sceneReady}
+        userInteracted={userInteracted}
       />
       <div className="h-full w-full">
         <PortfolioScene
@@ -37,6 +41,8 @@ export default function Home() {
           onAboutClick={() => setAboutOpen(true)}
           onContactClick={() => setContactOpen(true)}
           isDialogOpen={isAnyDialogOpen}
+          onReady={() => setSceneReady(true)}
+          onUserInteract={() => setUserInteracted(true)}
         />
       </div>
 

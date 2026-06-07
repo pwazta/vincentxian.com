@@ -89,7 +89,7 @@ function CameraMove({ start, to, speed = 0.8, onComplete }: {
 }
 
 /** OrbitControls with pan limits - clamps target instead of camera to prevent rotation issues */
-function LimitedOrbitControls({ limitMaxDistance }: { limitMaxDistance: boolean }) {
+function LimitedOrbitControls({ limitMaxDistance, onUserInteract }: { limitMaxDistance: boolean; onUserInteract?: () => void }) {
 	const { controls, camera } = useThree();
 	const ISLAND_FLOOR_Y = 1.5; // Hard limit - no camera below this
 	const targetInitialized = React.useRef(false);
@@ -112,7 +112,7 @@ function LimitedOrbitControls({ limitMaxDistance }: { limitMaxDistance: boolean 
 
 	// Disable distance limits during intro animation
 	const maxDist = limitMaxDistance ? 12 : 100;
-	return <OrbitControls makeDefault enablePan={true} enableZoom={true} enableRotate={true} minDistance={2} maxDistance={maxDist} />;
+	return <OrbitControls makeDefault enablePan={true} enableZoom={true} enableRotate={true} minDistance={2} maxDistance={maxDist} onStart={onUserInteract} />;
 }
 
 type PortfolioSceneProps = {
@@ -121,6 +121,8 @@ type PortfolioSceneProps = {
   onAboutClick: () => void;
   onContactClick: () => void;
   isDialogOpen: boolean;
+  onReady?: () => void;
+  onUserInteract?: () => void;
 };
 
 type SceneContentProps = PortfolioSceneProps & {
@@ -336,7 +338,7 @@ function CreditToast({ isVisible, artist, artistUrl, onMouseEnter, onMouseLeave 
 }
 
 /** Main exported component - sets up Canvas, loader, and camera animation */
-export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen }: PortfolioSceneProps) {
+export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, isDialogOpen, onReady, onUserInteract }: PortfolioSceneProps) {
   const [showLoader, setShowLoader] = React.useState(true);
   const [isZooming, setIsZooming] = React.useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = React.useState(0);
@@ -345,6 +347,8 @@ export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onC
   const [showCredit, setShowCredit] = React.useState(false);
   const hoverDelayRef = React.useRef<NodeJS.Timeout | null>(null);
   const hideDelayRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const handleControlsStart = React.useCallback(() => onUserInteract?.(), [onUserInteract]);
 
   const handleVideoIndexChange = React.useCallback(() => {
     setCurrentVideoIndex((prev) => (prev + 1) % VIDEO_COUNT);
@@ -401,7 +405,7 @@ export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onC
 
   return (
     <div className="relative h-full w-full" style={{ pointerEvents: isDialogOpen ? "none" : "auto" }}>
-      {showLoader && <SceneLoader onLoaded={() => setShowLoader(false)} onEnterClick={() => setIsZooming(true)} />}
+      {showLoader && <SceneLoader onLoaded={() => { setShowLoader(false); onReady?.(); }} onEnterClick={() => setIsZooming(true)} />}
       <CreditToast isVisible={showCredit || isCreditHovered} artist={currentCredit?.artist} artistUrl={currentCredit?.artistUrl} onMouseEnter={handleCreditMouseEnter} onMouseLeave={handleCreditMouseLeave} />
       <Canvas
         shadows
@@ -427,7 +431,7 @@ export function PortfolioScene({ onSoftwareClick, onArtsClick, onAboutClick, onC
           currentVideoIndex={currentVideoIndex}
           onVideoIndexChange={handleVideoIndexChange}
         />
-        <LimitedOrbitControls limitMaxDistance={!isZooming && !showLoader} />
+        <LimitedOrbitControls limitMaxDistance={!isZooming && !showLoader} onUserInteract={handleControlsStart} />
       </Canvas>
     </div>
   );

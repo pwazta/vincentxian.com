@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "~/features/shared/components/ui/button";
 import { ThemeToggle } from "~/features/shared/components/ThemeToggle";
 import { SoundToggle } from "~/features/shared/components/SoundToggle";
+import { ControlsHint } from "./ControlsHint";
 import { playSound } from "~/lib/sounds";
 
 type NavbarProps = {
@@ -17,9 +18,11 @@ type NavbarProps = {
   onArtsClick: () => void;
   onAboutClick: () => void;
   onContactClick: () => void;
+  sceneReady: boolean;
+  userInteracted: boolean;
 };
 
-export function Navbar({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick }: NavbarProps) {
+export function Navbar({ onSoftwareClick, onArtsClick, onAboutClick, onContactClick, sceneReady, userInteracted }: NavbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleMenuClick = (callback: () => void) => {
@@ -115,6 +118,8 @@ export function Navbar({ onSoftwareClick, onArtsClick, onAboutClick, onContactCl
             )}
           </AnimatePresence>
 
+          <ControlsHint ready={sceneReady} userInteracted={userInteracted} />
+
           <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
             <SoundToggle />
           </motion.div>
@@ -149,6 +154,8 @@ export function Navbar({ onSoftwareClick, onArtsClick, onAboutClick, onContactCl
 
         {/* Mobile: Icons only */}
         <div className="flex sm:hidden items-center gap-4">
+          <ControlsHint ready={sceneReady} userInteracted={userInteracted} />
+
           <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
             <SoundToggle />
           </motion.div>
