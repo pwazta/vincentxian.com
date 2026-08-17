@@ -2,6 +2,8 @@
  * Reusable experience/activity card component with image, title, role, and description
  * Used in: ExperienceContent and ActivitiesContent for About modal tabs
  */
+"use client";
+
 import * as React from "react";
 import Image, { type StaticImageData } from "next/image";
 import { cn } from "~/lib/utils";
@@ -13,10 +15,14 @@ export interface ExperienceCardProps {
   role: string;
   dates?: string;
   description: string;
+  /** Remainder of the description, hidden behind a read more toggle. */
+  details?: string;
   className?: string;
 }
 
-export function ExperienceCard({image, imageAlt, title, role, dates, description, className}: ExperienceCardProps) {
+export function ExperienceCard({image, imageAlt, title, role, dates, description, details, className}: ExperienceCardProps) {
+  const [expanded, setExpanded] = React.useState(false);
+
   return (
     <div className={cn("flex flex-col md:flex-row gap-3 md:gap-4 p-3 md:p-4 rounded transition-colors hover:bg-muted", className)}>
       {/* Left: Image */}
@@ -40,7 +46,22 @@ export function ExperienceCard({image, imageAlt, title, role, dates, description
           {role}
           {dates && <span className="text-foreground/50"> · {dates}</span>}
         </p>
-        <p className="text-foreground/90 text-sm mt-2 flex-1">{description}</p>
+        <p className="text-foreground/90 text-sm mt-2 flex-1">
+          {description}
+          {details && (
+            <>
+              {expanded && ` ${details}`}
+              <button
+                type="button"
+                aria-expanded={expanded}
+                onClick={() => setExpanded((prev) => !prev)}
+                className="ml-1.5 font-medium text-primary hover:underline cursor-pointer"
+              >
+                {expanded ? "read less" : "read more..."}
+              </button>
+            </>
+          )}
+        </p>
       </div>
     </div>
   );
