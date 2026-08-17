@@ -53,9 +53,7 @@ export function ExperienceContent() {
       role: "Software Engineer (Contract)",
       dates: "Jan 2026",
       description:
-        "Polar is an AI browser that autonomously runs internet tasks, from quick lookups to hours-long research, inside the accounts you already use.",
-      details:
-        "Owned testing and evaluation, running WebArena benchmarks against the leading browser and frontier models of the time.",
+        "Polar is an AI browser that autonomously runs internet tasks and automations from quick lookups to hours-long research inside integrated browsers. Owned testing and evaluation, running WebArena benchmarks against leading frontier models like Claude, Perplexity Comet, Codex and Manus.",
     },
     {
       image: logoChakra,
@@ -64,9 +62,7 @@ export function ExperienceContent() {
       role: "Software Engineer",
       dates: "Dec 2025 - Mar 2026",
       description:
-        "Chakra Labs engineers high-fidelity trajectories and environments for frontier AI research.",
-      details:
-        "Built production grade clones of complex consumer apps for training automation, including Canva and a full Gmail clone.",
+        "Chakra Labs engineers high-fidelity trajectories and environments for frontier AI research. Built production grade clones of complex consumer apps for training automation, including Canva and a full Gmail clone.",
     },
     {
       image: logoMykaion,
