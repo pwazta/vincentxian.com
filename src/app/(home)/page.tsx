@@ -24,6 +24,37 @@ export default function Home() {
 
   const isAnyDialogOpen = softwareOpen || artsOpen || aboutOpen || contactOpen;
 
+  const sceneReadyRef = React.useRef(false);
+  const pendingSectionRef = React.useRef<string | null>(null);
+
+  // Show exactly the hash's section ("" closes all)
+  const openSection = React.useCallback((slug: string) => {
+    setSoftwareOpen(slug === "software");
+    setArtsOpen(slug === "arts");
+    setAboutOpen(slug === "about");
+    setContactOpen(slug === "contact");
+  }, []);
+
+  // Sync modals from hash; defer until entered so none opens over the loader. hashchange handles live edits
+  React.useEffect(() => {
+    const syncFromHash = () => {
+      const slug = window.location.hash.slice(1);
+      if (sceneReadyRef.current) openSection(slug);
+      else if (slug) pendingSectionRef.current = slug;
+    };
+    syncFromHash();
+    window.addEventListener("hashchange", syncFromHash);
+    return () => window.removeEventListener("hashchange", syncFromHash);
+  }, [openSection]);
+
+  // Mirror open modal to hash, post-entry only so the deep link survives load (replaceState = no reload)
+  React.useEffect(() => {
+    if (!sceneReady) return;
+    const active = softwareOpen ? "#software" : artsOpen ? "#arts" : aboutOpen ? "#about" : contactOpen ? "#contact" : "";
+    if (active === window.location.hash) return;
+    window.history.replaceState(null, "", active || window.location.pathname + window.location.search);
+  }, [sceneReady, softwareOpen, artsOpen, aboutOpen, contactOpen]);
+
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-background">
       <Navbar
@@ -41,7 +72,14 @@ export default function Home() {
           onAboutClick={() => setAboutOpen(true)}
           onContactClick={() => setContactOpen(true)}
           isDialogOpen={isAnyDialogOpen}
-          onReady={() => setSceneReady(true)}
+          onReady={() => {
+            sceneReadyRef.current = true;
+            setSceneReady(true);
+            if (pendingSectionRef.current) {
+              openSection(pendingSectionRef.current);
+              pendingSectionRef.current = null;
+            }
+          }}
           onUserInteract={() => setUserInteracted(true)}
         />
       </div>
