@@ -43,16 +43,6 @@ export function ImageGalleryModal({images, isOpen, onClose, initialIndex = 0, pr
     if (isOpen) setCurrentIndex(Math.max(0, Math.min(initialIndex, images.length - 1)));
   }, [initialIndex, isOpen, images.length]);
 
-  // Preload all images when gallery opens for instant navigation
-  React.useEffect(() => {
-    if (!isOpen || images.length <= 1) return;
-
-    images.forEach((img) => {
-      const imageSrc = typeof img.src === "string" ? img.src : img.src.src;
-      new window.Image().src = imageSrc;
-    });
-  }, [isOpen, images]);
-
   React.useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -120,17 +110,25 @@ export function ImageGalleryModal({images, isOpen, onClose, initialIndex = 0, pr
 
             {/* Center: Image + Dots with padding wrapper */}
             <div className="flex-1 flex flex-col items-center justify-center relative min-w-0 px-2">
+              {/* Mount all images so next/image preloads each; nav just toggles opacity */}
               <div className="relative w-full flex-1 flex items-center justify-center">
-                <Image
-                  src={currentImage.src}
-                  alt={currentImage.alt}
-                  fill
-                  className="object-contain"
-                  priority
-                  quality={100}
-                  sizes="95vw"
-                  placeholder={typeof currentImage.src !== "string" ? "blur" : undefined}
-                />
+                {images.map((image, index) => (
+                  <Image
+                    key={index}
+                    src={image.src}
+                    alt={image.alt}
+                    fill
+                    loading="eager"
+                    quality={100}
+                    sizes="95vw"
+                    aria-hidden={index !== currentIndex}
+                    placeholder={typeof image.src !== "string" ? "blur" : undefined}
+                    className={cn(
+                      "object-contain transition-opacity duration-200",
+                      index === currentIndex ? "opacity-100" : "opacity-0 pointer-events-none"
+                    )}
+                  />
+                ))}
               </div>
 
               {/* Dots indicator - no top padding, only bottom padding */}
