@@ -7,18 +7,20 @@
  */
 "use client";
 
-import * as React from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/features/shared/components/ui/tabs";
 import { AboutMeContent } from "./aboutPageContents/AboutMeContent";
 import { ExperienceContent } from "./aboutPageContents/ExperienceContent";
 import { ActivitiesContent } from "./aboutPageContents/ActivitiesContent";
 
-export function AboutContent() {
-  const [activeTab, setActiveTab] = React.useState("about");
+type AboutContentProps = {
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+};
 
+export function AboutContent({ activeTab, onTabChange }: AboutContentProps) {
   return (
-    <Tabs defaultValue="about" value={activeTab} onValueChange={setActiveTab} className="w-full">
+    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
       {/* Mobile: Horizontal tabs with sliding indicator */}
       <TabsList className="md:hidden w-full flex justify-center gap-1 bg-transparent mb-4 relative">
         <TabsTrigger
