@@ -6,6 +6,9 @@ import * as React from "react";
 import { Palette } from "lucide-react";
 import { ProjectCard } from "~/features/shared/components/ProjectCard";
 import { ScrollArea } from "~/features/shared/components/ui/scroll-area";
+import reverie1Image from "~/assets/images/projects/reverie_1.webp";
+import reverie2Image from "~/assets/images/projects/reverie_2.webp";
+import reverie3Image from "~/assets/images/projects/reverie_3.webp";
 import steampunkCityPlazaImage from "~/assets/images/projects/steampunk_city_plaza.webp";
 import steampunkCityStreetsImage from "~/assets/images/projects/steampunk_city_streets.webp";
 import steampunkCityFactoryImage from "~/assets/images/projects/steampunk_city_factory.webp";
@@ -16,6 +19,29 @@ import libraryWireframe2Image from "~/assets/images/projects/3DVis_Library_Wiref
 
 export function ArtsContent() {
   const artworks = [
+    {
+      title: "Reverie - 3D Cinematic",
+      description:
+        "A 3D cinematic that drifts through a contemporary cityscape overtaken by nature and time, built to convey hyperfixation through a focus on the smaller details. I aim to construct the often incomplete sense of nostalgia and tranquillity, focusing on material details through camerawork and framing as the actual subject rather than forms of environmental storytelling.",
+      details:
+        "It treats hyperfixation not as an uncontrollable instinct but as something that can be intentionally directed, even within artificial spaces that hold no such feeling on their own. Built in Maya and UE5, Reverie represents a work I've wanted to create for a long time, and it is one I hope has been able to recreate this ethereal feeling of hyperfixation, and to let others experience this sensation from a similar perspective. Please contact me for the full cinematic! :)",
+      images: [
+        {
+          src: reverie1Image,
+          alt: "Reverie 3D cinematic Scene 2",
+        },
+        {
+          src: reverie2Image,
+          alt: "Reverie 3D cinematic Scene 5",
+        },
+        {
+          src: reverie3Image,
+          alt: "Reverie 3D cinematic Scene 8",
+        },
+      ],
+      technologies: ["Maya", "Substance Painter", "Unreal Engine", "Premiere Pro"],
+      links: [],
+    },
     {
       title: "Steampunk Cityscape Environment",
       description:

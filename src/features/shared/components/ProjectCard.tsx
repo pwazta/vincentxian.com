@@ -14,6 +14,7 @@ import { playSound } from "~/lib/sounds";
 export interface ProjectCardProps {
   title: string;
   description: string;
+  details?: string;
   images: ImageGalleryImage[];
   technologies: string[];
   links?: Array<{
@@ -23,10 +24,11 @@ export interface ProjectCardProps {
   className?: string;
 }
 
-export function ProjectCard({title, description, images, technologies, links = [], className}: ProjectCardProps) {
+export function ProjectCard({title, description, details, images, technologies, links = [], className}: ProjectCardProps) {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = React.useState(false);
+  const [expanded, setExpanded] = React.useState(false);
 
   React.useEffect(() => {
     if (!api) return;
@@ -100,7 +102,22 @@ export function ProjectCard({title, description, images, technologies, links = [
       {/* Right: Content */}
       <div className="flex-1 flex flex-col min-w-0 w-full md:w-auto">
         <h3 className="font-semibold text-foreground text-base md:text-lg">{title}</h3>
-        <p className="text-foreground/90 text-sm mb-2 md:mb-3 flex-1">{description}</p>
+        <p className="text-foreground/90 text-sm mb-2 md:mb-3 flex-1">
+          {description}
+          {details && (
+            <>
+              {expanded && ` ${details}`}
+              <button
+                type="button"
+                aria-expanded={expanded}
+                onClick={() => setExpanded((prev) => !prev)}
+                className="ml-1.5 font-medium text-primary hover:underline cursor-pointer"
+              >
+                {expanded ? "read less" : "read more..."}
+              </button>
+            </>
+          )}
+        </p>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4 mt-auto">
 
           {/* Tech stack badges */}

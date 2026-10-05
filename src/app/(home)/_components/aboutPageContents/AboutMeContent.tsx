@@ -62,11 +62,11 @@ export function AboutMeContent() {
             (Animation / 3DVis) at UNSW.
           </p>
           <p className="text-foreground/90">
-            Whether it&apos;s designing AI systems in Unity, crunching code
+            Whether it&apos;s designing combat systems in Unity, crunching code
             deadlines in NextJS, or animating and modelling in Maya, I&apos;m
             always experimenting and pushing myself to learn something new. I
-            seek to create innovative, engaging experiences that others can
-            enjoy — and I&apos;m excited to share that passion with the world.
+            love creating innovative, engaging experiences that others can
+            enjoy - and I&apos;m excited to share that passion with the world!
           </p>
         </div>
 
